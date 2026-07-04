@@ -973,6 +973,7 @@ namespace Game.Editor
             var deckPanel = CreateDeckPanel(rootRect, font, starIcon);
             var upgradePanel = CreateUpgradePanel(rootRect, font, starIcon, goldIcon, arrowIcon);
             var missionPanel = CreateMissionPanel(rootRect, font, goldIcon);
+            var shopPanel = CreateShopPanel(rootRect, font, goldIcon);
             var dailyRewardPopup = CreateDailyRewardPopup(rootRect, font, goldIcon, starIcon);
             var settingsPopup = CreateSettingsPopup(rootRect, font);
 
@@ -987,6 +988,7 @@ namespace Game.Editor
             var deckPanelView = deckPanel.GetComponent<UI_DeckPanelView>();
             var upgradePanelView = upgradePanel.GetComponent<UI_UpgradePanelView>();
             var missionPanelView = missionPanel.GetComponent<UI_MissionPanelView>();
+            var shopPanelView = shopPanel.GetComponent<UI_ShopPanelView>();
             var dailyRewardPopupView = dailyRewardPopup.GetComponent<UI_DailyRewardPopupView>();
             var settingsPopupView = settingsPopup.GetComponent<UI_SettingsPopupView>();
 
@@ -996,6 +998,7 @@ namespace Game.Editor
             homeSerializer.FindProperty("deckTabButton").objectReferenceValue = tabButtons[1];
             homeSerializer.FindProperty("upgradeTabButton").objectReferenceValue = tabButtons[2];
             homeSerializer.FindProperty("missionsTabButton").objectReferenceValue = tabButtons[3];
+            homeSerializer.FindProperty("shopTabButton").objectReferenceValue = tabButtons[4];
             homeSerializer.FindProperty("settingsButton").objectReferenceValue = settingsButton;
             homeSerializer.FindProperty("stagePanelRoot").objectReferenceValue = stagePanelRoot;
             homeSerializer.FindProperty("goldText").objectReferenceValue = goldText;
@@ -1068,6 +1071,20 @@ namespace Game.Editor
             settingsSerializer.ApplyModifiedProperties();
 
             Object.DestroyImmediate(settingsPopupView);
+
+            rootObject.AddComponent<UI_ShopPanelView>();
+            var shopViewCopy = rootObject.GetComponent<UI_ShopPanelView>();
+            var shopSerializer = new SerializedObject(shopViewCopy);
+            shopSerializer.FindProperty("root").objectReferenceValue = shopPanel;
+            var originalShopSerializer = new SerializedObject(shopPanelView);
+            shopSerializer.FindProperty("shopItems").arraySize = shopPanelView.ShopItems.Length;
+            for (var i = 0; i < shopPanelView.ShopItems.Length; i++)
+            {
+                shopSerializer.FindProperty("shopItems").GetArrayElementAtIndex(i).objectReferenceValue = shopPanelView.ShopItems[i];
+            }
+            shopSerializer.ApplyModifiedProperties();
+
+            Object.DestroyImmediate(shopPanelView);
 
             var prefabPath = OutputRoot + "StageSelectScreen.prefab";
             DeleteExistingPrefab(prefabPath);
@@ -1363,11 +1380,11 @@ namespace Game.Editor
 
         private static Button[] CreateTabButtons(RectTransform parent, TMP_FontAsset font)
         {
-            var buttons = new Button[4];
-            var labels = new[] { "STAGES", "DECK", "UPGRADE", "MISSIONS" };
-            var xPositions = new[] { -330f, -110f, 110f, 330f };
+            var buttons = new Button[5];
+            var labels = new[] { "STAGES", "DECK", "UPGRADE", "MISSIONS", "SHOP" };
+            var xPositions = new[] { -440f, -220f, 0f, 220f, 440f };
 
-            for (var i = 0; i < 4; i++)
+            for (var i = 0; i < 5; i++)
             {
                 var buttonInstance = InstantiateKitPrefab(ButtonBluePath, parent);
                 if (buttonInstance == null)
@@ -1776,6 +1793,182 @@ namespace Game.Editor
             maxLevelMarkObject.SetActive(false);
 
             return detailPanel;
+        }
+
+        private static GameObject CreateShopPanel(RectTransform parent, TMP_FontAsset font, Sprite goldIcon)
+        {
+            var panelObject = new GameObject("ShopPanel");
+            panelObject.transform.SetParent(parent, false);
+
+            var panelRect = panelObject.AddComponent<RectTransform>();
+            panelRect.anchorMin = Vector2.zero;
+            panelRect.anchorMax = Vector2.one;
+            panelRect.offsetMin = Vector2.zero;
+            panelRect.offsetMax = Vector2.zero;
+
+            var shopItems = new UI_ShopItemView[5];
+            const float itemHeight = 120f;
+            const float itemWidth = 700f;
+            const float spacingY = 140f;
+            const float startY = 250f;
+
+            for (var i = 0; i < 5; i++)
+            {
+                var y = startY - i * spacingY;
+                shopItems[i] = CreateShopItem(panelRect, new Vector2(0, y), new Vector2(itemWidth, itemHeight), font, goldIcon, i);
+            }
+
+            var shopPanelView = panelObject.AddComponent<UI_ShopPanelView>();
+            var serializedObject = new SerializedObject(shopPanelView);
+            serializedObject.FindProperty("root").objectReferenceValue = panelObject;
+            serializedObject.FindProperty("shopItems").arraySize = shopItems.Length;
+            for (var i = 0; i < shopItems.Length; i++)
+            {
+                serializedObject.FindProperty("shopItems").GetArrayElementAtIndex(i).objectReferenceValue = shopItems[i];
+            }
+            serializedObject.ApplyModifiedProperties();
+
+            panelObject.SetActive(false);
+
+            return panelObject;
+        }
+
+        private static UI_ShopItemView CreateShopItem(RectTransform parent, Vector2 position, Vector2 size, TMP_FontAsset font, Sprite goldIcon, int index)
+        {
+            var itemObject = new GameObject($"ShopItem_{index}");
+            itemObject.transform.SetParent(parent, false);
+
+            var itemRect = itemObject.AddComponent<RectTransform>();
+            itemRect.anchorMin = new Vector2(0.5f, 0.5f);
+            itemRect.anchorMax = new Vector2(0.5f, 0.5f);
+            itemRect.pivot = new Vector2(0.5f, 0.5f);
+            itemRect.anchoredPosition = position;
+            itemRect.sizeDelta = size;
+
+            var frameInstance = InstantiateKitPrefab(CardFrameBluePath, itemObject.transform);
+            if (frameInstance != null)
+            {
+                var frameRect = frameInstance.GetComponent<RectTransform>();
+                frameRect.anchorMin = Vector2.zero;
+                frameRect.anchorMax = Vector2.one;
+                frameRect.offsetMin = Vector2.zero;
+                frameRect.offsetMax = Vector2.zero;
+            }
+
+            var iconObject = new GameObject("UnitIcon");
+            iconObject.transform.SetParent(itemObject.transform, false);
+            var iconRect = iconObject.AddComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0, 0.5f);
+            iconRect.anchorMax = new Vector2(0, 0.5f);
+            iconRect.pivot = new Vector2(0, 0.5f);
+            iconRect.anchoredPosition = new Vector2(20, 0);
+            iconRect.sizeDelta = new Vector2(100, 100);
+
+            var iconImage = iconObject.AddComponent<Image>();
+            iconImage.raycastTarget = false;
+
+            var nameTextObject = new GameObject("NameText");
+            nameTextObject.transform.SetParent(itemObject.transform, false);
+            var nameTextRect = nameTextObject.AddComponent<RectTransform>();
+            nameTextRect.anchorMin = new Vector2(0, 0.5f);
+            nameTextRect.anchorMax = new Vector2(0, 0.5f);
+            nameTextRect.pivot = new Vector2(0, 0.5f);
+            nameTextRect.anchoredPosition = new Vector2(140, 0);
+            nameTextRect.sizeDelta = new Vector2(200, 50);
+
+            var nameText = nameTextObject.AddComponent<TextMeshProUGUI>();
+            nameText.text = "Unit Name";
+            nameText.fontSize = 28;
+            nameText.alignment = TextAlignmentOptions.Left;
+            nameText.font = font;
+
+            var priceContainerObject = new GameObject("PriceContainer");
+            priceContainerObject.transform.SetParent(itemObject.transform, false);
+            var priceContainerRect = priceContainerObject.AddComponent<RectTransform>();
+            priceContainerRect.anchorMin = new Vector2(0.5f, 0.5f);
+            priceContainerRect.anchorMax = new Vector2(0.5f, 0.5f);
+            priceContainerRect.pivot = new Vector2(0.5f, 0.5f);
+            priceContainerRect.anchoredPosition = new Vector2(50, 0);
+            priceContainerRect.sizeDelta = new Vector2(150, 50);
+
+            var goldIconObject = new GameObject("GoldIcon");
+            goldIconObject.transform.SetParent(priceContainerObject.transform, false);
+            var goldIconRect = goldIconObject.AddComponent<RectTransform>();
+            goldIconRect.anchorMin = new Vector2(0, 0.5f);
+            goldIconRect.anchorMax = new Vector2(0, 0.5f);
+            goldIconRect.pivot = new Vector2(0, 0.5f);
+            goldIconRect.anchoredPosition = new Vector2(0, 0);
+            goldIconRect.sizeDelta = new Vector2(40, 40);
+
+            var goldIconImage = goldIconObject.AddComponent<Image>();
+            goldIconImage.sprite = goldIcon;
+            goldIconImage.raycastTarget = false;
+
+            var priceTextObject = new GameObject("PriceText");
+            priceTextObject.transform.SetParent(priceContainerObject.transform, false);
+            var priceTextRect = priceTextObject.AddComponent<RectTransform>();
+            priceTextRect.anchorMin = new Vector2(0, 0.5f);
+            priceTextRect.anchorMax = new Vector2(0, 0.5f);
+            priceTextRect.pivot = new Vector2(0, 0.5f);
+            priceTextRect.anchoredPosition = new Vector2(50, 0);
+            priceTextRect.sizeDelta = new Vector2(100, 50);
+
+            var priceText = priceTextObject.AddComponent<TextMeshProUGUI>();
+            priceText.text = "0";
+            priceText.fontSize = 26;
+            priceText.alignment = TextAlignmentOptions.Left;
+            priceText.font = font;
+
+            var buyButtonInstance = InstantiateKitPrefab(ButtonGreenPath, itemObject.transform);
+            Button buyButton = null;
+            if (buyButtonInstance != null)
+            {
+                buyButtonInstance.name = "BuyButton";
+                var buyButtonRect = buyButtonInstance.GetComponent<RectTransform>();
+                buyButtonRect.anchorMin = new Vector2(1, 0.5f);
+                buyButtonRect.anchorMax = new Vector2(1, 0.5f);
+                buyButtonRect.pivot = new Vector2(1, 0.5f);
+                buyButtonRect.anchoredPosition = new Vector2(-20, 0);
+                buyButtonRect.sizeDelta = new Vector2(120, 70);
+
+                buyButton = EnsureButtonComponent(buyButtonInstance);
+                var buyButtonText = buyButtonInstance.GetComponentInChildren<TMP_Text>();
+                if (buyButtonText != null)
+                {
+                    buyButtonText.text = "BUY";
+                    buyButtonText.fontSize = 26;
+                    buyButtonText.alignment = TextAlignmentOptions.Center;
+                    buyButtonText.font = font;
+                }
+            }
+
+            var ownedMarkObject = new GameObject("OwnedMark");
+            ownedMarkObject.transform.SetParent(itemObject.transform, false);
+            var ownedMarkRect = ownedMarkObject.AddComponent<RectTransform>();
+            ownedMarkRect.anchorMin = new Vector2(1, 0.5f);
+            ownedMarkRect.anchorMax = new Vector2(1, 0.5f);
+            ownedMarkRect.pivot = new Vector2(1, 0.5f);
+            ownedMarkRect.anchoredPosition = new Vector2(-60, 0);
+            ownedMarkRect.sizeDelta = new Vector2(120, 50);
+
+            var ownedMarkText = ownedMarkObject.AddComponent<TextMeshProUGUI>();
+            ownedMarkText.text = "OWNED";
+            ownedMarkText.fontSize = 24;
+            ownedMarkText.alignment = TextAlignmentOptions.Center;
+            ownedMarkText.font = font;
+            ownedMarkText.color = new Color(0.3f, 0.8f, 0.3f);
+            ownedMarkObject.SetActive(false);
+
+            var shopItemView = itemObject.AddComponent<UI_ShopItemView>();
+            var serializedObject = new SerializedObject(shopItemView);
+            serializedObject.FindProperty("iconImage").objectReferenceValue = iconImage;
+            serializedObject.FindProperty("nameText").objectReferenceValue = nameText;
+            serializedObject.FindProperty("priceText").objectReferenceValue = priceText;
+            serializedObject.FindProperty("buyButton").objectReferenceValue = buyButton;
+            serializedObject.FindProperty("ownedMark").objectReferenceValue = ownedMarkObject;
+            serializedObject.ApplyModifiedProperties();
+
+            return shopItemView;
         }
 
         private static GameObject CreateMissionPanel(RectTransform parent, TMP_FontAsset font, Sprite goldIcon)

@@ -14,6 +14,7 @@ namespace Game.Presenter
         private readonly UpgradeService _upgradeService;
         private readonly GoldService _goldService;
         private readonly UnitTableSO _unitTable;
+        private readonly UserDataService _userDataService;
         private readonly CompositeDisposable _disposables = new();
 
         private string _selectedUnitId;
@@ -22,12 +23,14 @@ namespace Game.Presenter
             UI_UpgradePanelView view,
             UpgradeService upgradeService,
             GoldService goldService,
-            UnitTableSO unitTable)
+            UnitTableSO unitTable,
+            UserDataService userDataService)
         {
             _view = view;
             _upgradeService = upgradeService;
             _goldService = goldService;
             _unitTable = unitTable;
+            _userDataService = userDataService;
         }
 
         public void Start()
@@ -44,8 +47,9 @@ namespace Game.Presenter
             {
                 var unitData = allUnits[i];
                 var level = _upgradeService.GetLevel(unitData.id);
+                var isOwned = _userDataService.IsUnitOwned(unitData.id);
 
-                cards[i].Bind(unitData.id, unitData.iconSprite, unitData.unitName, level, false);
+                cards[i].Bind(unitData.id, unitData.iconSprite, unitData.unitName, level, false, isOwned);
 
                 var card = cards[i];
                 card.Button.onClick.AsObservable()
@@ -70,8 +74,9 @@ namespace Game.Presenter
                 var unitData = allUnits[i];
                 var level = _upgradeService.GetLevel(unitData.id);
                 var isSelected = unitData.id == _selectedUnitId;
+                var isOwned = _userDataService.IsUnitOwned(unitData.id);
 
-                cards[i].Bind(unitData.id, unitData.iconSprite, unitData.unitName, level, isSelected);
+                cards[i].Bind(unitData.id, unitData.iconSprite, unitData.unitName, level, isSelected, isOwned);
             }
 
             if (!string.IsNullOrEmpty(_selectedUnitId))
@@ -87,6 +92,12 @@ namespace Game.Presenter
 
         private void OnCardClicked(UI_UnitCardView card)
         {
+            if (!_userDataService.IsUnitOwned(card.UnitId))
+            {
+                GameLogger.Log($"[UpgradePresenter] Unit not owned: {card.UnitId}");
+                return;
+            }
+
             var previousSelection = _selectedUnitId;
             _selectedUnitId = card.UnitId;
 
@@ -195,7 +206,8 @@ namespace Game.Presenter
                     if (unitData != null)
                     {
                         var level = _upgradeService.GetLevel(unitId);
-                        card.Bind(unitId, unitData.iconSprite, unitData.unitName, level, true);
+                        var isOwned = _userDataService.IsUnitOwned(unitId);
+                        card.Bind(unitId, unitData.iconSprite, unitData.unitName, level, true, isOwned);
                     }
                     break;
                 }

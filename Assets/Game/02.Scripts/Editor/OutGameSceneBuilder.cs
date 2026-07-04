@@ -17,6 +17,7 @@ namespace Game.Editor
         private const string UpgradeTablePath = "Assets/Game/03.Resources/Data/UpgradeTable.asset";
         private const string DailyRewardTablePath = "Assets/Game/03.Resources/Data/DailyRewardTable.asset";
         private const string MissionTablePath = "Assets/Game/03.Resources/Data/MissionTable.asset";
+        private const string ShopTablePath = "Assets/Game/03.Resources/Data/ShopTable.asset";
         private const string ScenePath = "Assets/Game/01.Scene/OutGameScene.unity";
         private const string StageSelectScreenPrefabPath = "Assets/Game/03.Resources/UI/StageSelectScreen.prefab";
 
@@ -51,7 +52,8 @@ namespace Game.Editor
                 !AssetDatabase.AssetPathExists(UnitTablePath) ||
                 !AssetDatabase.AssetPathExists(UpgradeTablePath) ||
                 !AssetDatabase.AssetPathExists(DailyRewardTablePath) ||
-                !AssetDatabase.AssetPathExists(MissionTablePath))
+                !AssetDatabase.AssetPathExists(MissionTablePath) ||
+                !AssetDatabase.AssetPathExists(ShopTablePath))
             {
                 GameLogger.LogWarning("[OutGameSceneBuilder] Data tables not found. Importing sheets...");
                 CsvSheetImporter.ImportAllSheets();
@@ -134,6 +136,7 @@ namespace Game.Editor
             var upgradeTable = AssetDatabase.LoadAssetAtPath<UpgradeTableSO>(UpgradeTablePath);
             var dailyRewardTable = AssetDatabase.LoadAssetAtPath<DailyRewardTableSO>(DailyRewardTablePath);
             var missionTable = AssetDatabase.LoadAssetAtPath<MissionTableSO>(MissionTablePath);
+            var shopTable = AssetDatabase.LoadAssetAtPath<ShopTableSO>(ShopTablePath);
 
             var serializedObject = new SerializedObject(lifetimeScope);
             serializedObject.FindProperty("stageTable").objectReferenceValue = stageTable;
@@ -141,6 +144,7 @@ namespace Game.Editor
             serializedObject.FindProperty("upgradeTable").objectReferenceValue = upgradeTable;
             serializedObject.FindProperty("dailyRewardTable").objectReferenceValue = dailyRewardTable;
             serializedObject.FindProperty("missionTable").objectReferenceValue = missionTable;
+            serializedObject.FindProperty("shopTable").objectReferenceValue = shopTable;
             serializedObject.ApplyModifiedProperties();
 
             if (stageTable == null)
@@ -166,6 +170,11 @@ namespace Game.Editor
             if (missionTable == null)
             {
                 GameLogger.LogError("[OutGameSceneBuilder] Failed to assign MissionTable to LifetimeScope.");
+            }
+
+            if (shopTable == null)
+            {
+                GameLogger.LogError("[OutGameSceneBuilder] Failed to assign ShopTable to LifetimeScope.");
             }
         }
     }

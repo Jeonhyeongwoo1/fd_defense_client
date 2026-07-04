@@ -13,9 +13,11 @@ namespace Game.Presenter
         private readonly UI_DeckPanelView _deckPanelView;
         private readonly UI_UpgradePanelView _upgradePanelView;
         private readonly UI_MissionPanelView _missionPanelView;
+        private readonly UI_ShopPanelView _shopPanelView;
         private readonly DeckPresenter _deckPresenter;
         private readonly UpgradePresenter _upgradePresenter;
         private readonly MissionPanelPresenter _missionPanelPresenter;
+        private readonly ShopPanelPresenter _shopPanelPresenter;
         private readonly SettingsPresenter _settingsPresenter;
         private readonly CompositeDisposable _disposables = new();
 
@@ -25,9 +27,11 @@ namespace Game.Presenter
             UI_DeckPanelView deckPanelView,
             UI_UpgradePanelView upgradePanelView,
             UI_MissionPanelView missionPanelView,
+            UI_ShopPanelView shopPanelView,
             DeckPresenter deckPresenter,
             UpgradePresenter upgradePresenter,
             MissionPanelPresenter missionPanelPresenter,
+            ShopPanelPresenter shopPanelPresenter,
             SettingsPresenter settingsPresenter)
         {
             _view = view;
@@ -35,9 +39,11 @@ namespace Game.Presenter
             _deckPanelView = deckPanelView;
             _upgradePanelView = upgradePanelView;
             _missionPanelView = missionPanelView;
+            _shopPanelView = shopPanelView;
             _deckPresenter = deckPresenter;
             _upgradePresenter = upgradePresenter;
             _missionPanelPresenter = missionPanelPresenter;
+            _shopPanelPresenter = shopPanelPresenter;
             _settingsPresenter = settingsPresenter;
         }
 
@@ -59,6 +65,10 @@ namespace Game.Presenter
 
             _view.MissionsTabButton.onClick.AsObservable()
                 .Subscribe(_ => OnMissionsTabClicked())
+                .AddTo(_disposables);
+
+            _view.ShopTabButton.onClick.AsObservable()
+                .Subscribe(_ => OnShopTabClicked())
                 .AddTo(_disposables);
 
             _view.SettingsButton.onClick.AsObservable()
@@ -83,6 +93,7 @@ namespace Game.Presenter
             _deckPanelView.Hide();
             _upgradePanelView.Hide();
             _missionPanelView.Hide();
+            _shopPanelView.Hide();
         }
 
         private void OnDeckTabClicked()
@@ -95,6 +106,7 @@ namespace Game.Presenter
             _deckPanelView.Show();
             _upgradePanelView.Hide();
             _missionPanelView.Hide();
+            _shopPanelView.Hide();
 
             _deckPresenter.Refresh();
         }
@@ -109,6 +121,7 @@ namespace Game.Presenter
             _deckPanelView.Hide();
             _upgradePanelView.Show();
             _missionPanelView.Hide();
+            _shopPanelView.Hide();
 
             _upgradePresenter.Refresh();
         }
@@ -123,8 +136,24 @@ namespace Game.Presenter
             _deckPanelView.Hide();
             _upgradePanelView.Hide();
             _missionPanelView.Show();
+            _shopPanelView.Hide();
 
             _missionPanelPresenter.Refresh();
+        }
+
+        private void OnShopTabClicked()
+        {
+            if (_view.StagePanelRoot != null)
+            {
+                _view.StagePanelRoot.SetActive(false);
+            }
+
+            _deckPanelView.Hide();
+            _upgradePanelView.Hide();
+            _missionPanelView.Hide();
+            _shopPanelView.Show();
+
+            _shopPanelPresenter.Refresh();
         }
 
         private void OnSettingsClicked()

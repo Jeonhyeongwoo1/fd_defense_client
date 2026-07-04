@@ -1,14 +1,12 @@
 using Game.App;
 using Game.Core;
 using Game.Data;
-using Game.View;
-using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
-using UnityEngine.UI;
 
 namespace Game.Editor
 {
@@ -21,6 +19,7 @@ namespace Game.Editor
         private const string WaveTablePath = "Assets/Game/03.Resources/Data/WaveTable.asset";
         private const string EffectConfigPath = "Assets/Game/03.Resources/Data/EffectConfig.asset";
         private const string ScenePath = "Assets/Game/01.Scene/GameScene.unity";
+        private const string GameHudPrefabPath = "Assets/Game/03.Resources/UI/GameHud.prefab";
 
         public static void BuildGameScene()
         {
@@ -197,299 +196,38 @@ namespace Game.Editor
 
             canvasObject.AddComponent<GraphicRaycaster>();
 
-            var tmpFont = FindTMPFont();
-
-            var moneyText = CreateMoneyText(canvasObject.transform, tmpFont);
-            var waveText = CreateWaveText(canvasObject.transform, tmpFont);
-            var allyBaseHpFillImage = CreateBaseHpBar(canvasObject.transform, "AllyBaseHpBar", new Vector2(60, -140), new Vector2(0, 1), new Color(0.3f, 0.6f, 1f));
-            var enemyBaseHpFillImage = CreateBaseHpBar(canvasObject.transform, "EnemyBaseHpBar", new Vector2(-60, -140), new Vector2(1, 1), new Color(1f, 0.3f, 0.3f));
-            var spawnButtons = CreateSpawnButtons(canvasObject.transform, tmpFont);
-
-            var hudView = canvasObject.AddComponent<UI_GameHudView>();
-            var serializedObject = new SerializedObject(hudView);
-            serializedObject.FindProperty("moneyText").objectReferenceValue = moneyText;
-            serializedObject.FindProperty("waveText").objectReferenceValue = waveText;
-            serializedObject.FindProperty("allyBaseHpFillImage").objectReferenceValue = allyBaseHpFillImage;
-            serializedObject.FindProperty("enemyBaseHpFillImage").objectReferenceValue = enemyBaseHpFillImage;
-            serializedObject.FindProperty("spawnButtons").arraySize = spawnButtons.Length;
-            for (var i = 0; i < spawnButtons.Length; i++)
+            if (!AssetDatabase.AssetPathExists(GameHudPrefabPath))
             {
-                serializedObject.FindProperty("spawnButtons").GetArrayElementAtIndex(i).objectReferenceValue = spawnButtons[i];
-            }
-            serializedObject.ApplyModifiedProperties();
-
-            CreateResultPopup(canvasObject.transform, tmpFont);
-        }
-
-        private static TMP_FontAsset FindTMPFont()
-        {
-            var fontGuids = AssetDatabase.FindAssets("t:TMP_FontAsset", new[] { "Assets/Layer Lab/GUI Pro-MinimalGame" });
-
-            if (fontGuids.Length > 0)
-            {
-                var path = AssetDatabase.GUIDToAssetPath(fontGuids[0]);
-                return AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(path);
+                GameLogger.LogWarning("[VerticalSliceSceneBuilder] GameHud prefab not found. Building UI prefabs...");
+                UIPrefabBuilder.BuildAllUiPrefabs();
             }
 
-            GameLogger.LogWarning("[VerticalSliceSceneBuilder] TMP font not found. Using default font.");
-            return null;
-        }
+            var gameHudPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(GameHudPrefabPath);
 
-        private static TMP_Text CreateMoneyText(Transform parent, TMP_FontAsset font)
-        {
-            var moneyTextObject = new GameObject("MoneyText");
-            moneyTextObject.transform.SetParent(parent, false);
-
-            var rectTransform = moneyTextObject.AddComponent<RectTransform>();
-            rectTransform.anchorMin = new Vector2(0, 1);
-            rectTransform.anchorMax = new Vector2(0, 1);
-            rectTransform.pivot = new Vector2(0, 1);
-            rectTransform.anchoredPosition = new Vector2(60, -60);
-            rectTransform.sizeDelta = new Vector2(300, 100);
-
-            var tmpText = moneyTextObject.AddComponent<TextMeshProUGUI>();
-            tmpText.text = "0";
-            tmpText.fontSize = 56;
-            tmpText.font = font;
-
-            return tmpText;
-        }
-
-        private static TMP_Text CreateWaveText(Transform parent, TMP_FontAsset font)
-        {
-            var waveTextObject = new GameObject("WaveText");
-            waveTextObject.transform.SetParent(parent, false);
-
-            var rectTransform = waveTextObject.AddComponent<RectTransform>();
-            rectTransform.anchorMin = new Vector2(0.5f, 1);
-            rectTransform.anchorMax = new Vector2(0.5f, 1);
-            rectTransform.pivot = new Vector2(0.5f, 1);
-            rectTransform.anchoredPosition = new Vector2(0, -60);
-            rectTransform.sizeDelta = new Vector2(400, 100);
-
-            var tmpText = waveTextObject.AddComponent<TextMeshProUGUI>();
-            tmpText.text = "Wave 1/5";
-            tmpText.fontSize = 48;
-            tmpText.alignment = TextAlignmentOptions.Center;
-            tmpText.font = font;
-
-            return tmpText;
-        }
-
-        private static Image CreateBaseHpBar(Transform parent, string name, Vector2 position, Vector2 anchor, Color fillColor)
-        {
-            var barObject = new GameObject(name);
-            barObject.transform.SetParent(parent, false);
-
-            var barRectTransform = barObject.AddComponent<RectTransform>();
-            barRectTransform.anchorMin = anchor;
-            barRectTransform.anchorMax = anchor;
-            barRectTransform.pivot = anchor;
-            barRectTransform.anchoredPosition = position;
-            barRectTransform.sizeDelta = new Vector2(400, 36);
-
-            var barImage = barObject.AddComponent<Image>();
-            barImage.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
-
-            var fillObject = new GameObject("Fill");
-            fillObject.transform.SetParent(barObject.transform, false);
-
-            var fillRectTransform = fillObject.AddComponent<RectTransform>();
-            fillRectTransform.anchorMin = Vector2.zero;
-            fillRectTransform.anchorMax = Vector2.one;
-            fillRectTransform.offsetMin = Vector2.zero;
-            fillRectTransform.offsetMax = Vector2.zero;
-
-            var fillImage = fillObject.AddComponent<Image>();
-            fillImage.color = fillColor;
-            fillImage.type = Image.Type.Filled;
-            fillImage.fillMethod = Image.FillMethod.Horizontal;
-            fillImage.fillAmount = 1f;
-
-            return fillImage;
-        }
-
-        private static UI_UnitSpawnButtonView[] CreateSpawnButtons(Transform parent, TMP_FontAsset font)
-        {
-            var buttons = new UI_UnitSpawnButtonView[5];
-            var unitIds = new[] { "pet_chick", "pet_pug", "pet_bat", "pet_ghost", "pet_titan" };
-            var xPositions = new[] { -420f, -210f, 0f, 210f, 420f };
-
-            for (var i = 0; i < 5; i++)
+            if (gameHudPrefab == null)
             {
-                buttons[i] = CreateSpawnButton(parent, new Vector2(xPositions[i], 110), unitIds[i], font);
+                GameLogger.LogError("[VerticalSliceSceneBuilder] Failed to load GameHud prefab.");
+                return;
             }
 
-            return buttons;
+            var gameHudInstance = PrefabUtility.InstantiatePrefab(gameHudPrefab) as GameObject;
+
+            if (gameHudInstance != null)
+            {
+                gameHudInstance.transform.SetParent(canvasObject.transform, false);
+
+                var hudRect = gameHudInstance.GetComponent<RectTransform>();
+                hudRect.anchorMin = Vector2.zero;
+                hudRect.anchorMax = Vector2.one;
+                hudRect.offsetMin = Vector2.zero;
+                hudRect.offsetMax = Vector2.zero;
+            }
+            else
+            {
+                GameLogger.LogError("[VerticalSliceSceneBuilder] Failed to instantiate GameHud prefab.");
+            }
         }
 
-        private static UI_UnitSpawnButtonView CreateSpawnButton(Transform parent, Vector2 position, string unitId, TMP_FontAsset font)
-        {
-            var buttonObject = new GameObject($"SpawnButton_{unitId}");
-            buttonObject.transform.SetParent(parent, false);
-
-            var rectTransform = buttonObject.AddComponent<RectTransform>();
-            rectTransform.anchorMin = new Vector2(0.5f, 0);
-            rectTransform.anchorMax = new Vector2(0.5f, 0);
-            rectTransform.pivot = new Vector2(0.5f, 0);
-            rectTransform.anchoredPosition = position;
-            rectTransform.sizeDelta = new Vector2(200, 130);
-
-            var image = buttonObject.AddComponent<Image>();
-            image.color = new Color(1f, 1f, 1f, 0.7f);
-
-            var button = buttonObject.AddComponent<Button>();
-
-            var nameTextObject = new GameObject("NameText");
-            nameTextObject.transform.SetParent(buttonObject.transform, false);
-
-            var nameRectTransform = nameTextObject.AddComponent<RectTransform>();
-            nameRectTransform.anchorMin = new Vector2(0, 0.7f);
-            nameRectTransform.anchorMax = new Vector2(1, 1);
-            nameRectTransform.offsetMin = new Vector2(10, 0);
-            nameRectTransform.offsetMax = new Vector2(-10, -10);
-
-            var nameText = nameTextObject.AddComponent<TextMeshProUGUI>();
-            nameText.text = "Unit";
-            nameText.fontSize = 28;
-            nameText.alignment = TextAlignmentOptions.Center;
-            nameText.font = font;
-
-            var costTextObject = new GameObject("CostText");
-            costTextObject.transform.SetParent(buttonObject.transform, false);
-
-            var costRectTransform = costTextObject.AddComponent<RectTransform>();
-            costRectTransform.anchorMin = new Vector2(0, 0);
-            costRectTransform.anchorMax = new Vector2(1, 0.3f);
-            costRectTransform.offsetMin = new Vector2(10, 10);
-            costRectTransform.offsetMax = new Vector2(-10, 0);
-
-            var costText = costTextObject.AddComponent<TextMeshProUGUI>();
-            costText.text = "0";
-            costText.fontSize = 32;
-            costText.alignment = TextAlignmentOptions.Center;
-            costText.font = font;
-
-            var cooldownFillObject = new GameObject("CooldownFill");
-            cooldownFillObject.transform.SetParent(buttonObject.transform, false);
-
-            var cooldownRectTransform = cooldownFillObject.AddComponent<RectTransform>();
-            cooldownRectTransform.anchorMin = Vector2.zero;
-            cooldownRectTransform.anchorMax = Vector2.one;
-            cooldownRectTransform.offsetMin = Vector2.zero;
-            cooldownRectTransform.offsetMax = Vector2.zero;
-
-            var cooldownImage = cooldownFillObject.AddComponent<Image>();
-            cooldownImage.color = new Color(0, 0, 0, 0.5f);
-            cooldownImage.type = Image.Type.Filled;
-            cooldownImage.fillMethod = Image.FillMethod.Vertical;
-            cooldownImage.fillAmount = 0f;
-            cooldownImage.raycastTarget = false;
-
-            var buttonView = buttonObject.AddComponent<UI_UnitSpawnButtonView>();
-            var serializedObject = new SerializedObject(buttonView);
-            serializedObject.FindProperty("button").objectReferenceValue = button;
-            serializedObject.FindProperty("cooldownFillImage").objectReferenceValue = cooldownImage;
-            serializedObject.FindProperty("costText").objectReferenceValue = costText;
-            serializedObject.FindProperty("nameText").objectReferenceValue = nameText;
-            serializedObject.FindProperty("unitId").stringValue = unitId;
-            serializedObject.ApplyModifiedProperties();
-
-            return buttonView;
-        }
-
-        private static void CreateResultPopup(Transform canvasTransform, TMP_FontAsset font)
-        {
-            var resultPopupRoot = new GameObject("ResultPopupRoot");
-            resultPopupRoot.transform.SetParent(canvasTransform, false);
-
-            var rootRectTransform = resultPopupRoot.AddComponent<RectTransform>();
-            rootRectTransform.anchorMin = Vector2.zero;
-            rootRectTransform.anchorMax = Vector2.one;
-            rootRectTransform.offsetMin = Vector2.zero;
-            rootRectTransform.offsetMax = Vector2.zero;
-
-            var backgroundImage = resultPopupRoot.AddComponent<Image>();
-            backgroundImage.color = new Color(0, 0, 0, 0.7f);
-            backgroundImage.raycastTarget = true;
-
-            var panelObject = new GameObject("Panel");
-            panelObject.transform.SetParent(resultPopupRoot.transform, false);
-
-            var panelRectTransform = panelObject.AddComponent<RectTransform>();
-            panelRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
-            panelRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
-            panelRectTransform.pivot = new Vector2(0.5f, 0.5f);
-            panelRectTransform.anchoredPosition = Vector2.zero;
-            panelRectTransform.sizeDelta = new Vector2(700, 450);
-
-            var panelImage = panelObject.AddComponent<Image>();
-            panelImage.color = new Color(0.2f, 0.2f, 0.2f, 1f);
-
-            var resultTextObject = new GameObject("ResultText");
-            resultTextObject.transform.SetParent(panelObject.transform, false);
-
-            var resultTextRectTransform = resultTextObject.AddComponent<RectTransform>();
-            resultTextRectTransform.anchorMin = new Vector2(0.5f, 0.7f);
-            resultTextRectTransform.anchorMax = new Vector2(0.5f, 0.7f);
-            resultTextRectTransform.pivot = new Vector2(0.5f, 0.5f);
-            resultTextRectTransform.anchoredPosition = Vector2.zero;
-            resultTextRectTransform.sizeDelta = new Vector2(600, 150);
-
-            var resultText = resultTextObject.AddComponent<TextMeshProUGUI>();
-            resultText.text = "VICTORY";
-            resultText.fontSize = 80;
-            resultText.alignment = TextAlignmentOptions.Center;
-            resultText.font = font;
-
-            var retryButton = CreateResultButton(panelObject.transform, "RetryButton", new Vector2(-140, 60), "RETRY", font);
-            var stageSelectButton = CreateResultButton(panelObject.transform, "StageSelectButton", new Vector2(140, 60), "STAGES", font);
-
-            var resultPopupView = canvasTransform.gameObject.AddComponent<UI_ResultPopupView>();
-            var serializedObject = new SerializedObject(resultPopupView);
-            serializedObject.FindProperty("root").objectReferenceValue = resultPopupRoot;
-            serializedObject.FindProperty("resultText").objectReferenceValue = resultText;
-            serializedObject.FindProperty("retryButton").objectReferenceValue = retryButton;
-            serializedObject.FindProperty("stageSelectButton").objectReferenceValue = stageSelectButton;
-            serializedObject.ApplyModifiedProperties();
-
-            resultPopupRoot.SetActive(false);
-        }
-
-        private static Button CreateResultButton(Transform parent, string name, Vector2 position, string labelText, TMP_FontAsset font)
-        {
-            var buttonObject = new GameObject(name);
-            buttonObject.transform.SetParent(parent, false);
-
-            var rectTransform = buttonObject.AddComponent<RectTransform>();
-            rectTransform.anchorMin = new Vector2(0.5f, 0);
-            rectTransform.anchorMax = new Vector2(0.5f, 0);
-            rectTransform.pivot = new Vector2(0.5f, 0);
-            rectTransform.anchoredPosition = position;
-            rectTransform.sizeDelta = new Vector2(260, 100);
-
-            var image = buttonObject.AddComponent<Image>();
-            image.color = new Color(0.3f, 0.5f, 0.8f, 1f);
-
-            var button = buttonObject.AddComponent<Button>();
-
-            var labelObject = new GameObject("Label");
-            labelObject.transform.SetParent(buttonObject.transform, false);
-
-            var labelRectTransform = labelObject.AddComponent<RectTransform>();
-            labelRectTransform.anchorMin = Vector2.zero;
-            labelRectTransform.anchorMax = Vector2.one;
-            labelRectTransform.offsetMin = Vector2.zero;
-            labelRectTransform.offsetMax = Vector2.zero;
-
-            var labelTextComponent = labelObject.AddComponent<TextMeshProUGUI>();
-            labelTextComponent.text = labelText;
-            labelTextComponent.fontSize = 40;
-            labelTextComponent.alignment = TextAlignmentOptions.Center;
-            labelTextComponent.font = font;
-
-            return button;
-        }
 
         private static void CreateEventSystem()
         {

@@ -1,4 +1,5 @@
 using Game.Data;
+using UnityEngine;
 
 namespace Game.Model
 {
@@ -13,6 +14,9 @@ namespace Game.Model
         public float AttackRange { get; }
         public float MoveSpeed { get; }
         public float AttackTimer { get; set; }
+        public bool IsRanged { get; }
+        public float ProjectileSpeed { get; }
+        public Sprite ProjectileSprite { get; }
 
         public bool IsAlive => CurrentHp > 0;
 
@@ -27,6 +31,9 @@ namespace Game.Model
             AttackRange = data.attackRange;
             MoveSpeed = data.moveSpeed;
             AttackTimer = 0f;
+            IsRanged = data.isRanged;
+            ProjectileSpeed = data.projectileSpeed;
+            ProjectileSprite = data.projectileSprite;
         }
 
         public UnitModel(EnemyData data, UnitSide side)
@@ -40,6 +47,9 @@ namespace Game.Model
             AttackRange = data.attackRange;
             MoveSpeed = data.moveSpeed;
             AttackTimer = 0f;
+            IsRanged = false;
+            ProjectileSpeed = 0f;
+            ProjectileSprite = null;
         }
     }
 }

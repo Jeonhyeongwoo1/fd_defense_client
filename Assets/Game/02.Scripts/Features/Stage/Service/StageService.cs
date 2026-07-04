@@ -11,33 +11,33 @@ namespace Game.Service
         private readonly StageTableSO _stageTable;
         private readonly BaseService _baseService;
         private readonly WalletService _walletService;
-        private readonly EnemySpawnService _enemySpawnService;
+        private readonly WaveProgressService _waveProgressService;
 
         public StageService(
             StageTableSO stageTable,
             BaseService baseService,
             WalletService walletService,
-            EnemySpawnService enemySpawnService)
+            WaveProgressService waveProgressService)
         {
             _stageTable = stageTable;
             _baseService = baseService;
             _walletService = walletService;
-            _enemySpawnService = enemySpawnService;
+            _waveProgressService = waveProgressService;
         }
 
         public void Start()
         {
-            CurrentStage = _stageTable.GetById("stage_001");
+            CurrentStage = _stageTable.GetById(Const.DefaultStageId);
 
             if (CurrentStage == null)
             {
-                GameLogger.LogError("[StageService] Stage 'stage_001' not found");
+                GameLogger.LogError($"[StageService] Stage '{Const.DefaultStageId}' not found");
                 return;
             }
 
             _baseService.Initialize(CurrentStage);
             _walletService.Initialize(CurrentStage.startMoney, CurrentStage.moneyPerSecond);
-            _enemySpawnService.SetStage(CurrentStage);
+            _waveProgressService.SetStage(CurrentStage);
 
             GameLogger.Log($"[StageService] Stage loaded: {CurrentStage.id}");
         }

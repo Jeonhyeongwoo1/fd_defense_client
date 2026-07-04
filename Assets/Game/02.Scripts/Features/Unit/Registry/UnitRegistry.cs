@@ -18,9 +18,9 @@ namespace Game.Service
             _entryDict[entry.Model.Side].Add(entry);
         }
 
-        public void Unregister(UnitEntry entry)
+        public bool Unregister(UnitEntry entry)
         {
-            _entryDict[entry.Model.Side].Remove(entry);
+            return _entryDict[entry.Model.Side].Remove(entry);
         }
 
         public IReadOnlyList<UnitEntry> GetEntryList(UnitSide side)

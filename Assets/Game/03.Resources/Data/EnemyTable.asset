@@ -29,3 +29,27 @@ MonoBehaviour:
     attackRange: 0.5
     moveSpeed: 0.6
     prefab: {fileID: 4026474863858924207, guid: 46bb1660f70c7144c869cfff97de27f7, type: 3}
+  - id: enemy_beetle_red
+    unitName: Beetle_Red
+    hp: 150
+    attackPower: 30
+    attackInterval: 1.5
+    attackRange: 0.5
+    moveSpeed: 1.3
+    prefab: {fileID: 7208961884514881485, guid: 928a4574f2ddeee4f8a57ab117187c31, type: 3}
+  - id: enemy_wolf_gray
+    unitName: Wolf_Gray
+    hp: 200
+    attackPower: 40
+    attackInterval: 1
+    attackRange: 0.6
+    moveSpeed: 1.6
+    prefab: {fileID: 7454506752429640450, guid: 22b58f19592df994a8ca5d2c7dca5218, type: 3}
+  - id: enemy_turtle_tower
+    unitName: Turtle_Tower
+    hp: 600
+    attackPower: 50
+    attackInterval: 2.5
+    attackRange: 0.5
+    moveSpeed: 0.4
+    prefab: {fileID: 5285736365805239009, guid: e47d17f2d01d3aa42820905ca4ea0754, type: 3}

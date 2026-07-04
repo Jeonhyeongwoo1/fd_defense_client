@@ -11,18 +11,22 @@ namespace Game.GameState
 
         private readonly BaseService _baseService;
         private readonly GameResultModel _resultModel;
+        private readonly WaveProgressService _waveProgressService;
 
         public WavePlayingState(
             Action<GameStateType> requestStateChange,
             BaseService baseService,
-            GameResultModel resultModel) : base(requestStateChange)
+            GameResultModel resultModel,
+            WaveProgressService waveProgressService) : base(requestStateChange)
         {
             _baseService = baseService;
             _resultModel = resultModel;
+            _waveProgressService = waveProgressService;
         }
 
         public override void Enter()
         {
+            _waveProgressService.StartWave(_waveProgressService.CurrentWaveIndex.Value + 1);
             GameLogger.Log("[WavePlayingState] Entered");
         }
 
@@ -39,6 +43,12 @@ namespace Game.GameState
             {
                 _resultModel.SetWinner(UnitSide.Enemy);
                 RequestStateChange(GameStateType.Result);
+                return;
+            }
+
+            if (_waveProgressService.IsCurrentWaveCleared)
+            {
+                RequestStateChange(GameStateType.WaveCleared);
             }
         }
     }

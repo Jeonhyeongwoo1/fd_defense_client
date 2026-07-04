@@ -17,6 +17,8 @@ namespace Game.Presenter
         private readonly WalletModel _walletModel;
         private readonly UnitSpawnService _unitSpawnService;
         private readonly UnitTableSO _unitTable;
+        private readonly WaveProgressService _waveProgressService;
+        private readonly BaseService _baseService;
         private readonly CompositeDisposable _disposables = new();
         private readonly List<(UI_UnitSpawnButtonView view, UnitData data)> _buttonEntryList = new();
 
@@ -24,17 +26,35 @@ namespace Game.Presenter
             UI_GameHudView view,
             WalletModel walletModel,
             UnitSpawnService unitSpawnService,
-            UnitTableSO unitTable)
+            UnitTableSO unitTable,
+            WaveProgressService waveProgressService,
+            BaseService baseService)
         {
             _view = view;
             _walletModel = walletModel;
             _unitSpawnService = unitSpawnService;
             _unitTable = unitTable;
+            _waveProgressService = waveProgressService;
+            _baseService = baseService;
         }
 
         public void Start()
         {
             _walletModel.Money.Subscribe(_view.UpdateMoney).AddTo(_disposables);
+
+            _waveProgressService.CurrentWaveIndex
+                .Subscribe(index => _view.UpdateWave(index + 1, _waveProgressService.TotalWaveCount))
+                .AddTo(_disposables);
+
+            var allyBase = _baseService.GetBase(UnitSide.Ally);
+            allyBase.CurrentHp
+                .Subscribe(hp => _view.UpdateAllyBaseHp((float)hp / allyBase.MaxHp))
+                .AddTo(_disposables);
+
+            var enemyBase = _baseService.GetBase(UnitSide.Enemy);
+            enemyBase.CurrentHp
+                .Subscribe(hp => _view.UpdateEnemyBaseHp((float)hp / enemyBase.MaxHp))
+                .AddTo(_disposables);
 
             foreach (var button in _view.SpawnButtonList)
             {

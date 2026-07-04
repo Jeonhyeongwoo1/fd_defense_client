@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77fefc28d79644fb3acd79bc98b3bcfe, type: 3}
+  m_Name: WaveTable
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Data.WaveTableSO
+  WaveDataList:
+  - id: wave_001
+    SpawnEntryList:
+    - enemyId: enemy_slime_green
+      count: 5
+      interval: 2.5
+  - id: wave_002
+    SpawnEntryList:
+    - enemyId: enemy_slime_green
+      count: 5
+      interval: 2
+    - enemyId: enemy_beetle_red
+      count: 3
+      interval: 4
+  - id: wave_003
+    SpawnEntryList:
+    - enemyId: enemy_snail_blue
+      count: 4
+      interval: 5
+    - enemyId: enemy_wolf_gray
+      count: 4
+      interval: 3
+  - id: wave_004
+    SpawnEntryList:
+    - enemyId: enemy_wolf_gray
+      count: 6
+      interval: 2
+    - enemyId: enemy_beetle_red
+      count: 4
+      interval: 3
+  - id: wave_005
+    SpawnEntryList:
+    - enemyId: enemy_turtle_tower
+      count: 2
+      interval: 8
+    - enemyId: enemy_slime_green
+      count: 8
+      interval: 1.5

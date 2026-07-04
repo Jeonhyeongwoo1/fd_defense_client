@@ -18,6 +18,7 @@ namespace Game.App
         [SerializeField] private StageTableSO stageTable;
         [SerializeField] private WaveTableSO waveTable;
         [SerializeField] private EffectConfigSO effectConfig;
+        [SerializeField] private MapTableSO mapTable;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -33,6 +34,7 @@ namespace Game.App
             builder.RegisterInstance(stageTable);
             builder.RegisterInstance(waveTable);
             builder.RegisterInstance(effectConfig);
+            builder.RegisterInstance(mapTable);
 
             builder.Register<UnitRegistry>(Lifetime.Scoped);
             builder.Register<UnitFactory>(Lifetime.Scoped);
@@ -42,9 +44,12 @@ namespace Game.App
             builder.Register<WalletModel>(Lifetime.Scoped);
             builder.Register<BaseService>(Lifetime.Scoped);
             builder.Register<EffectService>(Lifetime.Scoped);
+            builder.Register<MapBuilderService>(Lifetime.Scoped);
+            builder.Register<PauseService>(Lifetime.Scoped);
 
             builder.RegisterComponentInHierarchy<UI_GameHudView>();
             builder.RegisterComponentInHierarchy<UI_ResultPopupView>();
+            builder.RegisterComponentInHierarchy<UI_PausePopupView>();
 
             builder.RegisterEntryPoint<StageService>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<WalletService>(Lifetime.Scoped).AsSelf();
@@ -55,6 +60,7 @@ namespace Game.App
             builder.RegisterEntryPoint<GameFlowService>(Lifetime.Scoped);
             builder.RegisterEntryPoint<GameHudPresenter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<ResultPresenter>(Lifetime.Scoped);
+            builder.RegisterEntryPoint<PausePresenter>(Lifetime.Scoped);
         }
     }
 }

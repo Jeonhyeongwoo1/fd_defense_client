@@ -13,19 +13,22 @@ namespace Game.Service
         private readonly WalletService _walletService;
         private readonly WaveProgressService _waveProgressService;
         private readonly StageProgressService _stageProgressService;
+        private readonly MapBuilderService _mapBuilderService;
 
         public StageService(
             StageTableSO stageTable,
             BaseService baseService,
             WalletService walletService,
             WaveProgressService waveProgressService,
-            StageProgressService stageProgressService)
+            StageProgressService stageProgressService,
+            MapBuilderService mapBuilderService)
         {
             _stageTable = stageTable;
             _baseService = baseService;
             _walletService = walletService;
             _waveProgressService = waveProgressService;
             _stageProgressService = stageProgressService;
+            _mapBuilderService = mapBuilderService;
         }
 
         public void Start()
@@ -44,6 +47,7 @@ namespace Game.Service
                 }
             }
 
+            _mapBuilderService.BuildMap(CurrentStage.mapId);
             _baseService.Initialize(CurrentStage);
             _walletService.Initialize(CurrentStage.startMoney, CurrentStage.moneyPerSecond);
             _waveProgressService.SetStage(CurrentStage);

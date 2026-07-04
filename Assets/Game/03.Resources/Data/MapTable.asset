@@ -1,0 +1,134 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d19846ab80f646d38fba19220625ee6, type: 3}
+  m_Name: MapTable
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Data.MapTableSO
+  MapDataList:
+  - id: map_forest
+    skyColor: {r: 0.5294118, g: 0.80784315, b: 0.92156863, a: 1}
+    fieldPrefab: {fileID: 4206744518503836758, guid: f9ba63f9d28bdef46b9f2a5acf423ba6, type: 3}
+    DecorEntryList:
+    - PrefabList:
+      - {fileID: 1489224363939222040, guid: 58f08fdddf240f048999ca7b2fa8e5a4, type: 3}
+      - {fileID: 6018668928385323313, guid: e4725a028fac294498abe11c57ac47f0, type: 3}
+      - {fileID: 4128367921379472963, guid: bc2301baa0d22d24b8a31e99eea01492, type: 3}
+      - {fileID: 6160392627575103061, guid: e50c0828793bfb64095285cdf29ec912, type: 3}
+      - {fileID: 5560681053939379332, guid: 9c63c20744b987945b2288f811beb8ad, type: 3}
+      - {fileID: 3254527276924013646, guid: 97cd03326f39d5546a3905512fd298fb, type: 3}
+      - {fileID: 5240524010635080167, guid: de1e56ab97d2c6843a66f79338bdb1fe, type: 3}
+      - {fileID: 1318189572298945814, guid: 3e2fbde73fe0f314399458a851745661, type: 3}
+      - {fileID: 8890575423699592607, guid: dbff00494217181458861a42b3bc9df5, type: 3}
+      - {fileID: 8634174987305786792, guid: 1b448f41f8d645b4a821bbd09b3aa52b, type: 3}
+      - {fileID: 3067143817535155231, guid: a4881d5e286ffe543af17bad0d235cb3, type: 3}
+      - {fileID: 619118979888269962, guid: 66b0c0af581878343aabad4b662964d9, type: 3}
+      - {fileID: 8088627300999214073, guid: b3e857df66efad340915bd029f41f9af, type: 3}
+      - {fileID: 4022230233666076908, guid: 6ab1053f2728e654aa9fc005194bef3c, type: 3}
+      - {fileID: 1444935265682571951, guid: 63a9ffdbb86a5524ebf3780668dfd18b, type: 3}
+      - {fileID: 8018449157249512409, guid: 6f828fed4e730e6498a5d8deb161baf8, type: 3}
+      - {fileID: 1073934124200362927, guid: 3802a33407afa2d4daa02341e59895ba, type: 3}
+      - {fileID: 4677069677277388594, guid: c6d25f196243824498f6cad12c6ea380, type: 3}
+      - {fileID: 5424237520473863121, guid: 6a7fbc95d29b26a4eaf8da26dc0a365b, type: 3}
+      count: 4
+    - PrefabList:
+      - {fileID: 8292759255454085054, guid: 5b1900a4ce73a344cb117d268ffbb415, type: 3}
+      - {fileID: 27757799866794905, guid: 5419661c18cc820468db7f2ac4f1c1d2, type: 3}
+      - {fileID: 8109512082212809791, guid: 991e7e0ce2f8df540a5f7cddb0477712, type: 3}
+      count: 3
+    - PrefabList:
+      - {fileID: 8278071208390361819, guid: ac9c435390f8feb4f8b2f0a539c7ea8d, type: 3}
+      - {fileID: 707546734044129544, guid: efaa6cc5bbf74aa4ea60081e2663cb03, type: 3}
+      - {fileID: 378881080441135530, guid: e7bc8ff5375528d42915dbdb95e218a2, type: 3}
+      - {fileID: 5973142801498328438, guid: 1de7dafeabea2ab4b96beb5a55d5c0d5, type: 3}
+      - {fileID: 8444668201675742119, guid: 63b8a8db4d4565e418d0e28775fcbd64, type: 3}
+      count: 4
+    - PrefabList:
+      - {fileID: 7399334687987036684, guid: 198ee7f9e00951047a37c6e95d081745, type: 3}
+      - {fileID: 6181370033843121264, guid: 872474912066214408dfe315c47571e5, type: 3}
+      - {fileID: 2732462680729463034, guid: 4687c0806013b81478f7af49b4575617, type: 3}
+      - {fileID: 3998159253716063696, guid: d269ad8c77c78ca4486ee66422feaaf0, type: 3}
+      - {fileID: 3418821399622909578, guid: 69d05162b4cbd8142b256b8ac3665ee0, type: 3}
+      - {fileID: 1099632650097842566, guid: 7832298e974bf0d44838c50c997f159e, type: 3}
+      - {fileID: 1340500370898944965, guid: 03b987d1e067e31428ad00156da51952, type: 3}
+      - {fileID: 5321105768925286620, guid: 76ca6b7edd49c2a4997dab83f6af35c5, type: 3}
+      - {fileID: 8548372476732282188, guid: 2bde232f0449d0a4baec75d932ca27e5, type: 3}
+      - {fileID: 6202426700462949900, guid: fcdb2a56bbf3c974bb46ebcce4b8779e, type: 3}
+      - {fileID: 3107017144053442809, guid: b78bbd391ed195f43a178ed222663543, type: 3}
+      - {fileID: 7743268131549158420, guid: 2accc7ddf79ff8d4ebf1618f6b3b4561, type: 3}
+      count: 2
+    - PrefabList:
+      - {fileID: 6624171578341296798, guid: 3a549df1b87c8df4abb315b92be1c25a, type: 3}
+      - {fileID: 7381143725654976927, guid: 2f7f274ebbcdab44c9f3a34abc2b55f5, type: 3}
+      count: 2
+  - id: map_desert
+    skyColor: {r: 0.9372549, g: 0.8509804, b: 0.654902, a: 1}
+    fieldPrefab: {fileID: 5792720874028875126, guid: 988c54cebe6a22d4ea67e1ceae8400d4, type: 3}
+    DecorEntryList:
+    - PrefabList:
+      - {fileID: 897774976626044875, guid: 7ac9dcc444ad9cc44bf2d516b7f5d772, type: 3}
+      - {fileID: 1495255117871877778, guid: 51b8abd6c2122db4088e701ab1f99ae7, type: 3}
+      - {fileID: 585891945755538980, guid: 253c6f1c24f67e943ba3e33a0913d6e6, type: 3}
+      - {fileID: 14582383786922453, guid: d56a8f0e80b21834b8314ad89fa2f271, type: 3}
+      - {fileID: 7785329798982989413, guid: 301d7a3abee8e6a43b1a2de456316fc2, type: 3}
+      count: 4
+    - PrefabList:
+      - {fileID: 6678944391706963937, guid: 9109cf87967e20c4e9a9486c523e254d, type: 3}
+      - {fileID: 3783993279378315724, guid: 7ea97e5c83a30fd409d0acbaee66bfba, type: 3}
+      - {fileID: 1172517885723587437, guid: 69250a56eae01354fb3736c3e17207a2, type: 3}
+      count: 3
+    - PrefabList:
+      - {fileID: 9073273748154378047, guid: 7c8044a5613b71c40a81ad6a60ed6242, type: 3}
+      - {fileID: 237113321471421146, guid: 58fb2985a9ba09e499070024bb22ebe6, type: 3}
+      - {fileID: 243178350347374292, guid: e3a560cf900a8de4f9e3a9cfd634022c, type: 3}
+      - {fileID: 8444984820410227465, guid: 8f2b4183ab3a7f14ba46847c6adea713, type: 3}
+      - {fileID: 8257236056528144269, guid: 0689d363e8a29dc4db8a07808dd5a4cf, type: 3}
+      - {fileID: 4189946498599512725, guid: 85a1967c40234604a821661215ed4a7a, type: 3}
+      - {fileID: 2608015427877651197, guid: 10dca28a1806fa040a7d8ebae573db52, type: 3}
+      count: 3
+    - PrefabList:
+      - {fileID: 4696407499237679270, guid: ac8b55545db993846ab5d4c7b34aeb09, type: 3}
+      - {fileID: 1753821376077257305, guid: dec357da86c48ad4c984f1d87e479cab, type: 3}
+      - {fileID: 2584111636570662772, guid: 7d0f6d48bf6703d4d9a746777a1d29ef, type: 3}
+      count: 2
+  - id: map_autumn
+    skyColor: {r: 0.9098039, g: 0.7058824, b: 0.56078434, a: 1}
+    fieldPrefab: {fileID: 3740341990103245324, guid: 3ea06daef51f8a84d903b48cb84d8d06, type: 3}
+    DecorEntryList:
+    - PrefabList:
+      - {fileID: 1348681502504501031, guid: 37873c7167ed01b448ea79dd9573ee59, type: 3}
+      - {fileID: 2260339278587672334, guid: 2d555a07da114b84db87dfdbf515f10c, type: 3}
+      - {fileID: 7252773132177425439, guid: e25bceb8e5db572418e30113fd128a26, type: 3}
+      - {fileID: 4257804394081117275, guid: 8a6b3a92b60b619478e11bd23f839e8b, type: 3}
+      count: 3
+    - PrefabList:
+      - {fileID: 5309656837926069387, guid: e16ae05ec7507e345bbf052e217631c2, type: 3}
+      - {fileID: 7395232908086268534, guid: 58619a7541f36804b939758a26a6f6ba, type: 3}
+      - {fileID: 6677756542957311061, guid: 31bb36de822453b42b724a6d70e6b1cf, type: 3}
+      count: 3
+    - PrefabList:
+      - {fileID: 9041098115212725520, guid: e8e4bcf3d71b05e4ca99aa4db467b0f0, type: 3}
+      - {fileID: 7156067069331423285, guid: 075fc2592bb4b5f40a574ebf4fb76155, type: 3}
+      - {fileID: 6519036518403802110, guid: b5a143c76707ce0488b15770ba8a5f05, type: 3}
+      count: 3
+    - PrefabList:
+      - {fileID: 374288662248413553, guid: 3710ea2867fe57947a775573e9801f81, type: 3}
+      - {fileID: 8887375563539526537, guid: 54981350242645948ba9157d7ff80648, type: 3}
+      - {fileID: 7271330030917864180, guid: dae8a816dace92e4a98a9f626c02ed19, type: 3}
+      count: 2
+    - PrefabList:
+      - {fileID: 3639866451795296138, guid: bf82c13f7684b4146b429440fce22bee, type: 3}
+      - {fileID: 120701775815022409, guid: 20e2eaa4b8d4a4142a8503fe9a83a9ec, type: 3}
+      - {fileID: 6415656965175448120, guid: a6b708b3ee184ef40834f361aac74a47, type: 3}
+      - {fileID: 3610057905416276163, guid: 4059cbd68d43b4e49b4ad3d9fe4e3bc4, type: 3}
+      - {fileID: 6941245696026704118, guid: 006e9beac5a83e64fb4047eaf42357e9, type: 3}
+      - {fileID: 5215756293650609489, guid: 0649f0924ff284f41891384e210ff274, type: 3}
+      - {fileID: 3213724601565826019, guid: b237430cf7e7bca49849f372ad7a127c, type: 3}
+      count: 2

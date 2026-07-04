@@ -639,6 +639,32 @@ namespace Game.Editor
             sleepModeRect.pivot = new Vector2(0.5f, 0.5f);
             sleepModeRect.anchoredPosition = Vector2.zero;
 
+            // Play_SleepMode는 폰 절전화면 데모라 배터리·LTE·시계·스테이지 표기가 포함됨 — 게임과 무관한 정보는 비활성화
+            var unnecessaryNames = new[] { "Battery", "LTE", "Text_Time", "Text_Stage" };
+            foreach (var child in sleepModeInstance.GetComponentsInChildren<Transform>(true))
+            {
+                if (unnecessaryNames.Contains(child.name))
+                {
+                    child.gameObject.SetActive(false);
+                }
+            }
+
+            var pausedTitleObject = new GameObject("PausedTitleText");
+            pausedTitleObject.transform.SetParent(pausePopupRoot.transform, false);
+
+            var pausedTitleRect = pausedTitleObject.AddComponent<RectTransform>();
+            pausedTitleRect.anchorMin = new Vector2(0.5f, 0.5f);
+            pausedTitleRect.anchorMax = new Vector2(0.5f, 0.5f);
+            pausedTitleRect.pivot = new Vector2(0.5f, 0.5f);
+            pausedTitleRect.anchoredPosition = new Vector2(0, 200);
+            pausedTitleRect.sizeDelta = new Vector2(500, 110);
+
+            var pausedTitleText = pausedTitleObject.AddComponent<TextMeshProUGUI>();
+            pausedTitleText.text = "PAUSED";
+            pausedTitleText.fontSize = 80;
+            pausedTitleText.alignment = TextAlignmentOptions.Center;
+            pausedTitleText.font = font;
+
             var resumeButton = CreatePausePopupButton(pausePopupRoot.transform, "ResumeButton", new Vector2(0, 40), "RESUME", ButtonGreenPath, font);
             var retryButton = CreatePausePopupButton(pausePopupRoot.transform, "RetryButton", new Vector2(0, -80), "RETRY", ButtonBluePath, font);
             var stageSelectButton = CreatePausePopupButton(pausePopupRoot.transform, "StageSelectButton", new Vector2(0, -200), "STAGES", ButtonBluePath, font);

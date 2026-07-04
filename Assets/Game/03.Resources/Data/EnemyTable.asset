@@ -21,6 +21,14 @@ MonoBehaviour:
     attackRange: 0.5
     moveSpeed: 1
     prefab: {fileID: 3453363338725102790, guid: e9bc82c66a2b2844f8d8d112c3b7afc4, type: 3}
+  - id: enemy_slime_purple
+    unitName: Slime_Purple
+    hp: 120
+    attackPower: 20
+    attackInterval: 1.1
+    attackRange: 0.5
+    moveSpeed: 1.1
+    prefab: {fileID: 299893550816836936, guid: e57710c82d1ace14196bdc60e30402bf, type: 3}
   - id: enemy_snail_blue
     unitName: Snail_Blue
     hp: 250
@@ -37,6 +45,14 @@ MonoBehaviour:
     attackRange: 0.5
     moveSpeed: 1.3
     prefab: {fileID: 7208961884514881485, guid: 928a4574f2ddeee4f8a57ab117187c31, type: 3}
+  - id: enemy_bird_eagle
+    unitName: Bird_Eagle
+    hp: 90
+    attackPower: 25
+    attackInterval: 1
+    attackRange: 0.6
+    moveSpeed: 1.8
+    prefab: {fileID: 1496231817828942283, guid: 45555cf8f2d9271419e2d8dfb05f503d, type: 3}
   - id: enemy_wolf_gray
     unitName: Wolf_Gray
     hp: 200
@@ -45,6 +61,30 @@ MonoBehaviour:
     attackRange: 0.6
     moveSpeed: 1.6
     prefab: {fileID: 7454506752429640450, guid: 22b58f19592df994a8ca5d2c7dca5218, type: 3}
+  - id: enemy_octopus_pirate
+    unitName: Octopus_Pirate
+    hp: 280
+    attackPower: 45
+    attackInterval: 1.6
+    attackRange: 0.6
+    moveSpeed: 0.8
+    prefab: {fileID: 8047425427515477164, guid: e02c897a52df8d147ac03acb6c798dd0, type: 3}
+  - id: enemy_crab_rock
+    unitName: Crab_Rock
+    hp: 350
+    attackPower: 30
+    attackInterval: 2
+    attackRange: 0.5
+    moveSpeed: 0.5
+    prefab: {fileID: 995725256631147197, guid: 5cba3ff1836608b498f5f06bae5e8698, type: 3}
+  - id: enemy_bear_grizzly
+    unitName: Bear_Grizzly
+    hp: 500
+    attackPower: 60
+    attackInterval: 2.2
+    attackRange: 0.6
+    moveSpeed: 0.6
+    prefab: {fileID: 4590042540313865625, guid: 2edccbcf5e3700949a060b8db952861a, type: 3}
   - id: enemy_turtle_tower
     unitName: Turtle_Tower
     hp: 600

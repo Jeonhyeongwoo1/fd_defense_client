@@ -23,9 +23,9 @@ MonoBehaviour:
     - enemyId: enemy_slime_green
       count: 5
       interval: 2
-    - enemyId: enemy_beetle_red
-      count: 3
-      interval: 4
+    - enemyId: enemy_slime_purple
+      count: 2
+      interval: 5
   - id: wave_003
     SpawnEntryList:
     - enemyId: enemy_snail_blue
@@ -42,6 +42,9 @@ MonoBehaviour:
     - enemyId: enemy_beetle_red
       count: 4
       interval: 3
+    - enemyId: enemy_bird_eagle
+      count: 3
+      interval: 4
   - id: wave_005
     SpawnEntryList:
     - enemyId: enemy_turtle_tower
@@ -55,9 +58,9 @@ MonoBehaviour:
     - enemyId: enemy_beetle_red
       count: 6
       interval: 2
-    - enemyId: enemy_slime_green
-      count: 6
-      interval: 1.5
+    - enemyId: enemy_slime_purple
+      count: 4
+      interval: 2
   - id: wave_007
     SpawnEntryList:
     - enemyId: enemy_wolf_gray
@@ -66,22 +69,25 @@ MonoBehaviour:
     - enemyId: enemy_snail_blue
       count: 3
       interval: 6
+    - enemyId: enemy_bird_eagle
+      count: 4
+      interval: 3
   - id: wave_008
     SpawnEntryList:
     - enemyId: enemy_beetle_red
       count: 8
       interval: 1.5
-    - enemyId: enemy_wolf_gray
-      count: 4
-      interval: 3
+    - enemyId: enemy_crab_rock
+      count: 2
+      interval: 8
   - id: wave_009
     SpawnEntryList:
     - enemyId: enemy_snail_blue
       count: 6
       interval: 4
-    - enemyId: enemy_wolf_gray
-      count: 6
-      interval: 2
+    - enemyId: enemy_octopus_pirate
+      count: 2
+      interval: 7
   - id: wave_010
     SpawnEntryList:
     - enemyId: enemy_turtle_tower
@@ -90,43 +96,52 @@ MonoBehaviour:
     - enemyId: enemy_beetle_red
       count: 10
       interval: 1.2
+    - enemyId: enemy_bird_eagle
+      count: 5
+      interval: 2.5
   - id: wave_011
     SpawnEntryList:
     - enemyId: enemy_wolf_gray
       count: 8
       interval: 1.5
-    - enemyId: enemy_beetle_red
-      count: 8
-      interval: 1.5
+    - enemyId: enemy_octopus_pirate
+      count: 3
+      interval: 5
   - id: wave_012
     SpawnEntryList:
     - enemyId: enemy_turtle_tower
       count: 3
       interval: 5
-    - enemyId: enemy_snail_blue
-      count: 6
-      interval: 3
+    - enemyId: enemy_crab_rock
+      count: 3
+      interval: 6
   - id: wave_013
     SpawnEntryList:
     - enemyId: enemy_beetle_red
       count: 12
       interval: 1
-    - enemyId: enemy_slime_green
-      count: 10
-      interval: 0.8
+    - enemyId: enemy_bird_eagle
+      count: 6
+      interval: 2
+    - enemyId: enemy_slime_purple
+      count: 8
+      interval: 1.2
   - id: wave_014
     SpawnEntryList:
     - enemyId: enemy_wolf_gray
       count: 10
       interval: 1.2
-    - enemyId: enemy_turtle_tower
+    - enemyId: enemy_bear_grizzly
       count: 2
-      interval: 8
+      interval: 10
   - id: wave_015
     SpawnEntryList:
+    - enemyId: enemy_bear_grizzly
+      count: 3
+      interval: 8
+    - enemyId: enemy_octopus_pirate
+      count: 3
+      interval: 5
     - enemyId: enemy_turtle_tower
-      count: 4
-      interval: 4
-    - enemyId: enemy_wolf_gray
-      count: 8
-      interval: 1.5
+      count: 2
+      interval: 9

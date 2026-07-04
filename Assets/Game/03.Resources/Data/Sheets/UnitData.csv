@@ -1,6 +1,11 @@
 id,unitName,hp,attackPower,attackInterval,attackRange,moveSpeed,cost,cooldown,isRanged,projectileSpeed,projectileSpritePath,prefabPath
+pet_goldfish,Goldfish,60,12,0.8,0.5,1.7,35,1.5,false,0,,Assets/Game/03.Resources/Units/Pets/Goldfish/Goldfish.prefab
 pet_chick,Chick,100,20,1.0,0.6,1.5,50,2.0,false,0,,Assets/Game/03.Resources/Units/Pets/Chick/Chick.prefab
-pet_pug,Pug,300,35,1.5,0.6,1.0,120,5.0,false,0,,Assets/Game/03.Resources/Units/Pets/Pug/Pug.prefab
 pet_bat,Bat,80,15,1.2,3.0,1.2,80,3.5,true,6.0,Assets/Layer Lab/2D Characters-PetPack1/Sprites/Shot/Bat.png,Assets/Game/03.Resources/Units/Pets/Bat/Bat.prefab
+pet_bomb,Bomb,60,50,1.5,0.6,1.8,100,4.0,false,0,,Assets/Game/03.Resources/Units/Pets/Bomb/Bomb.prefab
+pet_flower,Flower,70,20,1.0,3.5,1.1,110,4.5,true,6.0,Assets/Layer Lab/2D Characters-PetPack1/Sprites/Shot/Flower.png,Assets/Game/03.Resources/Units/Pets/Flower/Flower.prefab
+pet_pug,Pug,300,35,1.5,0.6,1.0,120,5.0,false,0,,Assets/Game/03.Resources/Units/Pets/Pug/Pug.prefab
 pet_ghost,Ghost,60,25,1.8,4.0,1.0,150,6.0,true,5.0,Assets/Layer Lab/2D Characters-PetPack1/Sprites/Shot/Ghost.png,Assets/Game/03.Resources/Units/Pets/Ghost/Ghost.prefab
+pet_melody,Melody,50,35,2.2,5.0,0.9,180,7.0,true,7.0,Assets/Layer Lab/2D Characters-PetPack1/Sprites/Shot/Melody.png,Assets/Game/03.Resources/Units/Pets/Melody/Melody.prefab
+pet_sword,Sword,180,45,1.1,0.7,1.4,200,6.0,false,0,,Assets/Game/03.Resources/Units/Pets/Sword/Sword.prefab
 pet_titan,Titan,800,80,2.0,0.7,0.7,400,12.0,false,0,,Assets/Game/03.Resources/Units/Pets/Titan/Titan.prefab

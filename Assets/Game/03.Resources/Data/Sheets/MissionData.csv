@@ -1,0 +1,11 @@
+id,missionType,targetCount,goldReward,description
+mission_kill_100,KillEnemies,100,300,Defeat 100 enemies
+mission_kill_500,KillEnemies,500,800,Defeat 500 enemies
+mission_kill_2000,KillEnemies,2000,2000,Defeat 2000 enemies
+mission_boss_5,KillBosses,5,500,Defeat 5 bosses
+mission_boss_25,KillBosses,25,1500,Defeat 25 bosses
+mission_clear_5,ClearStages,5,400,Clear 5 stages
+mission_clear_20,ClearStages,20,1200,Clear 20 stages
+mission_clear_50,ClearStages,50,5000,Clear 50 stages
+mission_upgrade_5,UpgradeUnits,5,300,Upgrade units 5 times
+mission_upgrade_30,UpgradeUnits,30,1500,Upgrade units 30 times

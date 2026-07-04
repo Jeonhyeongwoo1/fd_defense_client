@@ -17,6 +17,8 @@ namespace Game.Editor
         private const string WaveCsvPath = "Assets/Game/03.Resources/Data/Sheets/WaveData.csv";
         private const string MapCsvPath = "Assets/Game/03.Resources/Data/Sheets/MapData.csv";
         private const string UpgradeCsvPath = "Assets/Game/03.Resources/Data/Sheets/UpgradeData.csv";
+        private const string DailyRewardCsvPath = "Assets/Game/03.Resources/Data/Sheets/DailyRewardData.csv";
+        private const string MissionCsvPath = "Assets/Game/03.Resources/Data/Sheets/MissionData.csv";
 
         private const string UnitTablePath = "Assets/Game/03.Resources/Data/UnitTable.asset";
         private const string EnemyTablePath = "Assets/Game/03.Resources/Data/EnemyTable.asset";
@@ -25,6 +27,8 @@ namespace Game.Editor
         private const string WaveTablePath = "Assets/Game/03.Resources/Data/WaveTable.asset";
         private const string MapTablePath = "Assets/Game/03.Resources/Data/MapTable.asset";
         private const string UpgradeTablePath = "Assets/Game/03.Resources/Data/UpgradeTable.asset";
+        private const string DailyRewardTablePath = "Assets/Game/03.Resources/Data/DailyRewardTable.asset";
+        private const string MissionTablePath = "Assets/Game/03.Resources/Data/MissionTable.asset";
 
         public static void ImportAllSheets()
         {
@@ -37,6 +41,8 @@ namespace Game.Editor
             importedCount += ImportMapData();
             importedCount += ImportStageData();
             importedCount += ImportUpgradeData();
+            importedCount += ImportDailyRewardData();
+            importedCount += ImportMissionData();
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -328,6 +334,12 @@ namespace Game.Editor
                     }
                 }
 
+                var enemyStatMultiplier = 1.0f;
+                if (columns.Length > 10 && !string.IsNullOrEmpty(columns[10]))
+                {
+                    enemyStatMultiplier = float.Parse(columns[10], CultureInfo.InvariantCulture);
+                }
+
                 var data = new StageData
                 {
                     id = columns[0],
@@ -339,7 +351,8 @@ namespace Game.Editor
                     waveIntervalSeconds = float.Parse(columns[6], CultureInfo.InvariantCulture),
                     bossId = columns[7],
                     mapId = columns.Length > 8 ? columns[8] : string.Empty,
-                    goldReward = columns.Length > 9 ? int.Parse(columns[9]) : 0
+                    goldReward = columns.Length > 9 ? int.Parse(columns[9]) : 0,
+                    enemyStatMultiplier = enemyStatMultiplier
                 };
 
                 stageDataList.Add(data);
@@ -643,6 +656,130 @@ namespace Game.Editor
             EditorUtility.SetDirty(table);
 
             GameLogger.Log($"[CsvSheetImporter] UpgradeData imported: {upgradeDataList.Count} entries ({skippedCount} skipped)");
+            return 1;
+        }
+
+        private static int ImportDailyRewardData()
+        {
+            if (!File.Exists(DailyRewardCsvPath))
+            {
+                GameLogger.LogError($"[CsvSheetImporter] CSV not found: {DailyRewardCsvPath}");
+                return 0;
+            }
+
+            var lines = File.ReadAllLines(DailyRewardCsvPath);
+            if (lines.Length < 2)
+            {
+                GameLogger.LogWarning($"[CsvSheetImporter] No data rows in {DailyRewardCsvPath}");
+                return 0;
+            }
+
+            var rewardDataList = new List<DailyRewardData>();
+            var skippedCount = 0;
+
+            for (var i = 1; i < lines.Length; i++)
+            {
+                var line = lines[i].Trim();
+                if (string.IsNullOrEmpty(line))
+                {
+                    continue;
+                }
+
+                var columns = line.Split(',');
+                if (columns.Length < 2)
+                {
+                    GameLogger.LogError($"[CsvSheetImporter] Invalid DailyRewardData row {i}: insufficient columns");
+                    skippedCount++;
+                    continue;
+                }
+
+                var data = new DailyRewardData
+                {
+                    day = int.Parse(columns[0]),
+                    gold = int.Parse(columns[1])
+                };
+
+                rewardDataList.Add(data);
+            }
+
+            var table = AssetDatabase.LoadAssetAtPath<DailyRewardTableSO>(DailyRewardTablePath);
+            if (table == null)
+            {
+                table = ScriptableObject.CreateInstance<DailyRewardTableSO>();
+                AssetDatabase.CreateAsset(table, DailyRewardTablePath);
+            }
+
+            table.DailyRewardDataList = rewardDataList;
+            EditorUtility.SetDirty(table);
+
+            GameLogger.Log($"[CsvSheetImporter] DailyRewardData imported: {rewardDataList.Count} entries ({skippedCount} skipped)");
+            return 1;
+        }
+
+        private static int ImportMissionData()
+        {
+            if (!File.Exists(MissionCsvPath))
+            {
+                GameLogger.LogError($"[CsvSheetImporter] CSV not found: {MissionCsvPath}");
+                return 0;
+            }
+
+            var lines = File.ReadAllLines(MissionCsvPath);
+            if (lines.Length < 2)
+            {
+                GameLogger.LogWarning($"[CsvSheetImporter] No data rows in {MissionCsvPath}");
+                return 0;
+            }
+
+            var missionDataList = new List<MissionData>();
+            var skippedCount = 0;
+
+            for (var i = 1; i < lines.Length; i++)
+            {
+                var line = lines[i].Trim();
+                if (string.IsNullOrEmpty(line))
+                {
+                    continue;
+                }
+
+                var columns = line.Split(',');
+                if (columns.Length < 5)
+                {
+                    GameLogger.LogError($"[CsvSheetImporter] Invalid MissionData row {i}: insufficient columns");
+                    skippedCount++;
+                    continue;
+                }
+
+                if (!System.Enum.TryParse<MissionType>(columns[1], out var missionType))
+                {
+                    GameLogger.LogError($"[CsvSheetImporter] Invalid MissionType '{columns[1]}' at row {i}");
+                    skippedCount++;
+                    continue;
+                }
+
+                var data = new MissionData
+                {
+                    id = columns[0],
+                    missionType = missionType,
+                    targetCount = int.Parse(columns[2]),
+                    goldReward = int.Parse(columns[3]),
+                    description = columns[4]
+                };
+
+                missionDataList.Add(data);
+            }
+
+            var table = AssetDatabase.LoadAssetAtPath<MissionTableSO>(MissionTablePath);
+            if (table == null)
+            {
+                table = ScriptableObject.CreateInstance<MissionTableSO>();
+                AssetDatabase.CreateAsset(table, MissionTablePath);
+            }
+
+            table.MissionDataList = missionDataList;
+            EditorUtility.SetDirty(table);
+
+            GameLogger.Log($"[CsvSheetImporter] MissionData imported: {missionDataList.Count} entries ({skippedCount} skipped)");
             return 1;
         }
     }

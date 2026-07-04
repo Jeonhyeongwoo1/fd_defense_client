@@ -35,7 +35,16 @@ namespace Game.Editor
 
         private static readonly string[] PetNames = { "Goldfish", "Chick", "Bat", "Bomb", "Flower", "Pug", "Ghost", "Melody", "Sword", "Titan" };
         private static readonly string[] UnitIds = { "pet_goldfish", "pet_chick", "pet_bat", "pet_bomb", "pet_flower", "pet_pug", "pet_ghost", "pet_melody", "pet_sword", "pet_titan" };
-        private static readonly string[] StageIds = { "stage_001", "stage_002", "stage_003" };
+
+        private static string[] GenerateStageIds()
+        {
+            var stageIds = new string[50];
+            for (var i = 0; i < 50; i++)
+            {
+                stageIds[i] = $"stage_{(i + 1):D3}";
+            }
+            return stageIds;
+        }
 
         public static void BuildAllUiPrefabs()
         {
@@ -963,16 +972,31 @@ namespace Game.Editor
             var stagePanelRoot = CreateStagePanel(rootRect, font, starIcon, lockIcon);
             var deckPanel = CreateDeckPanel(rootRect, font, starIcon);
             var upgradePanel = CreateUpgradePanel(rootRect, font, starIcon, goldIcon, arrowIcon);
+            var missionPanel = CreateMissionPanel(rootRect, font, goldIcon);
+            var dailyRewardPopup = CreateDailyRewardPopup(rootRect, font, goldIcon, starIcon);
+            var settingsPopup = CreateSettingsPopup(rootRect, font);
+
+            var gearIcon = LoadSprite(KitRoot + "Shared/Icons/PictoIcon/128/headgear.png");
+            if (gearIcon == null)
+            {
+                gearIcon = LoadSprite(KitRoot + "Shared/Icons/PictoIcon/128/menu_1.png");
+            }
+            var settingsButton = CreateSettingsButton(rootRect, gearIcon);
 
             var stageSelectView = stagePanelRoot.GetComponent<UI_StageSelectView>();
             var deckPanelView = deckPanel.GetComponent<UI_DeckPanelView>();
             var upgradePanelView = upgradePanel.GetComponent<UI_UpgradePanelView>();
+            var missionPanelView = missionPanel.GetComponent<UI_MissionPanelView>();
+            var dailyRewardPopupView = dailyRewardPopup.GetComponent<UI_DailyRewardPopupView>();
+            var settingsPopupView = settingsPopup.GetComponent<UI_SettingsPopupView>();
 
             var outGameHomeView = rootObject.AddComponent<UI_OutGameHomeView>();
             var homeSerializer = new SerializedObject(outGameHomeView);
             homeSerializer.FindProperty("stageTabButton").objectReferenceValue = tabButtons[0];
             homeSerializer.FindProperty("deckTabButton").objectReferenceValue = tabButtons[1];
             homeSerializer.FindProperty("upgradeTabButton").objectReferenceValue = tabButtons[2];
+            homeSerializer.FindProperty("missionsTabButton").objectReferenceValue = tabButtons[3];
+            homeSerializer.FindProperty("settingsButton").objectReferenceValue = settingsButton;
             homeSerializer.FindProperty("stagePanelRoot").objectReferenceValue = stagePanelRoot;
             homeSerializer.FindProperty("goldText").objectReferenceValue = goldText;
             homeSerializer.ApplyModifiedProperties();
@@ -989,6 +1013,61 @@ namespace Game.Editor
             stageSerializer.ApplyModifiedProperties();
 
             Object.DestroyImmediate(stageSelectView);
+
+            rootObject.AddComponent<UI_MissionPanelView>();
+            var missionViewCopy = rootObject.GetComponent<UI_MissionPanelView>();
+            var missionSerializer = new SerializedObject(missionViewCopy);
+            missionSerializer.FindProperty("root").objectReferenceValue = missionPanel;
+            missionSerializer.FindProperty("missionRows").arraySize = missionPanelView.MissionRows.Length;
+            for (var i = 0; i < missionPanelView.MissionRows.Length; i++)
+            {
+                missionSerializer.FindProperty("missionRows").GetArrayElementAtIndex(i).objectReferenceValue = missionPanelView.MissionRows[i];
+            }
+            missionSerializer.ApplyModifiedProperties();
+
+            Object.DestroyImmediate(missionPanelView);
+
+            rootObject.AddComponent<UI_DailyRewardPopupView>();
+            var dailyRewardViewCopy = rootObject.GetComponent<UI_DailyRewardPopupView>();
+            var dailyRewardSerializer = new SerializedObject(dailyRewardViewCopy);
+            dailyRewardSerializer.FindProperty("root").objectReferenceValue = dailyRewardPopup;
+            var originalDailyRewardSerializer = new SerializedObject(dailyRewardPopupView);
+            dailyRewardSerializer.FindProperty("dayTexts").arraySize = 7;
+            dailyRewardSerializer.FindProperty("goldTexts").arraySize = 7;
+            dailyRewardSerializer.FindProperty("claimedMarks").arraySize = 7;
+            dailyRewardSerializer.FindProperty("todayHighlights").arraySize = 7;
+            for (var i = 0; i < 7; i++)
+            {
+                dailyRewardSerializer.FindProperty("dayTexts").GetArrayElementAtIndex(i).objectReferenceValue =
+                    originalDailyRewardSerializer.FindProperty("dayTexts").GetArrayElementAtIndex(i).objectReferenceValue;
+                dailyRewardSerializer.FindProperty("goldTexts").GetArrayElementAtIndex(i).objectReferenceValue =
+                    originalDailyRewardSerializer.FindProperty("goldTexts").GetArrayElementAtIndex(i).objectReferenceValue;
+                dailyRewardSerializer.FindProperty("claimedMarks").GetArrayElementAtIndex(i).objectReferenceValue =
+                    originalDailyRewardSerializer.FindProperty("claimedMarks").GetArrayElementAtIndex(i).objectReferenceValue;
+                dailyRewardSerializer.FindProperty("todayHighlights").GetArrayElementAtIndex(i).objectReferenceValue =
+                    originalDailyRewardSerializer.FindProperty("todayHighlights").GetArrayElementAtIndex(i).objectReferenceValue;
+            }
+            dailyRewardSerializer.FindProperty("claimButton").objectReferenceValue = originalDailyRewardSerializer.FindProperty("claimButton").objectReferenceValue;
+            dailyRewardSerializer.FindProperty("closeButton").objectReferenceValue = originalDailyRewardSerializer.FindProperty("closeButton").objectReferenceValue;
+            dailyRewardSerializer.ApplyModifiedProperties();
+
+            Object.DestroyImmediate(dailyRewardPopupView);
+
+            rootObject.AddComponent<UI_SettingsPopupView>();
+            var settingsViewCopy = rootObject.GetComponent<UI_SettingsPopupView>();
+            var settingsSerializer = new SerializedObject(settingsViewCopy);
+            var originalSettingsSerializer = new SerializedObject(settingsPopupView);
+            settingsSerializer.FindProperty("root").objectReferenceValue = settingsPopup;
+            settingsSerializer.FindProperty("vibrationToggle").objectReferenceValue = originalSettingsSerializer.FindProperty("vibrationToggle").objectReferenceValue;
+            settingsSerializer.FindProperty("resetButton").objectReferenceValue = originalSettingsSerializer.FindProperty("resetButton").objectReferenceValue;
+            settingsSerializer.FindProperty("resetConfirmRoot").objectReferenceValue = originalSettingsSerializer.FindProperty("resetConfirmRoot").objectReferenceValue;
+            settingsSerializer.FindProperty("resetConfirmButton").objectReferenceValue = originalSettingsSerializer.FindProperty("resetConfirmButton").objectReferenceValue;
+            settingsSerializer.FindProperty("resetCancelButton").objectReferenceValue = originalSettingsSerializer.FindProperty("resetCancelButton").objectReferenceValue;
+            settingsSerializer.FindProperty("closeButton").objectReferenceValue = originalSettingsSerializer.FindProperty("closeButton").objectReferenceValue;
+            settingsSerializer.FindProperty("versionText").objectReferenceValue = originalSettingsSerializer.FindProperty("versionText").objectReferenceValue;
+            settingsSerializer.ApplyModifiedProperties();
+
+            Object.DestroyImmediate(settingsPopupView);
 
             var prefabPath = OutputRoot + "StageSelectScreen.prefab";
             DeleteExistingPrefab(prefabPath);
@@ -1049,9 +1128,44 @@ namespace Game.Editor
 
         private static UI_StageButtonView[] CreateStageButtons(RectTransform parent, TMP_FontAsset font, Sprite starIcon, Sprite lockIcon)
         {
-            var buttons = new UI_StageButtonView[StageIds.Length];
-            var yPositions = new[] { 120f, -80f, -280f };
-            var stageNames = new[] { "STAGE 1", "STAGE 2", "STAGE 3" };
+            var stageIds = GenerateStageIds();
+            var buttons = new UI_StageButtonView[stageIds.Length];
+
+            var scrollViewObject = new GameObject("StageScrollView");
+            scrollViewObject.transform.SetParent(parent, false);
+            var scrollViewRect = scrollViewObject.AddComponent<RectTransform>();
+            scrollViewRect.anchorMin = new Vector2(0.5f, 0.5f);
+            scrollViewRect.anchorMax = new Vector2(0.5f, 0.5f);
+            scrollViewRect.pivot = new Vector2(0.5f, 0.5f);
+            scrollViewRect.anchoredPosition = Vector2.zero;
+            scrollViewRect.sizeDelta = new Vector2(1600, 700);
+
+            var scrollRect = scrollViewObject.AddComponent<ScrollRect>();
+            scrollRect.horizontal = false;
+            scrollRect.vertical = true;
+            scrollRect.movementType = ScrollRect.MovementType.Clamped;
+
+            var viewportObject = new GameObject("Viewport");
+            viewportObject.transform.SetParent(scrollViewObject.transform, false);
+            var viewportRect = viewportObject.AddComponent<RectTransform>();
+            viewportRect.anchorMin = Vector2.zero;
+            viewportRect.anchorMax = Vector2.one;
+            viewportRect.offsetMin = Vector2.zero;
+            viewportRect.offsetMax = Vector2.zero;
+            var mask = viewportObject.AddComponent<Mask>();
+            mask.showMaskGraphic = false;
+            var maskImage = viewportObject.AddComponent<Image>();
+            maskImage.color = new Color(1, 1, 1, 0.01f);
+
+            var contentObject = new GameObject("Content");
+            contentObject.transform.SetParent(viewportObject.transform, false);
+            var contentRect = contentObject.AddComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0.5f, 1);
+            contentRect.anchorMax = new Vector2(0.5f, 1);
+            contentRect.pivot = new Vector2(0.5f, 1);
+
+            scrollRect.viewport = viewportRect;
+            scrollRect.content = contentRect;
 
             var stageButtonPrefabPath = KitRoot + "Theme_Light/Prefabs/Prefabs_Button/Button_03_Blue.prefab";
             var stageButtonPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(stageButtonPrefabPath);
@@ -1068,15 +1182,31 @@ namespace Game.Editor
                 }
             }
 
-            for (var i = 0; i < StageIds.Length; i++)
+            const int columns = 5;
+            const float buttonWidth = 300f;
+            const float buttonHeight = 110f;
+            const float spacingX = 320f;
+            const float spacingY = 130f;
+
+            var rows = (stageIds.Length + columns - 1) / columns;
+            var contentHeight = rows * spacingY + 50f;
+            contentRect.sizeDelta = new Vector2(1600, contentHeight);
+
+            for (var i = 0; i < stageIds.Length; i++)
             {
-                buttons[i] = CreateStageButton(parent, new Vector2(0, yPositions[i]), StageIds[i], stageNames[i], stageButtonPrefabPath, font, starIcon, lockIcon);
+                var col = i % columns;
+                var row = i / columns;
+                var x = (col - (columns - 1) * 0.5f) * spacingX;
+                var y = -50f - row * spacingY;
+                var stageName = $"STAGE {i + 1}";
+
+                buttons[i] = CreateStageButton(contentRect, new Vector2(x, y), new Vector2(buttonWidth, buttonHeight), stageIds[i], stageName, stageButtonPrefabPath, font, starIcon, lockIcon);
             }
 
             return buttons;
         }
 
-        private static UI_StageButtonView CreateStageButton(RectTransform parent, Vector2 position, string stageId, string stageName, string buttonPrefabPath, TMP_FontAsset font, Sprite starIcon, Sprite lockIcon)
+        private static UI_StageButtonView CreateStageButton(RectTransform parent, Vector2 position, Vector2 size, string stageId, string stageName, string buttonPrefabPath, TMP_FontAsset font, Sprite starIcon, Sprite lockIcon)
         {
             var buttonInstance = InstantiateKitPrefab(buttonPrefabPath, parent);
 
@@ -1088,11 +1218,11 @@ namespace Game.Editor
 
             buttonInstance.name = $"StageButton_{stageId}";
             var buttonRect = buttonInstance.GetComponent<RectTransform>();
-            buttonRect.anchorMin = new Vector2(0.5f, 0.5f);
-            buttonRect.anchorMax = new Vector2(0.5f, 0.5f);
-            buttonRect.pivot = new Vector2(0.5f, 0.5f);
+            buttonRect.anchorMin = new Vector2(0.5f, 1);
+            buttonRect.anchorMax = new Vector2(0.5f, 1);
+            buttonRect.pivot = new Vector2(0.5f, 1);
             buttonRect.anchoredPosition = position;
-            buttonRect.sizeDelta = new Vector2(520, 150);
+            buttonRect.sizeDelta = size;
 
             var button = EnsureButtonComponent(buttonInstance);
 
@@ -1233,11 +1363,11 @@ namespace Game.Editor
 
         private static Button[] CreateTabButtons(RectTransform parent, TMP_FontAsset font)
         {
-            var buttons = new Button[3];
-            var labels = new[] { "STAGES", "DECK", "UPGRADE" };
-            var xPositions = new[] { -220f, 0f, 220f };
+            var buttons = new Button[4];
+            var labels = new[] { "STAGES", "DECK", "UPGRADE", "MISSIONS" };
+            var xPositions = new[] { -330f, -110f, 110f, 330f };
 
-            for (var i = 0; i < 3; i++)
+            for (var i = 0; i < 4; i++)
             {
                 var buttonInstance = InstantiateKitPrefab(ButtonBluePath, parent);
                 if (buttonInstance == null)
@@ -1646,6 +1776,519 @@ namespace Game.Editor
             maxLevelMarkObject.SetActive(false);
 
             return detailPanel;
+        }
+
+        private static GameObject CreateMissionPanel(RectTransform parent, TMP_FontAsset font, Sprite goldIcon)
+        {
+            var panelObject = new GameObject("MissionPanel");
+            panelObject.transform.SetParent(parent, false);
+
+            var panelRect = panelObject.AddComponent<RectTransform>();
+            panelRect.anchorMin = Vector2.zero;
+            panelRect.anchorMax = Vector2.one;
+            panelRect.offsetMin = Vector2.zero;
+            panelRect.offsetMax = Vector2.zero;
+
+            var rows = new UI_MissionRowView[10];
+            const float rowHeight = 80f;
+            const float rowWidth = 900f;
+            const float spacingY = 90f;
+            const float startY = 300f;
+
+            for (var i = 0; i < 10; i++)
+            {
+                var y = startY - i * spacingY;
+                rows[i] = CreateMissionRow(panelRect, new Vector2(0, y), new Vector2(rowWidth, rowHeight), font, goldIcon, i);
+            }
+
+            var missionPanelView = panelObject.AddComponent<UI_MissionPanelView>();
+            var serializedObject = new SerializedObject(missionPanelView);
+            serializedObject.FindProperty("root").objectReferenceValue = panelObject;
+            serializedObject.FindProperty("missionRows").arraySize = rows.Length;
+            for (var i = 0; i < rows.Length; i++)
+            {
+                serializedObject.FindProperty("missionRows").GetArrayElementAtIndex(i).objectReferenceValue = rows[i];
+            }
+            serializedObject.ApplyModifiedProperties();
+
+            panelObject.SetActive(false);
+
+            return panelObject;
+        }
+
+        private static UI_MissionRowView CreateMissionRow(RectTransform parent, Vector2 position, Vector2 size, TMP_FontAsset font, Sprite goldIcon, int index)
+        {
+            var rowObject = new GameObject($"MissionRow_{index}");
+            rowObject.transform.SetParent(parent, false);
+
+            var rowRect = rowObject.AddComponent<RectTransform>();
+            rowRect.anchorMin = new Vector2(0.5f, 0.5f);
+            rowRect.anchorMax = new Vector2(0.5f, 0.5f);
+            rowRect.pivot = new Vector2(0.5f, 0.5f);
+            rowRect.anchoredPosition = position;
+            rowRect.sizeDelta = size;
+
+            var frameInstance = InstantiateKitPrefab(CardFrameBluePath, rowObject.transform);
+            if (frameInstance != null)
+            {
+                var frameRect = frameInstance.GetComponent<RectTransform>();
+                frameRect.anchorMin = Vector2.zero;
+                frameRect.anchorMax = Vector2.one;
+                frameRect.offsetMin = Vector2.zero;
+                frameRect.offsetMax = Vector2.zero;
+            }
+
+            var descriptionTextObject = new GameObject("DescriptionText");
+            descriptionTextObject.transform.SetParent(rowObject.transform, false);
+            var descriptionTextRect = descriptionTextObject.AddComponent<RectTransform>();
+            descriptionTextRect.anchorMin = new Vector2(0, 0.5f);
+            descriptionTextRect.anchorMax = new Vector2(0, 0.5f);
+            descriptionTextRect.pivot = new Vector2(0, 0.5f);
+            descriptionTextRect.anchoredPosition = new Vector2(20, 0);
+            descriptionTextRect.sizeDelta = new Vector2(400, 60);
+
+            var descriptionText = descriptionTextObject.AddComponent<TextMeshProUGUI>();
+            descriptionText.text = "Mission Description";
+            descriptionText.fontSize = 24;
+            descriptionText.alignment = TextAlignmentOptions.Left;
+            descriptionText.font = font;
+
+            var progressTextObject = new GameObject("ProgressText");
+            progressTextObject.transform.SetParent(rowObject.transform, false);
+            var progressTextRect = progressTextObject.AddComponent<RectTransform>();
+            progressTextRect.anchorMin = new Vector2(0.5f, 0.5f);
+            progressTextRect.anchorMax = new Vector2(0.5f, 0.5f);
+            progressTextRect.pivot = new Vector2(0.5f, 0.5f);
+            progressTextRect.anchoredPosition = new Vector2(100, 0);
+            progressTextRect.sizeDelta = new Vector2(100, 40);
+
+            var progressText = progressTextObject.AddComponent<TextMeshProUGUI>();
+            progressText.text = "0/10";
+            progressText.fontSize = 22;
+            progressText.alignment = TextAlignmentOptions.Center;
+            progressText.font = font;
+
+            var claimButtonInstance = InstantiateKitPrefab(ButtonGreenPath, rowObject.transform);
+            if (claimButtonInstance != null)
+            {
+                claimButtonInstance.name = "ClaimButton";
+                var claimButtonRect = claimButtonInstance.GetComponent<RectTransform>();
+                claimButtonRect.anchorMin = new Vector2(1, 0.5f);
+                claimButtonRect.anchorMax = new Vector2(1, 0.5f);
+                claimButtonRect.pivot = new Vector2(1, 0.5f);
+                claimButtonRect.anchoredPosition = new Vector2(-20, 0);
+                claimButtonRect.sizeDelta = new Vector2(120, 60);
+
+                var claimButton = EnsureButtonComponent(claimButtonInstance);
+                var claimButtonText = claimButtonInstance.GetComponentInChildren<TMP_Text>();
+                if (claimButtonText != null)
+                {
+                    claimButtonText.text = "CLAIM";
+                    claimButtonText.fontSize = 22;
+                    claimButtonText.alignment = TextAlignmentOptions.Center;
+                    claimButtonText.font = font;
+                }
+            }
+
+            var claimedMarkObject = new GameObject("ClaimedMark");
+            claimedMarkObject.transform.SetParent(rowObject.transform, false);
+            var claimedMarkRect = claimedMarkObject.AddComponent<RectTransform>();
+            claimedMarkRect.anchorMin = new Vector2(1, 0.5f);
+            claimedMarkRect.anchorMax = new Vector2(1, 0.5f);
+            claimedMarkRect.pivot = new Vector2(1, 0.5f);
+            claimedMarkRect.anchoredPosition = new Vector2(-60, 0);
+            claimedMarkRect.sizeDelta = new Vector2(100, 40);
+
+            var claimedMarkText = claimedMarkObject.AddComponent<TextMeshProUGUI>();
+            claimedMarkText.text = "CLAIMED";
+            claimedMarkText.fontSize = 22;
+            claimedMarkText.alignment = TextAlignmentOptions.Center;
+            claimedMarkText.font = font;
+            claimedMarkText.color = new Color(0.3f, 0.8f, 0.3f);
+            claimedMarkObject.SetActive(false);
+
+            var rowView = rowObject.AddComponent<UI_MissionRowView>();
+            var serializedObject = new SerializedObject(rowView);
+            serializedObject.FindProperty("descriptionText").objectReferenceValue = descriptionText;
+            serializedObject.FindProperty("progressText").objectReferenceValue = progressText;
+            serializedObject.FindProperty("claimButton").objectReferenceValue = claimButtonInstance?.GetComponent<Button>();
+            serializedObject.FindProperty("claimedMark").objectReferenceValue = claimedMarkObject;
+            serializedObject.ApplyModifiedProperties();
+
+            return rowView;
+        }
+
+        private static GameObject CreateDailyRewardPopup(RectTransform parent, TMP_FontAsset font, Sprite goldIcon, Sprite starIcon)
+        {
+            var popupRoot = new GameObject("DailyRewardPopupRoot");
+            popupRoot.transform.SetParent(parent, false);
+
+            var rootRect = popupRoot.AddComponent<RectTransform>();
+            rootRect.anchorMin = Vector2.zero;
+            rootRect.anchorMax = Vector2.one;
+            rootRect.offsetMin = Vector2.zero;
+            rootRect.offsetMax = Vector2.zero;
+
+            var dimImage = popupRoot.AddComponent<Image>();
+            dimImage.color = new Color(0, 0, 0, 0.7f);
+            dimImage.raycastTarget = true;
+
+            var popupInstance = InstantiateKitPrefab(PopupPath, popupRoot.transform);
+            if (popupInstance != null)
+            {
+                popupInstance.name = "PopupBox";
+                var popupRect = popupInstance.GetComponent<RectTransform>();
+                popupRect.anchorMin = new Vector2(0.5f, 0.5f);
+                popupRect.anchorMax = new Vector2(0.5f, 0.5f);
+                popupRect.pivot = new Vector2(0.5f, 0.5f);
+                popupRect.anchoredPosition = Vector2.zero;
+                popupRect.sizeDelta = new Vector2(900, 750);
+            }
+
+            var titleTextObject = new GameObject("TitleText");
+            titleTextObject.transform.SetParent(popupRoot.transform, false);
+            var titleTextRect = titleTextObject.AddComponent<RectTransform>();
+            titleTextRect.anchorMin = new Vector2(0.5f, 0.5f);
+            titleTextRect.anchorMax = new Vector2(0.5f, 0.5f);
+            titleTextRect.pivot = new Vector2(0.5f, 0.5f);
+            titleTextRect.anchoredPosition = new Vector2(0, 300);
+            titleTextRect.sizeDelta = new Vector2(700, 80);
+
+            var titleText = titleTextObject.AddComponent<TextMeshProUGUI>();
+            titleText.text = "DAILY REWARD";
+            titleText.fontSize = 56;
+            titleText.alignment = TextAlignmentOptions.Center;
+            titleText.font = font;
+
+            var dayTexts = new TMP_Text[7];
+            var goldTexts = new TMP_Text[7];
+            var claimedMarks = new GameObject[7];
+            var todayHighlights = new GameObject[7];
+
+            const float slotWidth = 250f;
+            const float slotHeight = 150f;
+            const float spacingX = 270f;
+            const float spacingY = 170f;
+
+            for (var i = 0; i < 7; i++)
+            {
+                var col = i % 3;
+                var row = i / 3;
+                var x = (col - 1f) * spacingX;
+                var y = 150f - row * spacingY;
+
+                var slotObject = new GameObject($"DaySlot_{i + 1}");
+                slotObject.transform.SetParent(popupRoot.transform, false);
+                var slotRect = slotObject.AddComponent<RectTransform>();
+                slotRect.anchorMin = new Vector2(0.5f, 0.5f);
+                slotRect.anchorMax = new Vector2(0.5f, 0.5f);
+                slotRect.pivot = new Vector2(0.5f, 0.5f);
+                slotRect.anchoredPosition = new Vector2(x, y);
+                slotRect.sizeDelta = new Vector2(slotWidth, slotHeight);
+
+                var cardInstance = InstantiateKitPrefab(CardFrameBluePath, slotObject.transform);
+                if (cardInstance != null)
+                {
+                    var cardRect = cardInstance.GetComponent<RectTransform>();
+                    cardRect.anchorMin = Vector2.zero;
+                    cardRect.anchorMax = Vector2.one;
+                    cardRect.offsetMin = Vector2.zero;
+                    cardRect.offsetMax = Vector2.zero;
+                }
+
+                var dayTextObject = new GameObject("DayText");
+                dayTextObject.transform.SetParent(slotObject.transform, false);
+                var dayTextRect = dayTextObject.AddComponent<RectTransform>();
+                dayTextRect.anchorMin = new Vector2(0.5f, 1);
+                dayTextRect.anchorMax = new Vector2(0.5f, 1);
+                dayTextRect.pivot = new Vector2(0.5f, 1);
+                dayTextRect.anchoredPosition = new Vector2(0, -10);
+                dayTextRect.sizeDelta = new Vector2(230, 40);
+
+                dayTexts[i] = dayTextObject.AddComponent<TextMeshProUGUI>();
+                dayTexts[i].text = $"Day {i + 1}";
+                dayTexts[i].fontSize = 28;
+                dayTexts[i].alignment = TextAlignmentOptions.Center;
+                dayTexts[i].font = font;
+
+                var goldTextObject = new GameObject("GoldText");
+                goldTextObject.transform.SetParent(slotObject.transform, false);
+                var goldTextRect = goldTextObject.AddComponent<RectTransform>();
+                goldTextRect.anchorMin = new Vector2(0.5f, 0.5f);
+                goldTextRect.anchorMax = new Vector2(0.5f, 0.5f);
+                goldTextRect.pivot = new Vector2(0.5f, 0.5f);
+                goldTextRect.anchoredPosition = new Vector2(0, -10);
+                goldTextRect.sizeDelta = new Vector2(200, 50);
+
+                goldTexts[i] = goldTextObject.AddComponent<TextMeshProUGUI>();
+                goldTexts[i].text = "0";
+                goldTexts[i].fontSize = 36;
+                goldTexts[i].alignment = TextAlignmentOptions.Center;
+                goldTexts[i].font = font;
+
+                var claimedMarkObject = new GameObject("ClaimedMark");
+                claimedMarkObject.transform.SetParent(slotObject.transform, false);
+                var claimedMarkRect = claimedMarkObject.AddComponent<RectTransform>();
+                claimedMarkRect.anchorMin = new Vector2(1, 1);
+                claimedMarkRect.anchorMax = new Vector2(1, 1);
+                claimedMarkRect.pivot = new Vector2(1, 1);
+                claimedMarkRect.anchoredPosition = new Vector2(-10, -10);
+                claimedMarkRect.sizeDelta = new Vector2(40, 40);
+
+                var claimedMarkImage = claimedMarkObject.AddComponent<Image>();
+                claimedMarkImage.sprite = starIcon;
+                claimedMarkImage.raycastTarget = false;
+                claimedMarks[i] = claimedMarkObject;
+                claimedMarkObject.SetActive(false);
+
+                var highlightObject = new GameObject("TodayHighlight");
+                highlightObject.transform.SetParent(slotObject.transform, false);
+                var highlightRect = highlightObject.AddComponent<RectTransform>();
+                highlightRect.anchorMin = Vector2.zero;
+                highlightRect.anchorMax = Vector2.one;
+                highlightRect.offsetMin = Vector2.zero;
+                highlightRect.offsetMax = Vector2.zero;
+
+                var highlightImage = highlightObject.AddComponent<Image>();
+                highlightImage.color = new Color(1f, 1f, 0.3f, 0.3f);
+                highlightImage.raycastTarget = false;
+                todayHighlights[i] = highlightObject;
+                highlightObject.SetActive(false);
+            }
+
+            var claimButton = CreatePausePopupButton(popupRoot.transform, "ClaimButton", new Vector2(-100, -270), "CLAIM", ButtonGreenPath, font);
+            var closeButton = CreatePausePopupButton(popupRoot.transform, "CloseButton", new Vector2(100, -270), "CLOSE", ButtonBluePath, font);
+
+            var popupView = popupRoot.AddComponent<UI_DailyRewardPopupView>();
+            var serializedObject = new SerializedObject(popupView);
+            serializedObject.FindProperty("root").objectReferenceValue = popupRoot;
+            serializedObject.FindProperty("dayTexts").arraySize = 7;
+            serializedObject.FindProperty("goldTexts").arraySize = 7;
+            serializedObject.FindProperty("claimedMarks").arraySize = 7;
+            serializedObject.FindProperty("todayHighlights").arraySize = 7;
+            for (var i = 0; i < 7; i++)
+            {
+                serializedObject.FindProperty("dayTexts").GetArrayElementAtIndex(i).objectReferenceValue = dayTexts[i];
+                serializedObject.FindProperty("goldTexts").GetArrayElementAtIndex(i).objectReferenceValue = goldTexts[i];
+                serializedObject.FindProperty("claimedMarks").GetArrayElementAtIndex(i).objectReferenceValue = claimedMarks[i];
+                serializedObject.FindProperty("todayHighlights").GetArrayElementAtIndex(i).objectReferenceValue = todayHighlights[i];
+            }
+            serializedObject.FindProperty("claimButton").objectReferenceValue = claimButton;
+            serializedObject.FindProperty("closeButton").objectReferenceValue = closeButton;
+            serializedObject.ApplyModifiedProperties();
+
+            popupRoot.SetActive(false);
+
+            return popupRoot;
+        }
+
+        private static GameObject CreateSettingsPopup(RectTransform parent, TMP_FontAsset font)
+        {
+            var popupRoot = new GameObject("SettingsPopupRoot");
+            popupRoot.transform.SetParent(parent, false);
+
+            var rootRect = popupRoot.AddComponent<RectTransform>();
+            rootRect.anchorMin = Vector2.zero;
+            rootRect.anchorMax = Vector2.one;
+            rootRect.offsetMin = Vector2.zero;
+            rootRect.offsetMax = Vector2.zero;
+
+            var dimImage = popupRoot.AddComponent<Image>();
+            dimImage.color = new Color(0, 0, 0, 0.7f);
+            dimImage.raycastTarget = true;
+
+            var popupInstance = InstantiateKitPrefab(PopupPath, popupRoot.transform);
+            if (popupInstance != null)
+            {
+                popupInstance.name = "PopupBox";
+                var popupRect = popupInstance.GetComponent<RectTransform>();
+                popupRect.anchorMin = new Vector2(0.5f, 0.5f);
+                popupRect.anchorMax = new Vector2(0.5f, 0.5f);
+                popupRect.pivot = new Vector2(0.5f, 0.5f);
+                popupRect.anchoredPosition = Vector2.zero;
+                popupRect.sizeDelta = new Vector2(700, 600);
+            }
+
+            var titleTextObject = new GameObject("TitleText");
+            titleTextObject.transform.SetParent(popupRoot.transform, false);
+            var titleTextRect = titleTextObject.AddComponent<RectTransform>();
+            titleTextRect.anchorMin = new Vector2(0.5f, 0.5f);
+            titleTextRect.anchorMax = new Vector2(0.5f, 0.5f);
+            titleTextRect.pivot = new Vector2(0.5f, 0.5f);
+            titleTextRect.anchoredPosition = new Vector2(0, 220);
+            titleTextRect.sizeDelta = new Vector2(600, 80);
+
+            var titleText = titleTextObject.AddComponent<TextMeshProUGUI>();
+            titleText.text = "SETTINGS";
+            titleText.fontSize = 56;
+            titleText.alignment = TextAlignmentOptions.Center;
+            titleText.font = font;
+
+            var togglePath = KitRoot + "Theme_Light/Prefabs/Prefabs_Control/Toggle_Check_02.prefab";
+            var toggleInstance = InstantiateKitPrefab(togglePath, popupRoot.transform);
+            Toggle vibrationToggle = null;
+
+            if (toggleInstance != null)
+            {
+                toggleInstance.name = "VibrationToggle";
+                var toggleRect = toggleInstance.GetComponent<RectTransform>();
+                toggleRect.anchorMin = new Vector2(0.5f, 0.5f);
+                toggleRect.anchorMax = new Vector2(0.5f, 0.5f);
+                toggleRect.pivot = new Vector2(0.5f, 0.5f);
+                toggleRect.anchoredPosition = new Vector2(-50, 80);
+                toggleRect.sizeDelta = new Vector2(80, 80);
+
+                vibrationToggle = toggleInstance.GetComponent<Toggle>();
+                if (vibrationToggle == null)
+                {
+                    vibrationToggle = toggleInstance.AddComponent<Toggle>();
+                    var checkmark = toggleInstance.transform.Find("Checkmark");
+                    if (checkmark != null)
+                    {
+                        vibrationToggle.graphic = checkmark.GetComponent<Image>();
+                    }
+                }
+
+                var vibrationLabelObject = new GameObject("VibrationLabel");
+                vibrationLabelObject.transform.SetParent(popupRoot.transform, false);
+                var vibrationLabelRect = vibrationLabelObject.AddComponent<RectTransform>();
+                vibrationLabelRect.anchorMin = new Vector2(0.5f, 0.5f);
+                vibrationLabelRect.anchorMax = new Vector2(0.5f, 0.5f);
+                vibrationLabelRect.pivot = new Vector2(0, 0.5f);
+                vibrationLabelRect.anchoredPosition = new Vector2(50, 80);
+                vibrationLabelRect.sizeDelta = new Vector2(200, 50);
+
+                var vibrationLabelText = vibrationLabelObject.AddComponent<TextMeshProUGUI>();
+                vibrationLabelText.text = "Vibration";
+                vibrationLabelText.fontSize = 32;
+                vibrationLabelText.alignment = TextAlignmentOptions.Left;
+                vibrationLabelText.font = font;
+            }
+
+            var resetButton = CreatePausePopupButton(popupRoot.transform, "ResetButton", new Vector2(0, -20), "RESET PROGRESS", ButtonBluePath, font);
+            if (resetButton != null)
+            {
+                var resetButtonRect = resetButton.GetComponent<RectTransform>();
+                resetButtonRect.sizeDelta = new Vector2(350, 80);
+            }
+
+            var resetConfirmRoot = new GameObject("ResetConfirmRoot");
+            resetConfirmRoot.transform.SetParent(popupRoot.transform, false);
+            var resetConfirmRect = resetConfirmRoot.AddComponent<RectTransform>();
+            resetConfirmRect.anchorMin = new Vector2(0.5f, 0.5f);
+            resetConfirmRect.anchorMax = new Vector2(0.5f, 0.5f);
+            resetConfirmRect.pivot = new Vector2(0.5f, 0.5f);
+            resetConfirmRect.anchoredPosition = new Vector2(0, -130);
+            resetConfirmRect.sizeDelta = new Vector2(500, 100);
+
+            var confirmTextObject = new GameObject("ConfirmText");
+            confirmTextObject.transform.SetParent(resetConfirmRoot.transform, false);
+            var confirmTextRect = confirmTextObject.AddComponent<RectTransform>();
+            confirmTextRect.anchorMin = new Vector2(0.5f, 1);
+            confirmTextRect.anchorMax = new Vector2(0.5f, 1);
+            confirmTextRect.pivot = new Vector2(0.5f, 1);
+            confirmTextRect.anchoredPosition = new Vector2(0, 0);
+            confirmTextRect.sizeDelta = new Vector2(480, 40);
+
+            var confirmText = confirmTextObject.AddComponent<TextMeshProUGUI>();
+            confirmText.text = "Are you sure?";
+            confirmText.fontSize = 28;
+            confirmText.alignment = TextAlignmentOptions.Center;
+            confirmText.font = font;
+            confirmText.color = new Color(1f, 0.3f, 0.3f);
+
+            var resetConfirmButton = CreatePausePopupButton(resetConfirmRoot.transform, "ResetConfirmButton", new Vector2(-80, -50), "YES", ButtonGreenPath, font);
+            var resetCancelButton = CreatePausePopupButton(resetConfirmRoot.transform, "ResetCancelButton", new Vector2(80, -50), "NO", ButtonBluePath, font);
+
+            if (resetConfirmButton != null)
+            {
+                var confirmBtnRect = resetConfirmButton.GetComponent<RectTransform>();
+                confirmBtnRect.anchoredPosition = new Vector2(-80, -50);
+                confirmBtnRect.sizeDelta = new Vector2(130, 70);
+            }
+
+            if (resetCancelButton != null)
+            {
+                var cancelBtnRect = resetCancelButton.GetComponent<RectTransform>();
+                cancelBtnRect.anchoredPosition = new Vector2(80, -50);
+                cancelBtnRect.sizeDelta = new Vector2(130, 70);
+            }
+
+            resetConfirmRoot.SetActive(false);
+
+            var versionTextObject = new GameObject("VersionText");
+            versionTextObject.transform.SetParent(popupRoot.transform, false);
+            var versionTextRect = versionTextObject.AddComponent<RectTransform>();
+            versionTextRect.anchorMin = new Vector2(0.5f, 0);
+            versionTextRect.anchorMax = new Vector2(0.5f, 0);
+            versionTextRect.pivot = new Vector2(0.5f, 0);
+            versionTextRect.anchoredPosition = new Vector2(0, 80);
+            versionTextRect.sizeDelta = new Vector2(300, 40);
+
+            var versionText = versionTextObject.AddComponent<TextMeshProUGUI>();
+            versionText.text = "v1.0.0";
+            versionText.fontSize = 24;
+            versionText.alignment = TextAlignmentOptions.Center;
+            versionText.font = font;
+            versionText.color = new Color(0.7f, 0.7f, 0.7f);
+
+            var closeButton = CreatePausePopupButton(popupRoot.transform, "CloseButton", new Vector2(0, 20), "CLOSE", ButtonBluePath, font);
+
+            var settingsView = popupRoot.AddComponent<UI_SettingsPopupView>();
+            var serializedObject = new SerializedObject(settingsView);
+            serializedObject.FindProperty("root").objectReferenceValue = popupRoot;
+            serializedObject.FindProperty("vibrationToggle").objectReferenceValue = vibrationToggle;
+            serializedObject.FindProperty("resetButton").objectReferenceValue = resetButton;
+            serializedObject.FindProperty("resetConfirmRoot").objectReferenceValue = resetConfirmRoot;
+            serializedObject.FindProperty("resetConfirmButton").objectReferenceValue = resetConfirmButton;
+            serializedObject.FindProperty("resetCancelButton").objectReferenceValue = resetCancelButton;
+            serializedObject.FindProperty("closeButton").objectReferenceValue = closeButton;
+            serializedObject.FindProperty("versionText").objectReferenceValue = versionText;
+            serializedObject.ApplyModifiedProperties();
+
+            popupRoot.SetActive(false);
+
+            return popupRoot;
+        }
+
+        private static Button CreateSettingsButton(RectTransform parent, Sprite gearIcon)
+        {
+            var buttonInstance = InstantiateKitPrefab(ButtonCirclePath, parent);
+
+            if (buttonInstance == null)
+            {
+                GameLogger.LogError("[UIPrefabBuilder] Failed to create SettingsButton.");
+                return null;
+            }
+
+            buttonInstance.name = "SettingsButton";
+            var buttonRect = buttonInstance.GetComponent<RectTransform>();
+            buttonRect.anchorMin = new Vector2(1, 1);
+            buttonRect.anchorMax = new Vector2(1, 1);
+            buttonRect.pivot = new Vector2(1, 1);
+            buttonRect.anchoredPosition = new Vector2(-40, -40);
+            buttonRect.sizeDelta = new Vector2(90, 90);
+
+            var button = EnsureButtonComponent(buttonInstance);
+
+            if (gearIcon != null)
+            {
+                var iconObject = new GameObject("GearIcon");
+                iconObject.transform.SetParent(buttonInstance.transform, false);
+
+                var iconRect = iconObject.AddComponent<RectTransform>();
+                iconRect.anchorMin = new Vector2(0.5f, 0.5f);
+                iconRect.anchorMax = new Vector2(0.5f, 0.5f);
+                iconRect.pivot = new Vector2(0.5f, 0.5f);
+                iconRect.anchoredPosition = Vector2.zero;
+                iconRect.sizeDelta = new Vector2(50, 50);
+
+                var iconImage = iconObject.AddComponent<Image>();
+                iconImage.sprite = gearIcon;
+                iconImage.raycastTarget = false;
+            }
+
+            return button;
         }
     }
 }

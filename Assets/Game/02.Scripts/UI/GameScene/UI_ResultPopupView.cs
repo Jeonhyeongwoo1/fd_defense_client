@@ -1,4 +1,3 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,7 +6,8 @@ namespace Game.View
     public class UI_ResultPopupView : MonoBehaviour
     {
         [SerializeField] private GameObject root;
-        [SerializeField] private TMP_Text resultText;
+        [SerializeField] private GameObject winRoot;
+        [SerializeField] private GameObject loseRoot;
         [SerializeField] private Button retryButton;
         [SerializeField] private Button stageSelectButton;
 
@@ -16,7 +16,16 @@ namespace Game.View
 
         public void UpdateUI(bool isVictory)
         {
-            resultText.text = isVictory ? "VICTORY" : "DEFEAT";
+            if (winRoot != null)
+            {
+                winRoot.SetActive(isVictory);
+            }
+
+            if (loseRoot != null)
+            {
+                loseRoot.SetActive(!isVictory);
+            }
+
             root.SetActive(true);
         }
 

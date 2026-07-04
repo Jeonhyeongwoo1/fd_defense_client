@@ -19,6 +19,10 @@ namespace Game.Editor
         private const string SliderBluePath = KitRoot + "Theme_Light/Prefabs/Prefabs_Slider/Slider_01_Blue.prefab";
         private const string SliderRedPath = KitRoot + "Theme_Light/Prefabs/Prefabs_Slider/Slider_01_Red.prefab";
         private const string ItemFramePath = KitRoot + "Theme_Light/Prefabs/Prefabs_Frame/ItemFrame/ItemFrame_01.prefab";
+        private const string ResourceBarGroupPath = KitRoot + "Theme_Light/Prefabs/Prefabs_HUD/ResourceBar_Group.prefab";
+        private const string ResultWinPath = KitRoot + "Theme_Light/Prefabs/Prefabs~DemoScenes/Play_Result_Win_Detail.prefab";
+        private const string ResultLosePath = KitRoot + "Theme_Light/Prefabs/Prefabs~DemoScenes/Play_Result_Lose.prefab";
+        private const string SleepModePath = KitRoot + "Theme_Light/Prefabs/Prefabs~DemoScenes/Play_SleepMode.prefab";
         private const string FontPath = KitRoot + "Shared/Font/LTAvocado-Bold SDF.asset";
         private const string IconCoinPath = KitRoot + "Shared/Icons/PictoIcon/128/coin_2.png";
         private const string IconLockPath = KitRoot + "Shared/Icons/PictoIcon/128/lock.png";
@@ -161,7 +165,7 @@ namespace Game.Editor
             rootRect.offsetMin = Vector2.zero;
             rootRect.offsetMax = Vector2.zero;
 
-            var moneyText = CreateMoneyFrame(rootRect, font, coinIcon);
+            var moneyText = CreateResourceBarGroup(rootRect, coinIcon);
             var waveText = CreateWaveTitle(rootRect, font);
             var allyBaseHpFillImage = CreateHpBar(rootRect, "AllyHpBar", new Vector2(60, -200), new Vector2(0, 1), SliderBluePath);
             var enemyBaseHpFillImage = CreateHpBar(rootRect, "EnemyHpBar", new Vector2(-60, -200), new Vector2(1, 1), SliderRedPath);
@@ -199,13 +203,62 @@ namespace Game.Editor
             GameLogger.Log($"[UIPrefabBuilder] GameHud.prefab created at {prefabPath}");
         }
 
-        private static TMP_Text CreateMoneyFrame(RectTransform parent, TMP_FontAsset font, Sprite coinIcon)
+        private static TMP_Text CreateResourceBarGroup(RectTransform parent, Sprite coinIcon)
+        {
+            var resourceBarInstance = InstantiateKitPrefab(ResourceBarGroupPath, parent);
+
+            if (resourceBarInstance == null)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] ResourceBar_Group not found, falling back to ItemFrame.");
+                return CreateMoneyFrameFallback(parent, coinIcon);
+            }
+
+            resourceBarInstance.name = "ResourceBarGroup";
+            var resourceBarRect = resourceBarInstance.GetComponent<RectTransform>();
+            resourceBarRect.anchorMin = new Vector2(0, 1);
+            resourceBarRect.anchorMax = new Vector2(0, 1);
+            resourceBarRect.pivot = new Vector2(0, 1);
+            resourceBarRect.anchoredPosition = new Vector2(40, -40);
+
+            var firstSlot = resourceBarInstance.transform.GetChild(0);
+            var iconTransform = firstSlot.Find("Icon");
+
+            if (iconTransform != null && coinIcon != null)
+            {
+                var iconImage = iconTransform.GetComponent<Image>();
+
+                if (iconImage != null)
+                {
+                    iconImage.sprite = coinIcon;
+                }
+            }
+
+            var textTMP = firstSlot.GetComponentInChildren<TMP_Text>();
+
+            if (textTMP == null)
+            {
+                GameLogger.LogError("[UIPrefabBuilder] Text (TMP) not found in ResourceBar_Group first slot.");
+            }
+            else
+            {
+                textTMP.text = "0";
+            }
+
+            for (var i = 1; i < resourceBarInstance.transform.childCount; i++)
+            {
+                resourceBarInstance.transform.GetChild(i).gameObject.SetActive(false);
+            }
+
+            return textTMP;
+        }
+
+        private static TMP_Text CreateMoneyFrameFallback(RectTransform parent, Sprite coinIcon)
         {
             var frameInstance = InstantiateKitPrefab(ItemFramePath, parent);
 
             if (frameInstance == null)
             {
-                GameLogger.LogError("[UIPrefabBuilder] Failed to create MoneyFrame.");
+                GameLogger.LogError("[UIPrefabBuilder] Failed to create MoneyFrame fallback.");
                 return null;
             }
 
@@ -244,7 +297,13 @@ namespace Game.Editor
             moneyText.text = "0";
             moneyText.fontSize = 44;
             moneyText.alignment = TextAlignmentOptions.Left;
-            moneyText.font = font;
+
+            var font = LoadFont();
+
+            if (font != null)
+            {
+                moneyText.font = font;
+            }
 
             return moneyText;
         }
@@ -557,11 +616,46 @@ namespace Game.Editor
             dimImage.color = new Color(0, 0, 0, 0.7f);
             dimImage.raycastTarget = true;
 
+            var sleepModeInstance = InstantiateKitPrefab(SleepModePath, pausePopupRoot.transform);
+
+            if (sleepModeInstance == null)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] Play_SleepMode not found, using Popup_Box fallback.");
+                return CreatePausePopupFallback(pausePopupRoot, font, hudView, pauseButton);
+            }
+
+            sleepModeInstance.name = "SleepModeContent";
+            var sleepModeRect = sleepModeInstance.GetComponent<RectTransform>();
+            sleepModeRect.anchorMin = new Vector2(0.5f, 0.5f);
+            sleepModeRect.anchorMax = new Vector2(0.5f, 0.5f);
+            sleepModeRect.pivot = new Vector2(0.5f, 0.5f);
+            sleepModeRect.anchoredPosition = Vector2.zero;
+
+            var resumeButton = CreatePausePopupButton(pausePopupRoot.transform, "ResumeButton", new Vector2(0, 40), "RESUME", ButtonGreenPath, font);
+            var retryButton = CreatePausePopupButton(pausePopupRoot.transform, "RetryButton", new Vector2(0, -80), "RETRY", ButtonBluePath, font);
+            var stageSelectButton = CreatePausePopupButton(pausePopupRoot.transform, "StageSelectButton", new Vector2(0, -200), "STAGES", ButtonBluePath, font);
+
+            var pausePopupView = hudView.gameObject.AddComponent<UI_PausePopupView>();
+            var serializedObject = new SerializedObject(pausePopupView);
+            serializedObject.FindProperty("root").objectReferenceValue = pausePopupRoot;
+            serializedObject.FindProperty("pauseButton").objectReferenceValue = pauseButton;
+            serializedObject.FindProperty("resumeButton").objectReferenceValue = resumeButton;
+            serializedObject.FindProperty("retryButton").objectReferenceValue = retryButton;
+            serializedObject.FindProperty("stageSelectButton").objectReferenceValue = stageSelectButton;
+            serializedObject.ApplyModifiedProperties();
+
+            pausePopupRoot.SetActive(false);
+
+            return pausePopupRoot;
+        }
+
+        private static GameObject CreatePausePopupFallback(GameObject pausePopupRoot, TMP_FontAsset font, UI_GameHudView hudView, Button pauseButton)
+        {
             var popupInstance = InstantiateKitPrefab(PopupPath, pausePopupRoot.transform);
 
             if (popupInstance == null)
             {
-                GameLogger.LogError("[UIPrefabBuilder] Failed to create PausePopup.");
+                GameLogger.LogError("[UIPrefabBuilder] Failed to create PausePopup fallback.");
                 return null;
             }
 
@@ -601,8 +695,6 @@ namespace Game.Editor
             serializedObject.FindProperty("retryButton").objectReferenceValue = retryButton;
             serializedObject.FindProperty("stageSelectButton").objectReferenceValue = stageSelectButton;
             serializedObject.ApplyModifiedProperties();
-
-            pausePopupRoot.SetActive(false);
 
             return pausePopupRoot;
         }
@@ -659,11 +751,56 @@ namespace Game.Editor
             dimImage.color = new Color(0, 0, 0, 0.7f);
             dimImage.raycastTarget = true;
 
+            var winInstance = InstantiateKitPrefab(ResultWinPath, resultPopupRoot.transform);
+            var loseInstance = InstantiateKitPrefab(ResultLosePath, resultPopupRoot.transform);
+
+            if (winInstance == null || loseInstance == null)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] Play_Result prefabs not found, using Popup_Box fallback.");
+                CreateResultPopupFallback(resultPopupRoot, font, hudView);
+                return;
+            }
+
+            winInstance.name = "WinContent";
+            loseInstance.name = "LoseContent";
+
+            var winRect = winInstance.GetComponent<RectTransform>();
+            winRect.anchorMin = new Vector2(0.5f, 0.5f);
+            winRect.anchorMax = new Vector2(0.5f, 0.5f);
+            winRect.pivot = new Vector2(0.5f, 0.5f);
+            winRect.anchoredPosition = Vector2.zero;
+
+            var loseRect = loseInstance.GetComponent<RectTransform>();
+            loseRect.anchorMin = new Vector2(0.5f, 0.5f);
+            loseRect.anchorMax = new Vector2(0.5f, 0.5f);
+            loseRect.pivot = new Vector2(0.5f, 0.5f);
+            loseRect.anchoredPosition = Vector2.zero;
+
+            winInstance.SetActive(false);
+            loseInstance.SetActive(false);
+
+            var retryButton = CreateResultButton(resultPopupRoot.transform, "RetryButton", new Vector2(-130, 80), "RETRY", ButtonGreenPath, font);
+            var stageSelectButton = CreateResultButton(resultPopupRoot.transform, "StageSelectButton", new Vector2(130, 80), "STAGES", ButtonBluePath, font);
+
+            var resultPopupView = hudView.gameObject.AddComponent<UI_ResultPopupView>();
+            var serializedObject = new SerializedObject(resultPopupView);
+            serializedObject.FindProperty("root").objectReferenceValue = resultPopupRoot;
+            serializedObject.FindProperty("winRoot").objectReferenceValue = winInstance;
+            serializedObject.FindProperty("loseRoot").objectReferenceValue = loseInstance;
+            serializedObject.FindProperty("retryButton").objectReferenceValue = retryButton;
+            serializedObject.FindProperty("stageSelectButton").objectReferenceValue = stageSelectButton;
+            serializedObject.ApplyModifiedProperties();
+
+            resultPopupRoot.SetActive(false);
+        }
+
+        private static void CreateResultPopupFallback(GameObject resultPopupRoot, TMP_FontAsset font, UI_GameHudView hudView)
+        {
             var popupInstance = InstantiateKitPrefab(PopupPath, resultPopupRoot.transform);
 
             if (popupInstance == null)
             {
-                GameLogger.LogError("[UIPrefabBuilder] Failed to create ResultPopup.");
+                GameLogger.LogError("[UIPrefabBuilder] Failed to create ResultPopup fallback.");
                 return;
             }
 
@@ -675,35 +812,64 @@ namespace Game.Editor
             popupRect.anchoredPosition = Vector2.zero;
             popupRect.sizeDelta = new Vector2(700, 900);
 
-            var resultTextObject = new GameObject("ResultText");
-            resultTextObject.transform.SetParent(popupInstance.transform, false);
+            var winRoot = new GameObject("WinContent");
+            winRoot.transform.SetParent(popupInstance.transform, false);
+            var winRootRect = winRoot.AddComponent<RectTransform>();
+            winRootRect.anchorMin = Vector2.zero;
+            winRootRect.anchorMax = Vector2.one;
+            winRootRect.offsetMin = Vector2.zero;
+            winRootRect.offsetMax = Vector2.zero;
 
-            var resultTextRect = resultTextObject.AddComponent<RectTransform>();
-            resultTextRect.anchorMin = new Vector2(0.5f, 1);
-            resultTextRect.anchorMax = new Vector2(0.5f, 1);
-            resultTextRect.pivot = new Vector2(0.5f, 1);
-            resultTextRect.anchoredPosition = new Vector2(0, -80);
-            resultTextRect.sizeDelta = new Vector2(600, 120);
+            var winTextObject = new GameObject("WinText");
+            winTextObject.transform.SetParent(winRoot.transform, false);
+            var winTextRect = winTextObject.AddComponent<RectTransform>();
+            winTextRect.anchorMin = new Vector2(0.5f, 1);
+            winTextRect.anchorMax = new Vector2(0.5f, 1);
+            winTextRect.pivot = new Vector2(0.5f, 1);
+            winTextRect.anchoredPosition = new Vector2(0, -80);
+            winTextRect.sizeDelta = new Vector2(600, 120);
+            var winText = winTextObject.AddComponent<TextMeshProUGUI>();
+            winText.text = "VICTORY";
+            winText.fontSize = 90;
+            winText.alignment = TextAlignmentOptions.Center;
+            winText.font = font;
 
-            var resultText = resultTextObject.AddComponent<TextMeshProUGUI>();
-            resultText.text = "VICTORY";
-            resultText.fontSize = 90;
-            resultText.alignment = TextAlignmentOptions.Center;
-            resultText.font = font;
+            var loseRoot = new GameObject("LoseContent");
+            loseRoot.transform.SetParent(popupInstance.transform, false);
+            var loseRootRect = loseRoot.AddComponent<RectTransform>();
+            loseRootRect.anchorMin = Vector2.zero;
+            loseRootRect.anchorMax = Vector2.one;
+            loseRootRect.offsetMin = Vector2.zero;
+            loseRootRect.offsetMax = Vector2.zero;
+
+            var loseTextObject = new GameObject("LoseText");
+            loseTextObject.transform.SetParent(loseRoot.transform, false);
+            var loseTextRect = loseTextObject.AddComponent<RectTransform>();
+            loseTextRect.anchorMin = new Vector2(0.5f, 1);
+            loseTextRect.anchorMax = new Vector2(0.5f, 1);
+            loseTextRect.pivot = new Vector2(0.5f, 1);
+            loseTextRect.anchoredPosition = new Vector2(0, -80);
+            loseTextRect.sizeDelta = new Vector2(600, 120);
+            var loseText = loseTextObject.AddComponent<TextMeshProUGUI>();
+            loseText.text = "DEFEAT";
+            loseText.fontSize = 90;
+            loseText.alignment = TextAlignmentOptions.Center;
+            loseText.font = font;
+
+            winRoot.SetActive(false);
+            loseRoot.SetActive(false);
 
             var retryButton = CreateResultButton(popupInstance.transform, "RetryButton", new Vector2(-130, 80), "RETRY", ButtonGreenPath, font);
             var stageSelectButton = CreateResultButton(popupInstance.transform, "StageSelectButton", new Vector2(130, 80), "STAGES", ButtonBluePath, font);
 
-            // 팝업 필드는 UI_ResultPopupView 소속 — 활성 GO(HUD 루트)에 부착해 RegisterComponentInHierarchy가 찾을 수 있게 한다
             var resultPopupView = hudView.gameObject.AddComponent<UI_ResultPopupView>();
             var serializedObject = new SerializedObject(resultPopupView);
             serializedObject.FindProperty("root").objectReferenceValue = resultPopupRoot;
-            serializedObject.FindProperty("resultText").objectReferenceValue = resultText;
+            serializedObject.FindProperty("winRoot").objectReferenceValue = winRoot;
+            serializedObject.FindProperty("loseRoot").objectReferenceValue = loseRoot;
             serializedObject.FindProperty("retryButton").objectReferenceValue = retryButton;
             serializedObject.FindProperty("stageSelectButton").objectReferenceValue = stageSelectButton;
             serializedObject.ApplyModifiedProperties();
-
-            resultPopupRoot.SetActive(false);
         }
 
         private static Button CreateResultButton(Transform parent, string name, Vector2 position, string labelText, string buttonPrefabPath, TMP_FontAsset font)

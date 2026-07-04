@@ -1,4 +1,4 @@
-id,skyColorHex,fieldPrefabPath,decorEntries
-map_forest,#87CEEB,Assets/Layer Lab/2D Minimal-Environment/Environment 1/Prefabs/Field/Field_Forest.prefab,Tree/Tree_Green:4;Tree/Small_Tree_Green:3;Bush/Bush_Green:4;Stone/Stone_Gray1:2;Etc/Autumn_Flower:2
-map_desert,#EFD9A7,Assets/Layer Lab/2D Minimal-Environment/Environment 1/Prefabs/Field/Field_Desert.prefab,Cactus/Cactus_Green1:4;Tree/Plam_Green:3;Stone/Stone_Brown:3;Tree/Dead_Tree_Brown:2
-map_autumn,#E8B48F,Assets/Layer Lab/2D Minimal-Environment/Environment 1/Prefabs/Field/Field_Autumn.prefab,Tree/Birch_Yellow:3;Tree/Small_Tree_Orange:3;Mushroom/Mushroom_Pink:3;Tree/Dead_Tree_White:2;Stone/Stone_Red:2
+id,skyColorHex,fieldPrefabPath,decorEntries,demoSceneName
+map_forest,#87CEEB,Assets/Layer Lab/2D Minimal-Environment/Environment 1/Prefabs/Field/Field_Forest.prefab,Tree/Tree_Green:4;Tree/Small_Tree_Green:3;Bush/Bush_Green:4;Stone/Stone_Gray1:2;Etc/Autumn_Flower:2,DemoScene_Forest
+map_desert,#EFD9A7,Assets/Layer Lab/2D Minimal-Environment/Environment 1/Prefabs/Field/Field_Desert.prefab,Cactus/Cactus_Green1:4;Tree/Plam_Green:3;Stone/Stone_Brown:3;Tree/Dead_Tree_Brown:2,DemoScene_Desert
+map_autumn,#E8B48F,Assets/Layer Lab/2D Minimal-Environment/Environment 1/Prefabs/Field/Field_Autumn.prefab,Tree/Birch_Yellow:3;Tree/Small_Tree_Orange:3;Mushroom/Mushroom_Pink:3;Tree/Dead_Tree_White:2;Stone/Stone_Red:2,DemoScene_Autumn

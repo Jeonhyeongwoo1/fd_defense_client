@@ -26,6 +26,7 @@ MonoBehaviour:
     - wave_005
     waveIntervalSeconds: 5
     bossId: boss_s1_100
+    mapId: map_forest
   - id: stage_002
     allyBaseHp: 1200
     enemyBaseHp: 1200
@@ -39,6 +40,7 @@ MonoBehaviour:
     - wave_010
     waveIntervalSeconds: 5
     bossId: boss_s1_102
+    mapId: map_desert
   - id: stage_003
     allyBaseHp: 1500
     enemyBaseHp: 1500
@@ -52,3 +54,4 @@ MonoBehaviour:
     - wave_015
     waveIntervalSeconds: 4
     bossId: boss_s2_104
+    mapId: map_autumn

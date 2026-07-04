@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Game.Core;
 using Game.Data;
 using UnityEngine;
@@ -49,10 +50,18 @@ namespace Game.Service
             var mapRoot = new GameObject(MapRootName);
 
             SetCameraBackgroundColor(mapData.skyColor);
-            BuildField(mapData.fieldPrefab, mapRoot.transform);
-            BuildDecor(mapId, mapData.DecorEntryList, mapRoot.transform);
 
-            GameLogger.Log($"[MapBuilderService] Map built: {mapId}");
+            if (mapData.LayoutItemList != null && mapData.LayoutItemList.Count > 0)
+            {
+                BuildLayoutMode(mapData.LayoutItemList, mapRoot.transform);
+                GameLogger.Log($"[MapBuilderService] Map built (layout mode): {mapId} ({mapData.LayoutItemList.Count} items)");
+            }
+            else
+            {
+                BuildField(mapData.fieldPrefab, mapRoot.transform);
+                BuildDecor(mapId, mapData.DecorEntryList, mapRoot.transform);
+                GameLogger.Log($"[MapBuilderService] Map built (fallback mode): {mapId}");
+            }
         }
 
         private void SetCameraBackgroundColor(Color skyColor)
@@ -104,7 +113,7 @@ namespace Game.Service
             }
         }
 
-        private void BuildDecor(string mapId, System.Collections.Generic.List<MapData.MapDecorEntry> decorEntryList, Transform parent)
+        private void BuildDecor(string mapId, List<MapData.MapDecorEntry> decorEntryList, Transform parent)
         {
             var entryIndex = 0;
             foreach (var entry in decorEntryList)
@@ -168,6 +177,28 @@ namespace Game.Service
         {
             var hash = mapId.GetHashCode();
             return hash ^ (entryIndex * 397) ^ index;
+        }
+
+        private void BuildLayoutMode(List<MapLayoutItem> layoutItemList, Transform parent)
+        {
+            foreach (var item in layoutItemList)
+            {
+                if (item.prefab == null)
+                {
+                    continue;
+                }
+
+                var instance = UnityEngine.Object.Instantiate(item.prefab, parent);
+                instance.transform.position = item.position;
+                instance.transform.localScale = item.scale;
+
+                var spriteRenderer = instance.GetComponentInChildren<SpriteRenderer>();
+                if (spriteRenderer != null)
+                {
+                    spriteRenderer.flipX = item.isFlippedX;
+                    spriteRenderer.sortingOrder = item.sortingOrder - 100;
+                }
+            }
         }
     }
 }

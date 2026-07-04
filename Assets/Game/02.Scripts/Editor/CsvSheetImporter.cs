@@ -443,6 +443,16 @@ namespace Game.Editor
                 return 0;
             }
 
+            var table = AssetDatabase.LoadAssetAtPath<MapTableSO>(MapTablePath);
+            var existingDataDict = new Dictionary<string, MapData>();
+            if (table != null)
+            {
+                foreach (var existingData in table.MapDataList)
+                {
+                    existingDataDict[existingData.id] = existingData;
+                }
+            }
+
             var mapDataList = new List<MapData>();
             var skippedCount = 0;
 
@@ -533,18 +543,24 @@ namespace Game.Editor
                     }
                 }
 
+                var demoSceneName = columns.Length > 4 ? columns[4] : string.Empty;
+
+                MapData existingData = null;
+                existingDataDict.TryGetValue(columns[0], out existingData);
+
                 var data = new MapData
                 {
                     id = columns[0],
-                    skyColor = skyColor,
+                    skyColor = existingData != null ? existingData.skyColor : skyColor,
                     fieldPrefab = fieldPrefab,
-                    DecorEntryList = decorEntryList
+                    DecorEntryList = decorEntryList,
+                    LayoutItemList = existingData != null ? existingData.LayoutItemList : new List<MapLayoutItem>(),
+                    demoSceneName = demoSceneName
                 };
 
                 mapDataList.Add(data);
             }
 
-            var table = AssetDatabase.LoadAssetAtPath<MapTableSO>(MapTablePath);
             if (table == null)
             {
                 table = ScriptableObject.CreateInstance<MapTableSO>();

@@ -16,6 +16,7 @@ namespace Game.Editor
         private const string StageCsvPath = "Assets/Game/03.Resources/Data/Sheets/StageData.csv";
         private const string WaveCsvPath = "Assets/Game/03.Resources/Data/Sheets/WaveData.csv";
         private const string MapCsvPath = "Assets/Game/03.Resources/Data/Sheets/MapData.csv";
+        private const string UpgradeCsvPath = "Assets/Game/03.Resources/Data/Sheets/UpgradeData.csv";
 
         private const string UnitTablePath = "Assets/Game/03.Resources/Data/UnitTable.asset";
         private const string EnemyTablePath = "Assets/Game/03.Resources/Data/EnemyTable.asset";
@@ -23,6 +24,7 @@ namespace Game.Editor
         private const string StageTablePath = "Assets/Game/03.Resources/Data/StageTable.asset";
         private const string WaveTablePath = "Assets/Game/03.Resources/Data/WaveTable.asset";
         private const string MapTablePath = "Assets/Game/03.Resources/Data/MapTable.asset";
+        private const string UpgradeTablePath = "Assets/Game/03.Resources/Data/UpgradeTable.asset";
 
         public static void ImportAllSheets()
         {
@@ -34,6 +36,7 @@ namespace Game.Editor
             importedCount += ImportWaveData();
             importedCount += ImportMapData();
             importedCount += ImportStageData();
+            importedCount += ImportUpgradeData();
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -89,10 +92,18 @@ namespace Game.Editor
                     projectileSprite = AssetDatabase.LoadAssetAtPath<Sprite>(columns[11]);
                 }
 
+                var unitName = columns[1];
+                var iconPath = $"Assets/Layer Lab/2D Characters-PetPack1/Sprites/ImageSequence/{unitName}/Idle/{unitName}-Idle_00.png";
+                var iconSprite = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
+                if (iconSprite == null)
+                {
+                    GameLogger.LogWarning($"[CsvSheetImporter] Icon sprite not found: {iconPath} (row {i})");
+                }
+
                 var data = new UnitData
                 {
                     id = columns[0],
-                    unitName = columns[1],
+                    unitName = unitName,
                     hp = int.Parse(columns[2]),
                     attackPower = int.Parse(columns[3]),
                     attackInterval = float.Parse(columns[4], CultureInfo.InvariantCulture),
@@ -103,6 +114,7 @@ namespace Game.Editor
                     isRanged = bool.Parse(columns[9]),
                     projectileSpeed = float.Parse(columns[10], CultureInfo.InvariantCulture),
                     projectileSprite = projectileSprite,
+                    iconSprite = iconSprite,
                     prefab = prefab
                 };
 
@@ -295,7 +307,7 @@ namespace Game.Editor
                 }
 
                 var columns = line.Split(',');
-                if (columns.Length < 9)
+                if (columns.Length < 10)
                 {
                     GameLogger.LogError($"[CsvSheetImporter] Invalid StageData row {i}: insufficient columns");
                     skippedCount++;
@@ -326,7 +338,8 @@ namespace Game.Editor
                     WaveIdList = waveIdList,
                     waveIntervalSeconds = float.Parse(columns[6], CultureInfo.InvariantCulture),
                     bossId = columns[7],
-                    mapId = columns.Length > 8 ? columns[8] : string.Empty
+                    mapId = columns.Length > 8 ? columns[8] : string.Empty,
+                    goldReward = columns.Length > 9 ? int.Parse(columns[9]) : 0
                 };
 
                 stageDataList.Add(data);
@@ -571,6 +584,65 @@ namespace Game.Editor
             EditorUtility.SetDirty(table);
 
             GameLogger.Log($"[CsvSheetImporter] MapData imported: {mapDataList.Count} entries ({skippedCount} skipped)");
+            return 1;
+        }
+
+        private static int ImportUpgradeData()
+        {
+            if (!File.Exists(UpgradeCsvPath))
+            {
+                GameLogger.LogError($"[CsvSheetImporter] CSV not found: {UpgradeCsvPath}");
+                return 0;
+            }
+
+            var lines = File.ReadAllLines(UpgradeCsvPath);
+            if (lines.Length < 2)
+            {
+                GameLogger.LogWarning($"[CsvSheetImporter] No data rows in {UpgradeCsvPath}");
+                return 0;
+            }
+
+            var upgradeDataList = new List<UpgradeData>();
+            var skippedCount = 0;
+
+            for (var i = 1; i < lines.Length; i++)
+            {
+                var line = lines[i].Trim();
+                if (string.IsNullOrEmpty(line))
+                {
+                    continue;
+                }
+
+                var columns = line.Split(',');
+                if (columns.Length < 4)
+                {
+                    GameLogger.LogError($"[CsvSheetImporter] Invalid UpgradeData row {i}: insufficient columns");
+                    skippedCount++;
+                    continue;
+                }
+
+                var data = new UpgradeData
+                {
+                    level = int.Parse(columns[0]),
+                    goldCost = int.Parse(columns[1]),
+                    hpMultiplier = float.Parse(columns[2], CultureInfo.InvariantCulture),
+                    attackMultiplier = float.Parse(columns[3], CultureInfo.InvariantCulture)
+                };
+
+                upgradeDataList.Add(data);
+            }
+
+            var table = AssetDatabase.LoadAssetAtPath<UpgradeTableSO>(UpgradeTablePath);
+            if (table == null)
+            {
+                table = ScriptableObject.CreateInstance<UpgradeTableSO>();
+                AssetDatabase.CreateAsset(table, UpgradeTablePath);
+            }
+
+            table.UpgradeDataList = upgradeDataList;
+            EditorUtility.SetDirty(table);
+
+            GameLogger.Log($"[CsvSheetImporter] UpgradeData imported: {upgradeDataList.Count} entries ({skippedCount} skipped)");
             return 1;
         }
     }

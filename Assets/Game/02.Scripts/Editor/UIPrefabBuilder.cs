@@ -28,6 +28,9 @@ namespace Game.Editor
         private const string IconLockPath = KitRoot + "Shared/Icons/PictoIcon/128/lock.png";
         private const string IconStarPath = KitRoot + "Shared/Icons/PictoIcon/128/star_1.png";
         private const string IconPausePath = KitRoot + "Shared/Icons/PictoIcon/128/pause_round.png";
+        private const string IconGoldPath = KitRoot + "Theme_Light/Sprites/HUD/ResourceBar_Icon_Gold.png";
+        private const string IconArrowUpPath = KitRoot + "Theme_Light/Sprites/Slider_Icon/Slider_Upgrade_01_Icon_Arrow_Up.png";
+        private const string CardFrameBluePath = KitRoot + "Theme_Light/Prefabs/Prefabs_Frame/CardFrame/CardFrame_02_Blue.prefab";
         private const string PetIconRoot = "Assets/Layer Lab/2D Characters-PetPack1/Sprites/ImageSequence/";
 
         private static readonly string[] PetNames = { "Goldfish", "Chick", "Bat", "Bomb", "Flower", "Pug", "Ghost", "Melody", "Sword", "Titan" };
@@ -43,9 +46,11 @@ namespace Game.Editor
             var lockIcon = LoadSprite(IconLockPath);
             var starIcon = LoadSprite(IconStarPath);
             var pauseIcon = LoadSprite(IconPausePath);
+            var goldIcon = LoadSprite(IconGoldPath);
+            var arrowIcon = LoadSprite(IconArrowUpPath);
 
             BuildGameHudPrefab(font, coinIcon, pauseIcon);
-            BuildStageSelectScreenPrefab(font, starIcon, lockIcon);
+            BuildStageSelectScreenPrefab(font, starIcon, lockIcon, goldIcon, arrowIcon);
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -517,6 +522,7 @@ namespace Game.Editor
             serializedObject.FindProperty("cooldownFillImage").objectReferenceValue = cooldownImage;
             serializedObject.FindProperty("costText").objectReferenceValue = costText;
             serializedObject.FindProperty("nameText").objectReferenceValue = nameText;
+            serializedObject.FindProperty("unitIconImage").objectReferenceValue = unitIconImage;
             serializedObject.FindProperty("unitId").stringValue = unitId;
             serializedObject.ApplyModifiedProperties();
 
@@ -943,7 +949,7 @@ namespace Game.Editor
             return button;
         }
 
-        private static void BuildStageSelectScreenPrefab(TMP_FontAsset font, Sprite starIcon, Sprite lockIcon)
+        private static void BuildStageSelectScreenPrefab(TMP_FontAsset font, Sprite starIcon, Sprite lockIcon, Sprite goldIcon, Sprite arrowIcon)
         {
             var rootObject = new GameObject("StageSelectScreen");
             var rootRect = rootObject.AddComponent<RectTransform>();
@@ -952,17 +958,37 @@ namespace Game.Editor
             rootRect.offsetMin = Vector2.zero;
             rootRect.offsetMax = Vector2.zero;
 
-            CreateStageTitle(rootRect, font);
-            var stageButtons = CreateStageButtons(rootRect, font, starIcon, lockIcon);
+            var goldText = CreateTopGoldBar(rootRect, goldIcon);
+            var tabButtons = CreateTabButtons(rootRect, font);
+            var stagePanelRoot = CreateStagePanel(rootRect, font, starIcon, lockIcon);
+            var deckPanel = CreateDeckPanel(rootRect, font, starIcon);
+            var upgradePanel = CreateUpgradePanel(rootRect, font, starIcon, goldIcon, arrowIcon);
 
-            var stageSelectView = rootObject.AddComponent<UI_StageSelectView>();
-            var serializedObject = new SerializedObject(stageSelectView);
-            serializedObject.FindProperty("stageButtons").arraySize = stageButtons.Length;
-            for (var i = 0; i < stageButtons.Length; i++)
+            var stageSelectView = stagePanelRoot.GetComponent<UI_StageSelectView>();
+            var deckPanelView = deckPanel.GetComponent<UI_DeckPanelView>();
+            var upgradePanelView = upgradePanel.GetComponent<UI_UpgradePanelView>();
+
+            var outGameHomeView = rootObject.AddComponent<UI_OutGameHomeView>();
+            var homeSerializer = new SerializedObject(outGameHomeView);
+            homeSerializer.FindProperty("stageTabButton").objectReferenceValue = tabButtons[0];
+            homeSerializer.FindProperty("deckTabButton").objectReferenceValue = tabButtons[1];
+            homeSerializer.FindProperty("upgradeTabButton").objectReferenceValue = tabButtons[2];
+            homeSerializer.FindProperty("stagePanelRoot").objectReferenceValue = stagePanelRoot;
+            homeSerializer.FindProperty("goldText").objectReferenceValue = goldText;
+            homeSerializer.ApplyModifiedProperties();
+
+            rootObject.AddComponent<UI_StageSelectView>();
+            var stageViewCopy = rootObject.GetComponent<UI_StageSelectView>();
+            var stageSerializer = new SerializedObject(stageViewCopy);
+            var originalButtons = stageSelectView.StageButtonList;
+            stageSerializer.FindProperty("stageButtons").arraySize = originalButtons.Count;
+            for (var i = 0; i < originalButtons.Count; i++)
             {
-                serializedObject.FindProperty("stageButtons").GetArrayElementAtIndex(i).objectReferenceValue = stageButtons[i];
+                stageSerializer.FindProperty("stageButtons").GetArrayElementAtIndex(i).objectReferenceValue = originalButtons[i];
             }
-            serializedObject.ApplyModifiedProperties();
+            stageSerializer.ApplyModifiedProperties();
+
+            Object.DestroyImmediate(stageSelectView);
 
             var prefabPath = OutputRoot + "StageSelectScreen.prefab";
             DeleteExistingPrefab(prefabPath);
@@ -1160,6 +1186,466 @@ namespace Game.Editor
             {
                 AssetDatabase.DeleteAsset(path);
             }
+        }
+
+        private static TMP_Text CreateTopGoldBar(RectTransform parent, Sprite goldIcon)
+        {
+            var resourceBarInstance = InstantiateKitPrefab(ResourceBarGroupPath, parent);
+
+            if (resourceBarInstance == null)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] ResourceBar_Group not found for gold bar.");
+                return null;
+            }
+
+            resourceBarInstance.name = "TopGoldBar";
+            var resourceBarRect = resourceBarInstance.GetComponent<RectTransform>();
+            resourceBarRect.anchorMin = new Vector2(0, 1);
+            resourceBarRect.anchorMax = new Vector2(0, 1);
+            resourceBarRect.pivot = new Vector2(0, 1);
+            resourceBarRect.anchoredPosition = new Vector2(40, -40);
+
+            var firstSlot = resourceBarInstance.transform.GetChild(0);
+            var iconTransform = firstSlot.Find("Icon");
+
+            if (iconTransform != null && goldIcon != null)
+            {
+                var iconImage = iconTransform.GetComponent<Image>();
+                if (iconImage != null)
+                {
+                    iconImage.sprite = goldIcon;
+                }
+            }
+
+            var textTMP = firstSlot.GetComponentInChildren<TMP_Text>();
+            if (textTMP != null)
+            {
+                textTMP.text = "0";
+            }
+
+            for (var i = 1; i < resourceBarInstance.transform.childCount; i++)
+            {
+                resourceBarInstance.transform.GetChild(i).gameObject.SetActive(false);
+            }
+
+            return textTMP;
+        }
+
+        private static Button[] CreateTabButtons(RectTransform parent, TMP_FontAsset font)
+        {
+            var buttons = new Button[3];
+            var labels = new[] { "STAGES", "DECK", "UPGRADE" };
+            var xPositions = new[] { -220f, 0f, 220f };
+
+            for (var i = 0; i < 3; i++)
+            {
+                var buttonInstance = InstantiateKitPrefab(ButtonBluePath, parent);
+                if (buttonInstance == null)
+                {
+                    GameLogger.LogError($"[UIPrefabBuilder] Failed to create tab button {i}");
+                    continue;
+                }
+
+                buttonInstance.name = $"TabButton_{labels[i]}";
+                var buttonRect = buttonInstance.GetComponent<RectTransform>();
+                buttonRect.anchorMin = new Vector2(0.5f, 1);
+                buttonRect.anchorMax = new Vector2(0.5f, 1);
+                buttonRect.pivot = new Vector2(0.5f, 1);
+                buttonRect.anchoredPosition = new Vector2(xPositions[i], -140);
+                buttonRect.sizeDelta = new Vector2(200, 70);
+
+                var button = EnsureButtonComponent(buttonInstance);
+                buttons[i] = button;
+
+                var labelTMP = buttonInstance.GetComponentInChildren<TMP_Text>();
+                if (labelTMP != null)
+                {
+                    labelTMP.text = labels[i];
+                    labelTMP.fontSize = 28;
+                    labelTMP.alignment = TextAlignmentOptions.Center;
+                    labelTMP.font = font;
+                }
+            }
+
+            return buttons;
+        }
+
+        private static GameObject CreateStagePanel(RectTransform parent, TMP_FontAsset font, Sprite starIcon, Sprite lockIcon)
+        {
+            var panelObject = new GameObject("StagePanel");
+            panelObject.transform.SetParent(parent, false);
+
+            var panelRect = panelObject.AddComponent<RectTransform>();
+            panelRect.anchorMin = Vector2.zero;
+            panelRect.anchorMax = Vector2.one;
+            panelRect.offsetMin = Vector2.zero;
+            panelRect.offsetMax = Vector2.zero;
+
+            CreateStageTitle(panelRect, font);
+            var stageButtons = CreateStageButtons(panelRect, font, starIcon, lockIcon);
+
+            var stageSelectView = panelObject.AddComponent<UI_StageSelectView>();
+            var serializedObject = new SerializedObject(stageSelectView);
+            serializedObject.FindProperty("stageButtons").arraySize = stageButtons.Length;
+            for (var i = 0; i < stageButtons.Length; i++)
+            {
+                serializedObject.FindProperty("stageButtons").GetArrayElementAtIndex(i).objectReferenceValue = stageButtons[i];
+            }
+            serializedObject.ApplyModifiedProperties();
+
+            return panelObject;
+        }
+
+        private static GameObject CreateDeckPanel(RectTransform parent, TMP_FontAsset font, Sprite starIcon)
+        {
+            var panelObject = new GameObject("DeckPanel");
+            panelObject.transform.SetParent(parent, false);
+
+            var panelRect = panelObject.AddComponent<RectTransform>();
+            panelRect.anchorMin = Vector2.zero;
+            panelRect.anchorMax = Vector2.one;
+            panelRect.offsetMin = Vector2.zero;
+            panelRect.offsetMax = Vector2.zero;
+
+            var cards = new UI_UnitCardView[15];
+            const int columns = 5;
+            const int rows = 3;
+            const float cardWidth = 170f;
+            const float cardHeight = 210f;
+            const float spacingX = 190f;
+            const float spacingY = 230f;
+            const float startY = 200f;
+
+            for (var i = 0; i < 15; i++)
+            {
+                var col = i % columns;
+                var row = i / columns;
+                var x = (col - (columns - 1) * 0.5f) * spacingX;
+                var y = startY - row * spacingY;
+
+                cards[i] = CreateUnitCard(panelRect, new Vector2(x, y), new Vector2(cardWidth, cardHeight), font, starIcon, $"DeckCard_{i}");
+            }
+
+            var deckCountTextObject = new GameObject("DeckCountText");
+            deckCountTextObject.transform.SetParent(panelObject.transform, false);
+            var deckCountRect = deckCountTextObject.AddComponent<RectTransform>();
+            deckCountRect.anchorMin = new Vector2(0.5f, 0);
+            deckCountRect.anchorMax = new Vector2(0.5f, 0);
+            deckCountRect.pivot = new Vector2(0.5f, 0);
+            deckCountRect.anchoredPosition = new Vector2(0, 120);
+            deckCountRect.sizeDelta = new Vector2(200, 50);
+
+            var deckCountText = deckCountTextObject.AddComponent<TextMeshProUGUI>();
+            deckCountText.text = "10/10";
+            deckCountText.fontSize = 36;
+            deckCountText.alignment = TextAlignmentOptions.Center;
+            deckCountText.font = font;
+
+            var confirmButton = CreatePausePopupButton(panelObject.transform, "ConfirmButton", new Vector2(0, 50), "CONFIRM", ButtonGreenPath, font);
+
+            var deckPanelView = panelObject.AddComponent<UI_DeckPanelView>();
+            var serializedObject = new SerializedObject(deckPanelView);
+            serializedObject.FindProperty("root").objectReferenceValue = panelObject;
+            serializedObject.FindProperty("unitCards").arraySize = cards.Length;
+            for (var i = 0; i < cards.Length; i++)
+            {
+                serializedObject.FindProperty("unitCards").GetArrayElementAtIndex(i).objectReferenceValue = cards[i];
+            }
+            serializedObject.FindProperty("deckCountText").objectReferenceValue = deckCountText;
+            serializedObject.FindProperty("confirmButton").objectReferenceValue = confirmButton;
+            serializedObject.ApplyModifiedProperties();
+
+            panelObject.SetActive(false);
+
+            return panelObject;
+        }
+
+        private static GameObject CreateUpgradePanel(RectTransform parent, TMP_FontAsset font, Sprite starIcon, Sprite goldIcon, Sprite arrowIcon)
+        {
+            var panelObject = new GameObject("UpgradePanel");
+            panelObject.transform.SetParent(parent, false);
+
+            var panelRect = panelObject.AddComponent<RectTransform>();
+            panelRect.anchorMin = Vector2.zero;
+            panelRect.anchorMax = Vector2.one;
+            panelRect.offsetMin = Vector2.zero;
+            panelRect.offsetMax = Vector2.zero;
+
+            var cards = new UI_UnitCardView[15];
+            const int columns = 5;
+            const int rows = 3;
+            const float cardWidth = 140f;
+            const float cardHeight = 170f;
+            const float spacingX = 155f;
+            const float spacingY = 190f;
+            const float startX = -320f;
+            const float startY = 200f;
+
+            for (var i = 0; i < 15; i++)
+            {
+                var col = i % columns;
+                var row = i / columns;
+                var x = startX + col * spacingX;
+                var y = startY - row * spacingY;
+
+                cards[i] = CreateUnitCard(panelRect, new Vector2(x, y), new Vector2(cardWidth, cardHeight), font, starIcon, $"UpgradeCard_{i}");
+            }
+
+            var detailPanel = CreateUpgradeDetailPanel(panelRect, font, goldIcon, arrowIcon);
+
+            var detailNameText = detailPanel.transform.Find("DetailNameText")?.GetComponent<TMP_Text>();
+            var levelText = detailPanel.transform.Find("LevelText")?.GetComponent<TMP_Text>();
+            var hpText = detailPanel.transform.Find("HPText")?.GetComponent<TMP_Text>();
+            var attackText = detailPanel.transform.Find("AttackText")?.GetComponent<TMP_Text>();
+            var costText = detailPanel.transform.Find("CostText")?.GetComponent<TMP_Text>();
+            var upgradeButton = detailPanel.transform.Find("UpgradeButton")?.GetComponent<Button>();
+            var maxLevelMark = detailPanel.transform.Find("MaxLevelMark")?.gameObject;
+
+            var upgradePanelView = panelObject.AddComponent<UI_UpgradePanelView>();
+            var serializedObject = new SerializedObject(upgradePanelView);
+            serializedObject.FindProperty("root").objectReferenceValue = panelObject;
+            serializedObject.FindProperty("unitCards").arraySize = cards.Length;
+            for (var i = 0; i < cards.Length; i++)
+            {
+                serializedObject.FindProperty("unitCards").GetArrayElementAtIndex(i).objectReferenceValue = cards[i];
+            }
+            serializedObject.FindProperty("detailNameText").objectReferenceValue = detailNameText;
+            serializedObject.FindProperty("levelText").objectReferenceValue = levelText;
+            serializedObject.FindProperty("hpText").objectReferenceValue = hpText;
+            serializedObject.FindProperty("attackText").objectReferenceValue = attackText;
+            serializedObject.FindProperty("costText").objectReferenceValue = costText;
+            serializedObject.FindProperty("upgradeButton").objectReferenceValue = upgradeButton;
+            serializedObject.FindProperty("maxLevelMark").objectReferenceValue = maxLevelMark;
+            serializedObject.ApplyModifiedProperties();
+
+            panelObject.SetActive(false);
+
+            return panelObject;
+        }
+
+        private static UI_UnitCardView CreateUnitCard(RectTransform parent, Vector2 position, Vector2 size, TMP_FontAsset font, Sprite starIcon, string cardName)
+        {
+            var cardInstance = InstantiateKitPrefab(CardFrameBluePath, parent);
+
+            if (cardInstance == null)
+            {
+                GameLogger.LogError($"[UIPrefabBuilder] Failed to create unit card: {cardName}");
+                return null;
+            }
+
+            cardInstance.name = cardName;
+            var cardRect = cardInstance.GetComponent<RectTransform>();
+            cardRect.anchorMin = new Vector2(0.5f, 0.5f);
+            cardRect.anchorMax = new Vector2(0.5f, 0.5f);
+            cardRect.pivot = new Vector2(0.5f, 0.5f);
+            cardRect.anchoredPosition = position;
+            cardRect.sizeDelta = size;
+
+            var button = EnsureButtonComponent(cardInstance);
+
+            var iconObject = new GameObject("UnitIcon");
+            iconObject.transform.SetParent(cardInstance.transform, false);
+            var iconRect = iconObject.AddComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0.5f, 1);
+            iconRect.anchorMax = new Vector2(0.5f, 1);
+            iconRect.pivot = new Vector2(0.5f, 1);
+            iconRect.anchoredPosition = new Vector2(0, -10);
+            iconRect.sizeDelta = new Vector2(size.x * 0.6f, size.x * 0.6f);
+
+            var iconImage = iconObject.AddComponent<Image>();
+            iconImage.raycastTarget = false;
+
+            var nameTextObject = new GameObject("NameText");
+            nameTextObject.transform.SetParent(cardInstance.transform, false);
+            var nameTextRect = nameTextObject.AddComponent<RectTransform>();
+            nameTextRect.anchorMin = new Vector2(0, 0);
+            nameTextRect.anchorMax = new Vector2(1, 0);
+            nameTextRect.pivot = new Vector2(0.5f, 0);
+            nameTextRect.anchoredPosition = new Vector2(0, 35);
+            nameTextRect.sizeDelta = new Vector2(-10, 30);
+
+            var nameText = nameTextObject.AddComponent<TextMeshProUGUI>();
+            nameText.text = "Unit";
+            nameText.fontSize = 20;
+            nameText.alignment = TextAlignmentOptions.Center;
+            nameText.font = font;
+
+            var levelTextObject = new GameObject("LevelText");
+            levelTextObject.transform.SetParent(cardInstance.transform, false);
+            var levelTextRect = levelTextObject.AddComponent<RectTransform>();
+            levelTextRect.anchorMin = new Vector2(0, 0);
+            levelTextRect.anchorMax = new Vector2(1, 0);
+            levelTextRect.pivot = new Vector2(0.5f, 0);
+            levelTextRect.anchoredPosition = new Vector2(0, 5);
+            levelTextRect.sizeDelta = new Vector2(-10, 25);
+
+            var levelText = levelTextObject.AddComponent<TextMeshProUGUI>();
+            levelText.text = "Lv.1";
+            levelText.fontSize = 18;
+            levelText.alignment = TextAlignmentOptions.Center;
+            levelText.font = font;
+
+            var selectedMarkObject = new GameObject("SelectedMark");
+            selectedMarkObject.transform.SetParent(cardInstance.transform, false);
+            var selectedMarkRect = selectedMarkObject.AddComponent<RectTransform>();
+            selectedMarkRect.anchorMin = new Vector2(1, 1);
+            selectedMarkRect.anchorMax = new Vector2(1, 1);
+            selectedMarkRect.pivot = new Vector2(1, 1);
+            selectedMarkRect.anchoredPosition = new Vector2(-5, -5);
+            selectedMarkRect.sizeDelta = new Vector2(40, 40);
+
+            var selectedMarkImage = selectedMarkObject.AddComponent<Image>();
+            selectedMarkImage.sprite = starIcon;
+            selectedMarkImage.raycastTarget = false;
+            selectedMarkObject.SetActive(false);
+
+            var dimOverlayObject = new GameObject("DimOverlay");
+            dimOverlayObject.transform.SetParent(cardInstance.transform, false);
+            var dimOverlayRect = dimOverlayObject.AddComponent<RectTransform>();
+            dimOverlayRect.anchorMin = Vector2.zero;
+            dimOverlayRect.anchorMax = Vector2.one;
+            dimOverlayRect.offsetMin = Vector2.zero;
+            dimOverlayRect.offsetMax = Vector2.zero;
+
+            var dimOverlayImage = dimOverlayObject.AddComponent<Image>();
+            dimOverlayImage.color = new Color(0, 0, 0, 0.5f);
+            dimOverlayImage.raycastTarget = false;
+            dimOverlayObject.SetActive(false);
+
+            var cardView = cardInstance.AddComponent<UI_UnitCardView>();
+            var serializedObject = new SerializedObject(cardView);
+            serializedObject.FindProperty("button").objectReferenceValue = button;
+            serializedObject.FindProperty("iconImage").objectReferenceValue = iconImage;
+            serializedObject.FindProperty("nameText").objectReferenceValue = nameText;
+            serializedObject.FindProperty("levelText").objectReferenceValue = levelText;
+            serializedObject.FindProperty("selectedMark").objectReferenceValue = selectedMarkObject;
+            serializedObject.FindProperty("dimOverlay").objectReferenceValue = dimOverlayObject;
+            serializedObject.FindProperty("unitId").stringValue = "";
+            serializedObject.ApplyModifiedProperties();
+
+            return cardView;
+        }
+
+        private static GameObject CreateUpgradeDetailPanel(RectTransform parent, TMP_FontAsset font, Sprite goldIcon, Sprite arrowIcon)
+        {
+            var detailPanel = new GameObject("DetailPanel");
+            detailPanel.transform.SetParent(parent, false);
+
+            var detailRect = detailPanel.AddComponent<RectTransform>();
+            detailRect.anchorMin = new Vector2(1, 0.5f);
+            detailRect.anchorMax = new Vector2(1, 0.5f);
+            detailRect.pivot = new Vector2(1, 0.5f);
+            detailRect.anchoredPosition = new Vector2(-50, 0);
+            detailRect.sizeDelta = new Vector2(400, 600);
+
+            var detailNameTextObject = new GameObject("DetailNameText");
+            detailNameTextObject.transform.SetParent(detailPanel.transform, false);
+            var detailNameTextRect = detailNameTextObject.AddComponent<RectTransform>();
+            detailNameTextRect.anchorMin = new Vector2(0.5f, 1);
+            detailNameTextRect.anchorMax = new Vector2(0.5f, 1);
+            detailNameTextRect.pivot = new Vector2(0.5f, 1);
+            detailNameTextRect.anchoredPosition = new Vector2(0, -20);
+            detailNameTextRect.sizeDelta = new Vector2(380, 50);
+
+            var detailNameText = detailNameTextObject.AddComponent<TextMeshProUGUI>();
+            detailNameText.text = "Unit Name";
+            detailNameText.fontSize = 36;
+            detailNameText.alignment = TextAlignmentOptions.Center;
+            detailNameText.font = font;
+
+            var levelTextObject = new GameObject("LevelText");
+            levelTextObject.transform.SetParent(detailPanel.transform, false);
+            var levelTextRect = levelTextObject.AddComponent<RectTransform>();
+            levelTextRect.anchorMin = new Vector2(0.5f, 1);
+            levelTextRect.anchorMax = new Vector2(0.5f, 1);
+            levelTextRect.pivot = new Vector2(0.5f, 1);
+            levelTextRect.anchoredPosition = new Vector2(0, -80);
+            levelTextRect.sizeDelta = new Vector2(380, 40);
+
+            var levelText = levelTextObject.AddComponent<TextMeshProUGUI>();
+            levelText.text = "Lv.1";
+            levelText.fontSize = 28;
+            levelText.alignment = TextAlignmentOptions.Center;
+            levelText.font = font;
+
+            var hpTextObject = new GameObject("HPText");
+            hpTextObject.transform.SetParent(detailPanel.transform, false);
+            var hpTextRect = hpTextObject.AddComponent<RectTransform>();
+            hpTextRect.anchorMin = new Vector2(0.5f, 0.5f);
+            hpTextRect.anchorMax = new Vector2(0.5f, 0.5f);
+            hpTextRect.pivot = new Vector2(0.5f, 0.5f);
+            hpTextRect.anchoredPosition = new Vector2(0, 80);
+            hpTextRect.sizeDelta = new Vector2(380, 40);
+
+            var hpText = hpTextObject.AddComponent<TextMeshProUGUI>();
+            hpText.text = "HP: 100 -> 120";
+            hpText.fontSize = 24;
+            hpText.alignment = TextAlignmentOptions.Center;
+            hpText.font = font;
+
+            var attackTextObject = new GameObject("AttackText");
+            attackTextObject.transform.SetParent(detailPanel.transform, false);
+            var attackTextRect = attackTextObject.AddComponent<RectTransform>();
+            attackTextRect.anchorMin = new Vector2(0.5f, 0.5f);
+            attackTextRect.anchorMax = new Vector2(0.5f, 0.5f);
+            attackTextRect.pivot = new Vector2(0.5f, 0.5f);
+            attackTextRect.anchoredPosition = new Vector2(0, 30);
+            attackTextRect.sizeDelta = new Vector2(380, 40);
+
+            var attackText = attackTextObject.AddComponent<TextMeshProUGUI>();
+            attackText.text = "ATK: 10 -> 12";
+            attackText.fontSize = 24;
+            attackText.alignment = TextAlignmentOptions.Center;
+            attackText.font = font;
+
+            var costTextObject = new GameObject("CostText");
+            costTextObject.transform.SetParent(detailPanel.transform, false);
+            var costTextRect = costTextObject.AddComponent<RectTransform>();
+            costTextRect.anchorMin = new Vector2(0.5f, 0);
+            costTextRect.anchorMax = new Vector2(0.5f, 0);
+            costTextRect.pivot = new Vector2(0.5f, 0);
+            costTextRect.anchoredPosition = new Vector2(40, 160);
+            costTextRect.sizeDelta = new Vector2(100, 40);
+
+            var costText = costTextObject.AddComponent<TextMeshProUGUI>();
+            costText.text = "100";
+            costText.fontSize = 28;
+            costText.alignment = TextAlignmentOptions.Left;
+            costText.font = font;
+
+            var goldIconObject = new GameObject("GoldIcon");
+            goldIconObject.transform.SetParent(detailPanel.transform, false);
+            var goldIconRect = goldIconObject.AddComponent<RectTransform>();
+            goldIconRect.anchorMin = new Vector2(0.5f, 0);
+            goldIconRect.anchorMax = new Vector2(0.5f, 0);
+            goldIconRect.pivot = new Vector2(0.5f, 0);
+            goldIconRect.anchoredPosition = new Vector2(-20, 165);
+            goldIconRect.sizeDelta = new Vector2(30, 30);
+
+            var goldIconImage = goldIconObject.AddComponent<Image>();
+            goldIconImage.sprite = goldIcon;
+            goldIconImage.raycastTarget = false;
+
+            var upgradeButton = CreatePausePopupButton(detailPanel.transform, "UpgradeButton", new Vector2(0, 100), "UPGRADE", ButtonGreenPath, font);
+
+            var maxLevelMarkObject = new GameObject("MaxLevelMark");
+            maxLevelMarkObject.transform.SetParent(detailPanel.transform, false);
+            var maxLevelMarkRect = maxLevelMarkObject.AddComponent<RectTransform>();
+            maxLevelMarkRect.anchorMin = new Vector2(0.5f, 0);
+            maxLevelMarkRect.anchorMax = new Vector2(0.5f, 0);
+            maxLevelMarkRect.pivot = new Vector2(0.5f, 0);
+            maxLevelMarkRect.anchoredPosition = new Vector2(0, 100);
+            maxLevelMarkRect.sizeDelta = new Vector2(300, 60);
+
+            var maxLevelMarkText = maxLevelMarkObject.AddComponent<TextMeshProUGUI>();
+            maxLevelMarkText.text = "MAX LEVEL";
+            maxLevelMarkText.fontSize = 32;
+            maxLevelMarkText.alignment = TextAlignmentOptions.Center;
+            maxLevelMarkText.font = font;
+            maxLevelMarkText.color = new Color(1f, 0.8f, 0.2f);
+            maxLevelMarkObject.SetActive(false);
+
+            return detailPanel;
         }
     }
 }

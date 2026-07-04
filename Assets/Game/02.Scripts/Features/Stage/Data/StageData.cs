@@ -15,5 +15,6 @@ namespace Game.Data
         public float waveIntervalSeconds;
         public string bossId;
         public string mapId;
+        public int goldReward;
     }
 }

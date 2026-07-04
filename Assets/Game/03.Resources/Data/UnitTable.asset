@@ -25,6 +25,7 @@ MonoBehaviour:
     isRanged: 0
     projectileSpeed: 0
     projectileSprite: {fileID: 0}
+    iconSprite: {fileID: 21300000, guid: 134d4b9cc94043047bf8f3f01f9a480c, type: 3}
     prefab: {fileID: 2917697522326887161, guid: d2ff7b510ea634226ade0a7255899c8f, type: 3}
   - id: pet_chick
     unitName: Chick
@@ -38,6 +39,7 @@ MonoBehaviour:
     isRanged: 0
     projectileSpeed: 0
     projectileSprite: {fileID: 0}
+    iconSprite: {fileID: 21300000, guid: bcecf3435166817458fde93cb8ef3dca, type: 3}
     prefab: {fileID: 5306234697238941939, guid: 15788831f5b0a47ecb448295a61f5f1d, type: 3}
   - id: pet_bat
     unitName: Bat
@@ -51,7 +53,36 @@ MonoBehaviour:
     isRanged: 1
     projectileSpeed: 6
     projectileSprite: {fileID: 21300000, guid: 31df8b0e85f806f438e8342a6c2c3709, type: 3}
+    iconSprite: {fileID: 21300000, guid: 2efce517028e62b4cb23be060cc493e7, type: 3}
     prefab: {fileID: 2071809353605984332, guid: 6305100a1702d4a2083206d89fa5f0c5, type: 3}
+  - id: pet_pig
+    unitName: Pig
+    hp: 250
+    attackPower: 25
+    attackInterval: 1.4
+    attackRange: 0.6
+    moveSpeed: 1.2
+    cost: 90
+    cooldown: 3.5
+    isRanged: 0
+    projectileSpeed: 0
+    projectileSprite: {fileID: 0}
+    iconSprite: {fileID: 21300000, guid: 7e8dc5aa2e07293448c7176941b760fb, type: 3}
+    prefab: {fileID: 7757079955164748837, guid: 4bda239eabd2846c5be76c8c288030d9, type: 3}
+  - id: pet_heart
+    unitName: Heart
+    hp: 65
+    attackPower: 18
+    attackInterval: 0.9
+    attackRange: 3.2
+    moveSpeed: 1.1
+    cost: 95
+    cooldown: 4
+    isRanged: 1
+    projectileSpeed: 6
+    projectileSprite: {fileID: 21300000, guid: 7cb9fdbecc8be0e4ebc8982f3a8f1780, type: 3}
+    iconSprite: {fileID: 21300000, guid: 4252e2cb23117ee408de6f5531455f3c, type: 3}
+    prefab: {fileID: 820726605094184214, guid: 1c1795366cbf54b03a1e44cc292b8be4, type: 3}
   - id: pet_bomb
     unitName: Bomb
     hp: 60
@@ -64,6 +95,7 @@ MonoBehaviour:
     isRanged: 0
     projectileSpeed: 0
     projectileSprite: {fileID: 0}
+    iconSprite: {fileID: 21300000, guid: 213d07394ac050648a9f291d69cb9ccf, type: 3}
     prefab: {fileID: 4950864132853701835, guid: a9445a2cb0c1945439dcea1c4d5a9b08, type: 3}
   - id: pet_flower
     unitName: Flower
@@ -77,6 +109,7 @@ MonoBehaviour:
     isRanged: 1
     projectileSpeed: 6
     projectileSprite: {fileID: 21300000, guid: b89333787d4a011488b299fbfa6f69f0, type: 3}
+    iconSprite: {fileID: 21300000, guid: a7dff995fdf1a60449fb96d57bacfc6d, type: 3}
     prefab: {fileID: 9029627937898259633, guid: 24d066f3bd5d940d68749540904ca55c, type: 3}
   - id: pet_pug
     unitName: Pug
@@ -90,6 +123,7 @@ MonoBehaviour:
     isRanged: 0
     projectileSpeed: 0
     projectileSprite: {fileID: 0}
+    iconSprite: {fileID: 21300000, guid: 5ad3bcd1988076a4698af4462d7791c0, type: 3}
     prefab: {fileID: 3409834589855295391, guid: 7e40a81ed5f18498cbd5b45b60ffcba3, type: 3}
   - id: pet_ghost
     unitName: Ghost
@@ -103,7 +137,22 @@ MonoBehaviour:
     isRanged: 1
     projectileSpeed: 5
     projectileSprite: {fileID: 21300000, guid: a94a6e377aced0540ab0b3821d3ecf84, type: 3}
+    iconSprite: {fileID: 21300000, guid: 2108380b3c977a141b9fa0bfff6ea90a, type: 3}
     prefab: {fileID: 7488292405944135183, guid: 86dd06eb43ad44ec6a3cff44bb1e134d, type: 3}
+  - id: pet_puppis
+    unitName: Puppis
+    hp: 140
+    attackPower: 30
+    attackInterval: 0.9
+    attackRange: 0.6
+    moveSpeed: 1.9
+    cost: 160
+    cooldown: 5
+    isRanged: 0
+    projectileSpeed: 0
+    projectileSprite: {fileID: 0}
+    iconSprite: {fileID: 21300000, guid: c7b178247c9899446a3869e01faf23c3, type: 3}
+    prefab: {fileID: 6809286059277305217, guid: ab02a17bf21c44323b72cf4cac7254f5, type: 3}
   - id: pet_melody
     unitName: Melody
     hp: 50
@@ -116,6 +165,7 @@ MonoBehaviour:
     isRanged: 1
     projectileSpeed: 7
     projectileSprite: {fileID: 21300000, guid: 391711ffcfdb5f343a4ac6bedf6fd37a, type: 3}
+    iconSprite: {fileID: 21300000, guid: 2115d44f2a35b6e458f7e56f981be4d2, type: 3}
     prefab: {fileID: 7989418039980233791, guid: e515064e81534497a9f4542d5246f34a, type: 3}
   - id: pet_sword
     unitName: Sword
@@ -129,7 +179,36 @@ MonoBehaviour:
     isRanged: 0
     projectileSpeed: 0
     projectileSprite: {fileID: 0}
+    iconSprite: {fileID: 21300000, guid: 9dd102f163465f9429fe483a07ff5d4a, type: 3}
     prefab: {fileID: 3200613813602395892, guid: 9fd2783e0288b47d89818ce63ab0f756, type: 3}
+  - id: pet_pumpkin
+    unitName: Pumpkin
+    hp: 320
+    attackPower: 55
+    attackInterval: 1.6
+    attackRange: 0.7
+    moveSpeed: 0.9
+    cost: 260
+    cooldown: 8
+    isRanged: 0
+    projectileSpeed: 0
+    projectileSprite: {fileID: 0}
+    iconSprite: {fileID: 21300000, guid: 8b6094788a2f20147a62e86635dbc034, type: 3}
+    prefab: {fileID: 224766197158519884, guid: 00bb9759cce5d47a0a15fdc16aa08a22, type: 3}
+  - id: pet_blackhole
+    unitName: Blackhole
+    hp: 90
+    attackPower: 60
+    attackInterval: 2.5
+    attackRange: 4.5
+    moveSpeed: 0.8
+    cost: 300
+    cooldown: 10
+    isRanged: 1
+    projectileSpeed: 5.5
+    projectileSprite: {fileID: 21300000, guid: 709a674501edf4a4a84d975f3a5a50ac, type: 3}
+    iconSprite: {fileID: 21300000, guid: 2615d08c12201cf479f0a9377d23641b, type: 3}
+    prefab: {fileID: 1095645067910236895, guid: 8c583cd49d30b41bda94578cd4f68057, type: 3}
   - id: pet_titan
     unitName: Titan
     hp: 800
@@ -142,4 +221,5 @@ MonoBehaviour:
     isRanged: 0
     projectileSpeed: 0
     projectileSprite: {fileID: 0}
+    iconSprite: {fileID: 21300000, guid: fe0e5abd5bc57074e840762f9b9575b3, type: 3}
     prefab: {fileID: 5506882305080794104, guid: b13393fdc05a7413a8856fde21d64ce6, type: 3}

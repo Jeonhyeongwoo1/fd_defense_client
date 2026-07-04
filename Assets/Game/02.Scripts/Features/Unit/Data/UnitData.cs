@@ -18,6 +18,7 @@ namespace Game.Data
         public bool isRanged;
         public float projectileSpeed;
         public Sprite projectileSprite;
+        public Sprite iconSprite;
         public GameObject prefab;
     }
 }

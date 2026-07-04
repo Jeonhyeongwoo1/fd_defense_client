@@ -18,8 +18,10 @@ MonoBehaviour:
     enemyBaseHp: 1000
     startMoney: 100
     moneyPerSecond: 20
-    SpawnEntryList:
-    - enemyId: enemy_slime_green
-      interval: 3
-    - enemyId: enemy_snail_blue
-      interval: 8
+    WaveIdList:
+    - wave_001
+    - wave_002
+    - wave_003
+    - wave_004
+    - wave_005
+    waveIntervalSeconds: 5

@@ -15,6 +15,9 @@ namespace Game.Data
         public float moveSpeed;
         public int cost;
         public float cooldown;
+        public bool isRanged;
+        public float projectileSpeed;
+        public Sprite projectileSprite;
         public GameObject prefab;
     }
 }

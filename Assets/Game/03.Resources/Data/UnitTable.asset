@@ -22,6 +22,9 @@ MonoBehaviour:
     moveSpeed: 1.5
     cost: 50
     cooldown: 2
+    isRanged: 0
+    projectileSpeed: 0
+    projectileSprite: {fileID: 0}
     prefab: {fileID: 5306234697238941939, guid: 15788831f5b0a47ecb448295a61f5f1d, type: 3}
   - id: pet_pug
     unitName: Pug
@@ -32,4 +35,46 @@ MonoBehaviour:
     moveSpeed: 1
     cost: 120
     cooldown: 5
+    isRanged: 0
+    projectileSpeed: 0
+    projectileSprite: {fileID: 0}
     prefab: {fileID: 3409834589855295391, guid: 7e40a81ed5f18498cbd5b45b60ffcba3, type: 3}
+  - id: pet_bat
+    unitName: Bat
+    hp: 80
+    attackPower: 15
+    attackInterval: 1.2
+    attackRange: 3
+    moveSpeed: 1.2
+    cost: 80
+    cooldown: 3.5
+    isRanged: 1
+    projectileSpeed: 6
+    projectileSprite: {fileID: 21300000, guid: 31df8b0e85f806f438e8342a6c2c3709, type: 3}
+    prefab: {fileID: 2071809353605984332, guid: 6305100a1702d4a2083206d89fa5f0c5, type: 3}
+  - id: pet_ghost
+    unitName: Ghost
+    hp: 60
+    attackPower: 25
+    attackInterval: 1.8
+    attackRange: 4
+    moveSpeed: 1
+    cost: 150
+    cooldown: 6
+    isRanged: 1
+    projectileSpeed: 5
+    projectileSprite: {fileID: 21300000, guid: a94a6e377aced0540ab0b3821d3ecf84, type: 3}
+    prefab: {fileID: 7488292405944135183, guid: 86dd06eb43ad44ec6a3cff44bb1e134d, type: 3}
+  - id: pet_titan
+    unitName: Titan
+    hp: 800
+    attackPower: 80
+    attackInterval: 2
+    attackRange: 0.7
+    moveSpeed: 0.7
+    cost: 400
+    cooldown: 12
+    isRanged: 0
+    projectileSpeed: 0
+    projectileSprite: {fileID: 0}
+    prefab: {fileID: 5506882305080794104, guid: b13393fdc05a7413a8856fde21d64ce6, type: 3}

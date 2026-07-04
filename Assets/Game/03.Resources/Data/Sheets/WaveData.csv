@@ -1,0 +1,6 @@
+id,spawnEntries
+wave_001,enemy_slime_green:5:2.5
+wave_002,enemy_slime_green:5:2.0;enemy_beetle_red:3:4.0
+wave_003,enemy_snail_blue:4:5.0;enemy_wolf_gray:4:3.0
+wave_004,enemy_wolf_gray:6:2.0;enemy_beetle_red:4:3.0
+wave_005,enemy_turtle_tower:2:8.0;enemy_slime_green:8:1.5

@@ -15,6 +15,7 @@ namespace Game.App
         [SerializeField] private UnitTableSO unitTable;
         [SerializeField] private EnemyTableSO enemyTable;
         [SerializeField] private StageTableSO stageTable;
+        [SerializeField] private WaveTableSO waveTable;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -25,11 +26,13 @@ namespace Game.App
             builder.RegisterInstance(unitTable);
             builder.RegisterInstance(enemyTable);
             builder.RegisterInstance(stageTable);
+            builder.RegisterInstance(waveTable);
 
             builder.Register<UnitRegistry>(Lifetime.Scoped);
             builder.Register<UnitFactory>(Lifetime.Scoped);
             builder.Register<UnitSpawnService>(Lifetime.Scoped);
             builder.Register<GameResultModel>(Lifetime.Scoped);
+            builder.Register<GameStateModel>(Lifetime.Scoped);
             builder.Register<WalletModel>(Lifetime.Scoped);
             builder.Register<BaseService>(Lifetime.Scoped);
 
@@ -37,9 +40,10 @@ namespace Game.App
 
             builder.RegisterEntryPoint<StageService>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<WalletService>(Lifetime.Scoped).AsSelf();
-            builder.RegisterEntryPoint<EnemySpawnService>(Lifetime.Scoped).AsSelf();
+            builder.RegisterEntryPoint<WaveProgressService>(Lifetime.Scoped).AsSelf();
+            builder.RegisterEntryPoint<ProjectileService>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<UnitBattleService>(Lifetime.Scoped).AsSelf();
-            builder.RegisterEntryPoint<GameFlowService>(Lifetime.Scoped).AsSelf();
+            builder.RegisterEntryPoint<GameFlowService>(Lifetime.Scoped);
             builder.RegisterEntryPoint<GameHudPresenter>(Lifetime.Scoped);
         }
     }

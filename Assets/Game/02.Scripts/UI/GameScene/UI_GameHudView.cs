@@ -12,6 +12,7 @@ namespace Game.View
         [SerializeField] private Image allyBaseHpFillImage;
         [SerializeField] private Image enemyBaseHpFillImage;
         [SerializeField] private UI_UnitSpawnButtonView[] spawnButtons;
+        [SerializeField] private GameObject bossBanner;
 
         public IReadOnlyList<UI_UnitSpawnButtonView> SpawnButtonList => spawnButtons;
 
@@ -38,6 +39,14 @@ namespace Game.View
         public void UpdateEnemyBaseHp(float ratio)
         {
             enemyBaseHpFillImage.fillAmount = ratio;
+        }
+
+        public void ShowBossBanner(bool isVisible)
+        {
+            if (bossBanner != null)
+            {
+                bossBanner.SetActive(isVisible);
+            }
         }
     }
 }

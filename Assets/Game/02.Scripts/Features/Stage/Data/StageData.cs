@@ -14,5 +14,6 @@ namespace Game.Data
         public List<string> WaveIdList = new();
         public float waveIntervalSeconds;
         public string bossId;
+        public string mapId;
     }
 }

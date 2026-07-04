@@ -18,6 +18,7 @@ namespace Game.Editor
         private const string StageTablePath = "Assets/Game/03.Resources/Data/StageTable.asset";
         private const string WaveTablePath = "Assets/Game/03.Resources/Data/WaveTable.asset";
         private const string EffectConfigPath = "Assets/Game/03.Resources/Data/EffectConfig.asset";
+        private const string MapTablePath = "Assets/Game/03.Resources/Data/MapTable.asset";
         private const string ScenePath = "Assets/Game/01.Scene/GameScene.unity";
         private const string GameHudPrefabPath = "Assets/Game/03.Resources/UI/GameHud.prefab";
 
@@ -28,7 +29,6 @@ namespace Game.Editor
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             CreateMainCamera();
-            CreateEnvironment();
             CreateBases();
             CreateLifetimeScope();
             CreateCanvas();
@@ -82,40 +82,6 @@ namespace Game.Editor
             cameraObject.transform.position = new Vector3(0f, 1f, -10f);
         }
 
-        private static void CreateEnvironment()
-        {
-            var fieldPrefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { "Assets/Layer Lab/2D Minimal-Environment/Environment 1/Prefabs" });
-            GameObject fieldPrefab = null;
-
-            foreach (var guid in fieldPrefabGuids)
-            {
-                var path = AssetDatabase.GUIDToAssetPath(guid);
-                if (path.Contains("Field"))
-                {
-                    fieldPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                    break;
-                }
-            }
-
-            if (fieldPrefab == null)
-            {
-                GameLogger.LogWarning("[VerticalSliceSceneBuilder] Field prefab not found. Skipping environment decoration.");
-                return;
-            }
-
-            var environmentParent = new GameObject("Environment");
-
-            for (var x = -8f; x <= 8f; x += 2f)
-            {
-                var fieldInstance = PrefabUtility.InstantiatePrefab(fieldPrefab) as GameObject;
-                if (fieldInstance != null)
-                {
-                    fieldInstance.transform.position = new Vector3(x, Const.GroundY - 0.8f, 0);
-                    fieldInstance.transform.SetParent(environmentParent.transform);
-                }
-            }
-        }
-
         private static void CreateBases()
         {
             var stoneSprite = FindSpriteByKeyword("Stone");
@@ -167,6 +133,7 @@ namespace Game.Editor
             var stageTable = AssetDatabase.LoadAssetAtPath<StageTableSO>(StageTablePath);
             var waveTable = AssetDatabase.LoadAssetAtPath<WaveTableSO>(WaveTablePath);
             var effectConfig = AssetDatabase.LoadAssetAtPath<EffectConfigSO>(EffectConfigPath);
+            var mapTable = AssetDatabase.LoadAssetAtPath<MapTableSO>(MapTablePath);
 
             var serializedObject = new SerializedObject(lifetimeScope);
             serializedObject.FindProperty("unitTable").objectReferenceValue = unitTable;
@@ -175,9 +142,10 @@ namespace Game.Editor
             serializedObject.FindProperty("stageTable").objectReferenceValue = stageTable;
             serializedObject.FindProperty("waveTable").objectReferenceValue = waveTable;
             serializedObject.FindProperty("effectConfig").objectReferenceValue = effectConfig;
+            serializedObject.FindProperty("mapTable").objectReferenceValue = mapTable;
             serializedObject.ApplyModifiedProperties();
 
-            if (unitTable == null || enemyTable == null || bossTable == null || stageTable == null || waveTable == null || effectConfig == null)
+            if (unitTable == null || enemyTable == null || bossTable == null || stageTable == null || waveTable == null || effectConfig == null || mapTable == null)
             {
                 GameLogger.LogError("[VerticalSliceSceneBuilder] Failed to assign one or more SO tables to LifetimeScope.");
             }

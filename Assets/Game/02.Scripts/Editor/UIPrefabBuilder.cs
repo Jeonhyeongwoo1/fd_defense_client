@@ -1,3 +1,4 @@
+using System.Linq;
 using Game.Core;
 using Game.View;
 using TMPro;
@@ -22,6 +23,7 @@ namespace Game.Editor
         private const string IconCoinPath = KitRoot + "Shared/Icons/PictoIcon/128/coin_2.png";
         private const string IconLockPath = KitRoot + "Shared/Icons/PictoIcon/128/lock.png";
         private const string IconStarPath = KitRoot + "Shared/Icons/PictoIcon/128/star_1.png";
+        private const string IconPausePath = KitRoot + "Shared/Icons/PictoIcon/128/pause_round.png";
         private const string PetIconRoot = "Assets/Layer Lab/2D Characters-PetPack1/Sprites/ImageSequence/";
 
         private static readonly string[] PetNames = { "Chick", "Pug", "Bat", "Ghost", "Titan" };
@@ -36,8 +38,9 @@ namespace Game.Editor
             var coinIcon = LoadSprite(IconCoinPath);
             var lockIcon = LoadSprite(IconLockPath);
             var starIcon = LoadSprite(IconStarPath);
+            var pauseIcon = LoadSprite(IconPausePath);
 
-            BuildGameHudPrefab(font, coinIcon);
+            BuildGameHudPrefab(font, coinIcon, pauseIcon);
             BuildStageSelectScreenPrefab(font, starIcon, lockIcon);
 
             AssetDatabase.SaveAssets();
@@ -149,7 +152,7 @@ namespace Game.Editor
             return null;
         }
 
-        private static void BuildGameHudPrefab(TMP_FontAsset font, Sprite coinIcon)
+        private static void BuildGameHudPrefab(TMP_FontAsset font, Sprite coinIcon, Sprite pauseIcon)
         {
             var rootObject = new GameObject("GameHud");
             var rootRect = rootObject.AddComponent<RectTransform>();
@@ -163,6 +166,8 @@ namespace Game.Editor
             var allyBaseHpFillImage = CreateHpBar(rootRect, "AllyHpBar", new Vector2(60, -200), new Vector2(0, 1), SliderBluePath);
             var enemyBaseHpFillImage = CreateHpBar(rootRect, "EnemyHpBar", new Vector2(-60, -200), new Vector2(1, 1), SliderRedPath);
             var spawnButtons = CreateUnitButtons(rootRect, font);
+            var pauseButton = CreatePauseButton(rootRect, pauseIcon);
+            var bossBanner = CreateBossBanner(rootRect, font);
 
             var hudView = rootObject.AddComponent<UI_GameHudView>();
             var serializedObject = new SerializedObject(hudView);
@@ -175,9 +180,16 @@ namespace Game.Editor
             {
                 serializedObject.FindProperty("spawnButtons").GetArrayElementAtIndex(i).objectReferenceValue = spawnButtons[i];
             }
+            serializedObject.FindProperty("bossBanner").objectReferenceValue = bossBanner;
             serializedObject.ApplyModifiedProperties();
 
+            var pausePopupRoot = CreatePausePopupInHud(rootRect, font, hudView, pauseButton);
             CreateResultPopupInHud(rootRect, font, hudView);
+
+            if (pausePopupRoot != null)
+            {
+                pausePopupRoot.transform.SetAsFirstSibling();
+            }
 
             var prefabPath = OutputRoot + "GameHud.prefab";
             DeleteExistingPrefab(prefabPath);
@@ -205,7 +217,9 @@ namespace Game.Editor
             frameRect.anchoredPosition = new Vector2(40, -40);
             frameRect.localScale = Vector3.one * 1.2f;
 
-            var iconImage = frameInstance.transform.Find("Icon")?.GetComponent<Image>();
+            var iconTransform = frameInstance.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name == "Icon");
+            var iconImage = iconTransform?.GetComponent<Image>();
 
             if (iconImage == null)
             {
@@ -440,6 +454,194 @@ namespace Game.Editor
             serializedObject.ApplyModifiedProperties();
 
             return buttonView;
+        }
+
+        private static Button CreatePauseButton(RectTransform parent, Sprite pauseIcon)
+        {
+            var buttonInstance = InstantiateKitPrefab(ButtonCirclePath, parent);
+
+            if (buttonInstance == null)
+            {
+                GameLogger.LogError("[UIPrefabBuilder] Failed to create PauseButton.");
+                return null;
+            }
+
+            buttonInstance.name = "PauseButton";
+            var buttonRect = buttonInstance.GetComponent<RectTransform>();
+            buttonRect.anchorMin = new Vector2(1, 1);
+            buttonRect.anchorMax = new Vector2(1, 1);
+            buttonRect.pivot = new Vector2(1, 1);
+            buttonRect.anchoredPosition = new Vector2(-80, -80);
+            buttonRect.sizeDelta = new Vector2(90, 90);
+
+            var button = EnsureButtonComponent(buttonInstance);
+
+            var iconObject = new GameObject("PauseIcon");
+            iconObject.transform.SetParent(buttonInstance.transform, false);
+
+            var iconRect = iconObject.AddComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0.5f, 0.5f);
+            iconRect.anchorMax = new Vector2(0.5f, 0.5f);
+            iconRect.pivot = new Vector2(0.5f, 0.5f);
+            iconRect.anchoredPosition = Vector2.zero;
+            iconRect.sizeDelta = new Vector2(50, 50);
+
+            var iconImage = iconObject.AddComponent<Image>();
+            iconImage.sprite = pauseIcon;
+            iconImage.raycastTarget = false;
+
+            return button;
+        }
+
+        private static GameObject CreateBossBanner(RectTransform parent, TMP_FontAsset font)
+        {
+            var titlePrefab = FindTitlePrefab("Deco");
+
+            GameObject bannerInstance;
+
+            if (titlePrefab != null)
+            {
+                bannerInstance = PrefabUtility.InstantiatePrefab(titlePrefab) as GameObject;
+                bannerInstance.transform.SetParent(parent, false);
+            }
+            else
+            {
+                bannerInstance = new GameObject("BossBanner");
+                bannerInstance.transform.SetParent(parent, false);
+            }
+
+            bannerInstance.name = "BossBanner";
+            var bannerRect = bannerInstance.GetComponent<RectTransform>();
+
+            if (bannerRect == null)
+            {
+                bannerRect = bannerInstance.AddComponent<RectTransform>();
+            }
+
+            bannerRect.anchorMin = new Vector2(0.5f, 1);
+            bannerRect.anchorMax = new Vector2(0.5f, 1);
+            bannerRect.pivot = new Vector2(0.5f, 1);
+            bannerRect.anchoredPosition = new Vector2(0, -350);
+            bannerRect.sizeDelta = new Vector2(600, 110);
+
+            var bannerText = bannerInstance.GetComponentInChildren<TMP_Text>();
+
+            if (bannerText == null)
+            {
+                bannerText = bannerInstance.AddComponent<TextMeshProUGUI>();
+            }
+
+            bannerText.text = "BOSS INCOMING";
+            bannerText.fontSize = 56;
+            bannerText.alignment = TextAlignmentOptions.Center;
+            bannerText.font = font;
+            bannerText.color = new Color(0.9f, 0.2f, 0.2f);
+
+            bannerInstance.SetActive(false);
+
+            return bannerInstance;
+        }
+
+        private static GameObject CreatePausePopupInHud(RectTransform canvasTransform, TMP_FontAsset font, UI_GameHudView hudView, Button pauseButton)
+        {
+            var pausePopupRoot = new GameObject("PausePopupRoot");
+            pausePopupRoot.transform.SetParent(canvasTransform, false);
+
+            var rootRect = pausePopupRoot.AddComponent<RectTransform>();
+            rootRect.anchorMin = Vector2.zero;
+            rootRect.anchorMax = Vector2.one;
+            rootRect.offsetMin = Vector2.zero;
+            rootRect.offsetMax = Vector2.zero;
+
+            var dimImage = pausePopupRoot.AddComponent<Image>();
+            dimImage.color = new Color(0, 0, 0, 0.7f);
+            dimImage.raycastTarget = true;
+
+            var popupInstance = InstantiateKitPrefab(PopupPath, pausePopupRoot.transform);
+
+            if (popupInstance == null)
+            {
+                GameLogger.LogError("[UIPrefabBuilder] Failed to create PausePopup.");
+                return null;
+            }
+
+            popupInstance.name = "PopupBox";
+            var popupRect = popupInstance.GetComponent<RectTransform>();
+            popupRect.anchorMin = new Vector2(0.5f, 0.5f);
+            popupRect.anchorMax = new Vector2(0.5f, 0.5f);
+            popupRect.pivot = new Vector2(0.5f, 0.5f);
+            popupRect.anchoredPosition = Vector2.zero;
+            popupRect.sizeDelta = new Vector2(600, 700);
+
+            var titleTextObject = new GameObject("TitleText");
+            titleTextObject.transform.SetParent(popupInstance.transform, false);
+
+            var titleTextRect = titleTextObject.AddComponent<RectTransform>();
+            titleTextRect.anchorMin = new Vector2(0.5f, 1);
+            titleTextRect.anchorMax = new Vector2(0.5f, 1);
+            titleTextRect.pivot = new Vector2(0.5f, 1);
+            titleTextRect.anchoredPosition = new Vector2(0, -80);
+            titleTextRect.sizeDelta = new Vector2(500, 120);
+
+            var titleText = titleTextObject.AddComponent<TextMeshProUGUI>();
+            titleText.text = "PAUSED";
+            titleText.fontSize = 72;
+            titleText.alignment = TextAlignmentOptions.Center;
+            titleText.font = font;
+
+            var resumeButton = CreatePausePopupButton(popupInstance.transform, "ResumeButton", new Vector2(0, 40), "RESUME", ButtonGreenPath, font);
+            var retryButton = CreatePausePopupButton(popupInstance.transform, "RetryButton", new Vector2(0, -80), "RETRY", ButtonBluePath, font);
+            var stageSelectButton = CreatePausePopupButton(popupInstance.transform, "StageSelectButton", new Vector2(0, -200), "STAGES", ButtonBluePath, font);
+
+            var pausePopupView = hudView.gameObject.AddComponent<UI_PausePopupView>();
+            var serializedObject = new SerializedObject(pausePopupView);
+            serializedObject.FindProperty("root").objectReferenceValue = pausePopupRoot;
+            serializedObject.FindProperty("pauseButton").objectReferenceValue = pauseButton;
+            serializedObject.FindProperty("resumeButton").objectReferenceValue = resumeButton;
+            serializedObject.FindProperty("retryButton").objectReferenceValue = retryButton;
+            serializedObject.FindProperty("stageSelectButton").objectReferenceValue = stageSelectButton;
+            serializedObject.ApplyModifiedProperties();
+
+            pausePopupRoot.SetActive(false);
+
+            return pausePopupRoot;
+        }
+
+        private static Button CreatePausePopupButton(Transform parent, string name, Vector2 position, string labelText, string buttonPrefabPath, TMP_FontAsset font)
+        {
+            var buttonInstance = InstantiateKitPrefab(buttonPrefabPath, parent);
+
+            if (buttonInstance == null)
+            {
+                GameLogger.LogError($"[UIPrefabBuilder] Failed to create {name}.");
+                return null;
+            }
+
+            buttonInstance.name = name;
+            var buttonRect = buttonInstance.GetComponent<RectTransform>();
+            buttonRect.anchorMin = new Vector2(0.5f, 0.5f);
+            buttonRect.anchorMax = new Vector2(0.5f, 0.5f);
+            buttonRect.pivot = new Vector2(0.5f, 0.5f);
+            buttonRect.anchoredPosition = position;
+            buttonRect.sizeDelta = new Vector2(300, 90);
+
+            var button = EnsureButtonComponent(buttonInstance);
+
+            var labelTMP = buttonInstance.GetComponentInChildren<TMP_Text>();
+
+            if (labelTMP != null)
+            {
+                labelTMP.text = labelText;
+                labelTMP.fontSize = 36;
+                labelTMP.alignment = TextAlignmentOptions.Center;
+                labelTMP.font = font;
+            }
+            else
+            {
+                GameLogger.LogWarning($"[UIPrefabBuilder] TMP_Text not found in {name}.");
+            }
+
+            return button;
         }
 
         private static void CreateResultPopupInHud(RectTransform canvasTransform, TMP_FontAsset font, UI_GameHudView hudView)

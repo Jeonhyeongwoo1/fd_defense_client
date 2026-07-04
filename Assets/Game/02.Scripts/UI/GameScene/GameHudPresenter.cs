@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using Game.Core;
 using Game.Data;
 using Game.Model;
@@ -52,6 +53,7 @@ namespace Game.Presenter
                     if (isBoss)
                     {
                         _view.UpdateBossWave();
+                        ShowBossBannerAsync().Forget();
                     }
                     else
                     {
@@ -111,6 +113,13 @@ namespace Game.Presenter
         private void OnSpawnButtonClicked(string unitId)
         {
             _unitSpawnService.TrySpawnAlly(unitId);
+        }
+
+        private async UniTaskVoid ShowBossBannerAsync()
+        {
+            _view.ShowBossBanner(true);
+            await UniTask.Delay(TimeSpan.FromSeconds(Const.BossBannerSeconds), DelayType.UnscaledDeltaTime);
+            _view.ShowBossBanner(false);
         }
     }
 }

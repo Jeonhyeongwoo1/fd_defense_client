@@ -11,6 +11,7 @@ namespace Game.Core
         public const float ProjectileDespawnX = 12f;
         public const float UnitSpawnOffsetX = 1f;
         public const float EffectLifetimeSeconds = 1.5f;
+        public const float BossBannerSeconds = 2f;
         public const string DefaultStageId = "stage_001";
         public const string GameSceneName = "GameScene";
         public const string OutGameSceneName = "OutGameScene";

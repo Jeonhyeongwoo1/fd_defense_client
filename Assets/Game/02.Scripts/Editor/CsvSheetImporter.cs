@@ -15,12 +15,14 @@ namespace Game.Editor
         private const string BossCsvPath = "Assets/Game/03.Resources/Data/Sheets/BossData.csv";
         private const string StageCsvPath = "Assets/Game/03.Resources/Data/Sheets/StageData.csv";
         private const string WaveCsvPath = "Assets/Game/03.Resources/Data/Sheets/WaveData.csv";
+        private const string MapCsvPath = "Assets/Game/03.Resources/Data/Sheets/MapData.csv";
 
         private const string UnitTablePath = "Assets/Game/03.Resources/Data/UnitTable.asset";
         private const string EnemyTablePath = "Assets/Game/03.Resources/Data/EnemyTable.asset";
         private const string BossTablePath = "Assets/Game/03.Resources/Data/BossTable.asset";
         private const string StageTablePath = "Assets/Game/03.Resources/Data/StageTable.asset";
         private const string WaveTablePath = "Assets/Game/03.Resources/Data/WaveTable.asset";
+        private const string MapTablePath = "Assets/Game/03.Resources/Data/MapTable.asset";
 
         public static void ImportAllSheets()
         {
@@ -30,6 +32,7 @@ namespace Game.Editor
             importedCount += ImportEnemyData();
             importedCount += ImportBossData();
             importedCount += ImportWaveData();
+            importedCount += ImportMapData();
             importedCount += ImportStageData();
 
             AssetDatabase.SaveAssets();
@@ -292,7 +295,7 @@ namespace Game.Editor
                 }
 
                 var columns = line.Split(',');
-                if (columns.Length < 8)
+                if (columns.Length < 9)
                 {
                     GameLogger.LogError($"[CsvSheetImporter] Invalid StageData row {i}: insufficient columns");
                     skippedCount++;
@@ -322,7 +325,8 @@ namespace Game.Editor
                     moneyPerSecond = float.Parse(columns[4], CultureInfo.InvariantCulture),
                     WaveIdList = waveIdList,
                     waveIntervalSeconds = float.Parse(columns[6], CultureInfo.InvariantCulture),
-                    bossId = columns[7]
+                    bossId = columns[7],
+                    mapId = columns.Length > 8 ? columns[8] : string.Empty
                 };
 
                 stageDataList.Add(data);
@@ -421,6 +425,136 @@ namespace Game.Editor
             EditorUtility.SetDirty(table);
 
             GameLogger.Log($"[CsvSheetImporter] WaveData imported: {waveDataList.Count} entries ({skippedCount} skipped)");
+            return 1;
+        }
+
+        private static int ImportMapData()
+        {
+            if (!File.Exists(MapCsvPath))
+            {
+                GameLogger.LogError($"[CsvSheetImporter] CSV not found: {MapCsvPath}");
+                return 0;
+            }
+
+            var lines = File.ReadAllLines(MapCsvPath);
+            if (lines.Length < 2)
+            {
+                GameLogger.LogWarning($"[CsvSheetImporter] No data rows in {MapCsvPath}");
+                return 0;
+            }
+
+            var mapDataList = new List<MapData>();
+            var skippedCount = 0;
+
+            for (var i = 1; i < lines.Length; i++)
+            {
+                var line = lines[i].Trim();
+                if (string.IsNullOrEmpty(line))
+                {
+                    continue;
+                }
+
+                var columns = line.Split(',');
+                if (columns.Length < 4)
+                {
+                    GameLogger.LogError($"[CsvSheetImporter] Invalid MapData row {i}: insufficient columns");
+                    skippedCount++;
+                    continue;
+                }
+
+                Color skyColor;
+                if (!ColorUtility.TryParseHtmlString(columns[1], out skyColor))
+                {
+                    GameLogger.LogError($"[CsvSheetImporter] Failed to parse skyColor: {columns[1]} (row {i})");
+                    skippedCount++;
+                    continue;
+                }
+
+                var fieldPrefab = AssetDatabase.LoadAssetAtPath<GameObject>(columns[2]);
+                if (fieldPrefab == null)
+                {
+                    GameLogger.LogError($"[CsvSheetImporter] Failed to load field prefab: {columns[2]} (row {i})");
+                    skippedCount++;
+                    continue;
+                }
+
+                var decorEntryList = new List<MapData.MapDecorEntry>();
+                var decorEntriesStr = columns[3];
+                if (!string.IsNullOrEmpty(decorEntriesStr))
+                {
+                    var entries = decorEntriesStr.Split(';');
+                    foreach (var entry in entries)
+                    {
+                        var parts = entry.Split(':');
+                        if (parts.Length == 2)
+                        {
+                            var folderAndPrefix = parts[0];
+                            var count = int.Parse(parts[1]);
+
+                            var prefixParts = folderAndPrefix.Split('/');
+                            var folder = prefixParts[0];
+                            var prefix = prefixParts.Length > 1 ? prefixParts[1] : folderAndPrefix;
+
+                            var searchFolder = $"Assets/Layer Lab/2D Minimal-Environment/Environment 1/Prefabs/{folder}";
+                            var prefabGuids = AssetDatabase.FindAssets("t:Prefab", new[] { searchFolder });
+
+                            var prefabList = new List<GameObject>();
+                            foreach (var guid in prefabGuids)
+                            {
+                                var path = AssetDatabase.GUIDToAssetPath(guid);
+                                var fileName = System.IO.Path.GetFileNameWithoutExtension(path);
+                                if (fileName.StartsWith(prefix))
+                                {
+                                    var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                                    if (prefab != null)
+                                    {
+                                        prefabList.Add(prefab);
+                                    }
+                                }
+                            }
+
+                            if (prefabList.Count == 0)
+                            {
+                                GameLogger.LogWarning($"[CsvSheetImporter] No prefabs found for decor entry: {folderAndPrefix} (row {i})");
+                                continue;
+                            }
+
+                            var decorEntry = new MapData.MapDecorEntry
+                            {
+                                PrefabList = prefabList,
+                                count = count
+                            };
+                            decorEntryList.Add(decorEntry);
+                        }
+                        else
+                        {
+                            GameLogger.LogWarning($"[CsvSheetImporter] Malformed MapData decor entry at row {i}: '{entry}' (expected format: folder/prefix:count)");
+                        }
+                    }
+                }
+
+                var data = new MapData
+                {
+                    id = columns[0],
+                    skyColor = skyColor,
+                    fieldPrefab = fieldPrefab,
+                    DecorEntryList = decorEntryList
+                };
+
+                mapDataList.Add(data);
+            }
+
+            var table = AssetDatabase.LoadAssetAtPath<MapTableSO>(MapTablePath);
+            if (table == null)
+            {
+                table = ScriptableObject.CreateInstance<MapTableSO>();
+                AssetDatabase.CreateAsset(table, MapTablePath);
+            }
+
+            table.MapDataList = mapDataList;
+            EditorUtility.SetDirty(table);
+
+            GameLogger.Log($"[CsvSheetImporter] MapData imported: {mapDataList.Count} entries ({skippedCount} skipped)");
             return 1;
         }
     }

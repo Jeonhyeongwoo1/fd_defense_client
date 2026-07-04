@@ -1,28 +1,26 @@
 using Game.Core;
 using Game.Data;
-using UnityEngine;
 
 namespace Game.Service
 {
     public class UpgradeService
     {
-        private const string UnitLevelPrefix = "UnitLevel_";
-
         private readonly UpgradeTableSO _upgradeTable;
         private readonly GoldService _goldService;
         private readonly EventBus _eventBus;
+        private readonly UserDataService _userDataService;
 
-        public UpgradeService(UpgradeTableSO upgradeTable, GoldService goldService, EventBus eventBus)
+        public UpgradeService(UpgradeTableSO upgradeTable, GoldService goldService, EventBus eventBus, UserDataService userDataService)
         {
             _upgradeTable = upgradeTable;
             _goldService = goldService;
             _eventBus = eventBus;
+            _userDataService = userDataService;
         }
 
         public int GetLevel(string unitId)
         {
-            var key = UnitLevelPrefix + unitId;
-            return PlayerPrefs.GetInt(key, 1);
+            return _userDataService.GetUnitLevel(unitId);
         }
 
         public bool IsMaxLevel(string unitId)
@@ -64,9 +62,8 @@ namespace Game.Service
             var currentLevel = GetLevel(unitId);
             var newLevel = currentLevel + 1;
 
-            var key = UnitLevelPrefix + unitId;
-            PlayerPrefs.SetInt(key, newLevel);
-            PlayerPrefs.Save();
+            _userDataService.SetUnitLevel(unitId, newLevel);
+            _userDataService.Save();
 
             _eventBus.Publish(new UnitUpgradedEvent { UnitId = unitId });
 

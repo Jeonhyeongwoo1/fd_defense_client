@@ -2,39 +2,38 @@ using System.Collections.Generic;
 using System.Linq;
 using Game.Core;
 using Game.Data;
-using UnityEngine;
 
 namespace Game.Service
 {
     public class DeckService
     {
         public const int DeckSize = 10;
-        private const string DeckKey = "Deck";
 
         private readonly UnitTableSO _unitTable;
+        private readonly UserDataService _userDataService;
 
-        public DeckService(UnitTableSO unitTable)
+        public DeckService(UnitTableSO unitTable, UserDataService userDataService)
         {
             _unitTable = unitTable;
+            _userDataService = userDataService;
         }
 
         public IReadOnlyList<string> GetDeck()
         {
-            var deckStr = PlayerPrefs.GetString(DeckKey, string.Empty);
+            var deckUnitIds = _userDataService.Data.deckUnitIds;
 
-            if (string.IsNullOrEmpty(deckStr))
+            if (deckUnitIds.Count == 0)
             {
                 return GetDefaultDeck();
             }
 
-            var unitIdArray = deckStr.Split(';');
-            if (unitIdArray.Length != DeckSize)
+            if (deckUnitIds.Count != DeckSize)
             {
-                GameLogger.LogWarning($"[DeckService] Corrupted deck data (expected {DeckSize} units, found {unitIdArray.Length}). Using default deck.");
+                GameLogger.LogWarning($"[DeckService] Corrupted deck data (expected {DeckSize} units, found {deckUnitIds.Count}). Using default deck.");
                 return GetDefaultDeck();
             }
 
-            foreach (var unitId in unitIdArray)
+            foreach (var unitId in deckUnitIds)
             {
                 var data = _unitTable.GetById(unitId);
                 if (data == null)
@@ -44,7 +43,7 @@ namespace Game.Service
                 }
             }
 
-            return unitIdArray;
+            return deckUnitIds;
         }
 
         public void SaveDeck(IReadOnlyList<string> unitIdList)
@@ -55,11 +54,14 @@ namespace Game.Service
                 return;
             }
 
-            var deckStr = string.Join(";", unitIdList);
-            PlayerPrefs.SetString(DeckKey, deckStr);
-            PlayerPrefs.Save();
+            _userDataService.Data.deckUnitIds.Clear();
+            foreach (var unitId in unitIdList)
+            {
+                _userDataService.Data.deckUnitIds.Add(unitId);
+            }
+            _userDataService.Save();
 
-            GameLogger.Log($"[DeckService] Deck saved: {deckStr}");
+            GameLogger.Log($"[DeckService] Deck saved: {string.Join(";", unitIdList)}");
         }
 
         public bool IsInDeck(string unitId)

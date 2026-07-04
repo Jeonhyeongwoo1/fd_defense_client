@@ -1,28 +1,27 @@
 using System;
 using Game.Core;
 using Game.Data;
-using UnityEngine;
 
 namespace Game.Service
 {
     public class DailyRewardService
     {
-        private const string LastClaimDateKey = "LastClaimDate";
-        private const string DailyStreakKey = "DailyStreak";
         private const int MaxStreakDays = 7;
 
         private readonly DailyRewardTableSO _rewardTable;
         private readonly GoldService _goldService;
+        private readonly UserDataService _userDataService;
 
-        public DailyRewardService(DailyRewardTableSO rewardTable, GoldService goldService)
+        public DailyRewardService(DailyRewardTableSO rewardTable, GoldService goldService, UserDataService userDataService)
         {
             _rewardTable = rewardTable;
             _goldService = goldService;
+            _userDataService = userDataService;
         }
 
         public bool CanClaim()
         {
-            var lastClaimDateStr = PlayerPrefs.GetString(LastClaimDateKey, string.Empty);
+            var lastClaimDateStr = _userDataService.Data.daily.lastClaimDate;
             if (string.IsNullOrEmpty(lastClaimDateStr))
             {
                 return true;
@@ -39,8 +38,8 @@ namespace Game.Service
 
         public int GetCurrentDay()
         {
-            var lastClaimDateStr = PlayerPrefs.GetString(LastClaimDateKey, string.Empty);
-            var currentStreak = PlayerPrefs.GetInt(DailyStreakKey, 0);
+            var lastClaimDateStr = _userDataService.Data.daily.lastClaimDate;
+            var currentStreak = _userDataService.Data.daily.streak;
 
             if (string.IsNullOrEmpty(lastClaimDateStr))
             {
@@ -89,9 +88,9 @@ namespace Game.Service
             _goldService.Add(rewardData.gold);
 
             var today = DateTime.Now.Date;
-            PlayerPrefs.SetString(LastClaimDateKey, today.ToString("yyyyMMdd"));
-            PlayerPrefs.SetInt(DailyStreakKey, day);
-            PlayerPrefs.Save();
+            _userDataService.Data.daily.lastClaimDate = today.ToString("yyyyMMdd");
+            _userDataService.Data.daily.streak = day;
+            _userDataService.Save();
 
             GameLogger.Log($"[DailyRewardService] Claimed day {day} reward: {rewardData.gold} gold");
             return rewardData.gold;

@@ -27,6 +27,7 @@ namespace Game.App
             builder.RegisterInstance(missionTable);
 
             builder.Register<EventBus>(Lifetime.Scoped);
+            builder.Register<UserDataService>(Lifetime.Scoped);
             builder.Register<StageProgressService>(Lifetime.Scoped);
             builder.Register<SceneLoadService>(Lifetime.Scoped);
             builder.Register<GoldService>(Lifetime.Scoped);

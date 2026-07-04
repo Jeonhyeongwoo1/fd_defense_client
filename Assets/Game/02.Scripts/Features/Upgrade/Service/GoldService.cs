@@ -1,21 +1,19 @@
 using Game.Core;
 using UniRx;
-using UnityEngine;
 
 namespace Game.Service
 {
     public class GoldService
     {
-        private const string GoldKey = "Gold";
-
+        private readonly UserDataService _userDataService;
         private readonly ReactiveProperty<int> _gold = new();
 
         public IReadOnlyReactiveProperty<int> Gold => _gold;
 
-        public GoldService()
+        public GoldService(UserDataService userDataService)
         {
-            var savedGold = PlayerPrefs.GetInt(GoldKey, 0);
-            _gold.Value = savedGold;
+            _userDataService = userDataService;
+            _gold.Value = _userDataService.Data.gold;
         }
 
         public void Add(int amount)
@@ -27,8 +25,8 @@ namespace Game.Service
             }
 
             _gold.Value += amount;
-            PlayerPrefs.SetInt(GoldKey, _gold.Value);
-            PlayerPrefs.Save();
+            _userDataService.Data.gold = _gold.Value;
+            _userDataService.Save();
         }
 
         public bool TrySpend(int amount)
@@ -39,8 +37,8 @@ namespace Game.Service
             }
 
             _gold.Value -= amount;
-            PlayerPrefs.SetInt(GoldKey, _gold.Value);
-            PlayerPrefs.Save();
+            _userDataService.Data.gold = _gold.Value;
+            _userDataService.Save();
             return true;
         }
     }

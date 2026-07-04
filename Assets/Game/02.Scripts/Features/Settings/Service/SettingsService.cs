@@ -1,27 +1,29 @@
 using Game.Core;
-using UnityEngine;
 
 namespace Game.Service
 {
     public class SettingsService
     {
-        private const string VibrationKey = "Vibration";
+        private readonly UserDataService _userDataService;
+
+        public SettingsService(UserDataService userDataService)
+        {
+            _userDataService = userDataService;
+        }
 
         public bool IsVibrationEnabled
         {
-            get => PlayerPrefs.GetInt(VibrationKey, 1) == 1;
+            get => _userDataService.Data.settings.isVibrationEnabled;
             set
             {
-                PlayerPrefs.SetInt(VibrationKey, value ? 1 : 0);
-                PlayerPrefs.Save();
+                _userDataService.Data.settings.isVibrationEnabled = value;
+                _userDataService.Save();
             }
         }
 
         public void ResetAllProgress()
         {
-            // WARNING: This action is irreversible and will delete all player progress
-            PlayerPrefs.DeleteAll();
-            PlayerPrefs.Save();
+            _userDataService.ResetToDefault();
             GameLogger.LogWarning("[SettingsService] All player progress has been reset (irreversible)");
         }
     }

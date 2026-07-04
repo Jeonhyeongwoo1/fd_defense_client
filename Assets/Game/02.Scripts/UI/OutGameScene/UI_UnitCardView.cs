@@ -17,7 +17,7 @@ namespace Game.View
         public string UnitId => unitId;
         public Button Button => button;
 
-        public void Bind(string id, Sprite icon, string unitName, int level, bool isSelected)
+        public void Bind(string id, Sprite icon, string unitName, int level, bool isSelected, bool isOwned = true)
         {
             unitId = id;
 
@@ -37,6 +37,12 @@ namespace Game.View
             }
 
             SetSelected(isSelected);
+            SetDim(!isOwned);
+
+            if (button != null)
+            {
+                button.interactable = isOwned;
+            }
         }
 
         public void SetSelected(bool isSelected)

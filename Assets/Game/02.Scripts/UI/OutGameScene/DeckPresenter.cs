@@ -49,8 +49,9 @@ namespace Game.Presenter
                 var unitData = allUnits[i];
                 var level = _upgradeService.GetLevel(unitData.id);
                 var isSelected = _tempSelectedUnitIdList.Contains(unitData.id);
+                var isOwned = _deckService.IsUnitOwned(unitData.id);
 
-                cards[i].Bind(unitData.id, unitData.iconSprite, unitData.unitName, level, isSelected);
+                cards[i].Bind(unitData.id, unitData.iconSprite, unitData.unitName, level, isSelected, isOwned);
 
                 var card = cards[i];
                 card.Button.onClick.AsObservable()
@@ -78,8 +79,9 @@ namespace Game.Presenter
                 var unitData = allUnits[i];
                 var level = _upgradeService.GetLevel(unitData.id);
                 var isSelected = _tempSelectedUnitIdList.Contains(unitData.id);
+                var isOwned = _deckService.IsUnitOwned(unitData.id);
 
-                cards[i].Bind(unitData.id, unitData.iconSprite, unitData.unitName, level, isSelected);
+                cards[i].Bind(unitData.id, unitData.iconSprite, unitData.unitName, level, isSelected, isOwned);
             }
 
             _view.UpdateDeckCount(_tempSelectedUnitIdList.Count, DeckService.DeckSize);
@@ -93,6 +95,13 @@ namespace Game.Presenter
         private void OnCardClicked(UI_UnitCardView card)
         {
             var unitId = card.UnitId;
+
+            if (!_deckService.IsUnitOwned(unitId))
+            {
+                GameLogger.Log($"[DeckPresenter] Unit not owned: {unitId}");
+                return;
+            }
+
             var isCurrentlySelected = _tempSelectedUnitIdList.Contains(unitId);
 
             if (isCurrentlySelected)

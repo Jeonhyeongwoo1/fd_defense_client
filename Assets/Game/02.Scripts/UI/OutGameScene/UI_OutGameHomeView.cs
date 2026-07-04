@@ -10,6 +10,7 @@ namespace Game.View
         [SerializeField] private Button deckTabButton;
         [SerializeField] private Button upgradeTabButton;
         [SerializeField] private Button missionsTabButton;
+        [SerializeField] private Button shopTabButton;
         [SerializeField] private Button settingsButton;
         [SerializeField] private GameObject stagePanelRoot;
         [SerializeField] private TMP_Text goldText;
@@ -18,6 +19,7 @@ namespace Game.View
         public Button DeckTabButton => deckTabButton;
         public Button UpgradeTabButton => upgradeTabButton;
         public Button MissionsTabButton => missionsTabButton;
+        public Button ShopTabButton => shopTabButton;
         public Button SettingsButton => settingsButton;
         public GameObject StagePanelRoot => stagePanelRoot;
 

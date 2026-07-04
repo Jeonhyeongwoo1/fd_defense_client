@@ -18,6 +18,12 @@ namespace Game.Service
             "pet_melody", "pet_sword", "pet_pumpkin", "pet_blackhole", "pet_titan"
         };
 
+        private static readonly string[] DefaultOwnedUnitIds = new[]
+        {
+            "pet_goldfish", "pet_chick", "pet_bat", "pet_pig", "pet_heart",
+            "pet_bomb", "pet_flower", "pet_pug", "pet_ghost", "pet_puppis"
+        };
+
         private static readonly string[] AllMissionTypes = new[]
         {
             "KillEnemies", "KillBosses", "ClearStages", "UpgradeUnits"
@@ -211,12 +217,40 @@ namespace Game.Service
             }
         }
 
+        public bool IsUnitOwned(string unitId)
+        {
+            foreach (var id in _data.ownedUnitIds)
+            {
+                if (id == unitId)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void AddOwnedUnit(string unitId)
+        {
+            if (!IsUnitOwned(unitId))
+            {
+                _data.ownedUnitIds.Add(unitId);
+            }
+        }
+
+        public void AddPurchase(string productId)
+        {
+            if (!_data.purchaseHistory.Contains(productId))
+            {
+                _data.purchaseHistory.Add(productId);
+            }
+        }
+
         private UserDataModel CreateDefault()
         {
             var data = new UserDataModel
             {
                 gold = 0,
-                ownedUnitIds = new List<string>(AllUnitIds),
+                ownedUnitIds = new List<string>(DefaultOwnedUnitIds),
                 selectedStageId = Const.DefaultStageId,
                 settings = new SettingsData { isVibrationEnabled = true }
             };

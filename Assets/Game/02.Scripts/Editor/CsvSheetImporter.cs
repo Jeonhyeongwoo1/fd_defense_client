@@ -19,6 +19,7 @@ namespace Game.Editor
         private const string UpgradeCsvPath = "Assets/Game/03.Resources/Data/Sheets/UpgradeData.csv";
         private const string DailyRewardCsvPath = "Assets/Game/03.Resources/Data/Sheets/DailyRewardData.csv";
         private const string MissionCsvPath = "Assets/Game/03.Resources/Data/Sheets/MissionData.csv";
+        private const string ShopCsvPath = "Assets/Game/03.Resources/Data/Sheets/ShopData.csv";
 
         private const string UnitTablePath = "Assets/Game/03.Resources/Data/UnitTable.asset";
         private const string EnemyTablePath = "Assets/Game/03.Resources/Data/EnemyTable.asset";
@@ -29,6 +30,7 @@ namespace Game.Editor
         private const string UpgradeTablePath = "Assets/Game/03.Resources/Data/UpgradeTable.asset";
         private const string DailyRewardTablePath = "Assets/Game/03.Resources/Data/DailyRewardTable.asset";
         private const string MissionTablePath = "Assets/Game/03.Resources/Data/MissionTable.asset";
+        private const string ShopTablePath = "Assets/Game/03.Resources/Data/ShopTable.asset";
 
         public static void ImportAllSheets()
         {
@@ -43,6 +45,7 @@ namespace Game.Editor
             importedCount += ImportUpgradeData();
             importedCount += ImportDailyRewardData();
             importedCount += ImportMissionData();
+            importedCount += ImportShopData();
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -780,6 +783,73 @@ namespace Game.Editor
             EditorUtility.SetDirty(table);
 
             GameLogger.Log($"[CsvSheetImporter] MissionData imported: {missionDataList.Count} entries ({skippedCount} skipped)");
+            return 1;
+        }
+
+        private static int ImportShopData()
+        {
+            if (!File.Exists(ShopCsvPath))
+            {
+                GameLogger.LogError($"[CsvSheetImporter] CSV not found: {ShopCsvPath}");
+                return 0;
+            }
+
+            var lines = File.ReadAllLines(ShopCsvPath);
+            if (lines.Length < 2)
+            {
+                GameLogger.LogWarning($"[CsvSheetImporter] No data rows in {ShopCsvPath}");
+                return 0;
+            }
+
+            var shopDataList = new List<ShopData>();
+            var skippedCount = 0;
+
+            for (var i = 1; i < lines.Length; i++)
+            {
+                var line = lines[i].Trim();
+                if (string.IsNullOrEmpty(line))
+                {
+                    continue;
+                }
+
+                var columns = line.Split(',');
+                if (columns.Length < 5)
+                {
+                    GameLogger.LogError($"[CsvSheetImporter] Invalid ShopData row {i}: insufficient columns");
+                    skippedCount++;
+                    continue;
+                }
+
+                if (!System.Enum.TryParse<ShopProductType>(columns[1], out var productType))
+                {
+                    GameLogger.LogError($"[CsvSheetImporter] Invalid ShopProductType '{columns[1]}' at row {i}");
+                    skippedCount++;
+                    continue;
+                }
+
+                var data = new ShopData
+                {
+                    id = columns[0],
+                    productType = productType,
+                    targetId = columns[2],
+                    price = int.Parse(columns[3]),
+                    displayOrder = int.Parse(columns[4])
+                };
+
+                shopDataList.Add(data);
+            }
+
+            var table = AssetDatabase.LoadAssetAtPath<ShopTableSO>(ShopTablePath);
+            if (table == null)
+            {
+                table = ScriptableObject.CreateInstance<ShopTableSO>();
+                AssetDatabase.CreateAsset(table, ShopTablePath);
+            }
+
+            table.ShopDataList = shopDataList;
+            EditorUtility.SetDirty(table);
+
+            GameLogger.Log($"[CsvSheetImporter] ShopData imported: {shopDataList.Count} entries ({skippedCount} skipped)");
             return 1;
         }
     }

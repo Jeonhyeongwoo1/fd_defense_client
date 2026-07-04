@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: defaf2fb529f049f593ff6da7f2d3030, type: 3}
+  m_Name: EnemyTable
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Data.EnemyTableSO
+  EnemyDataList:
+  - id: enemy_slime_green
+    unitName: Slime_Green
+    hp: 80
+    attackPower: 15
+    attackInterval: 1.2
+    attackRange: 0.5
+    moveSpeed: 1
+    prefab: {fileID: 3453363338725102790, guid: e9bc82c66a2b2844f8d8d112c3b7afc4, type: 3}
+  - id: enemy_snail_blue
+    unitName: Snail_Blue
+    hp: 250
+    attackPower: 25
+    attackInterval: 1.8
+    attackRange: 0.5
+    moveSpeed: 0.6
+    prefab: {fileID: 4026474863858924207, guid: 46bb1660f70c7144c869cfff97de27f7, type: 3}

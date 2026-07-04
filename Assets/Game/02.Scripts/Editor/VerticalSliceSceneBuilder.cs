@@ -76,7 +76,7 @@ namespace Game.Editor
 
             var camera = cameraObject.AddComponent<Camera>();
             camera.orthographic = true;
-            camera.orthographicSize = 5f;
+            camera.orthographicSize = 8f;
             camera.backgroundColor = new Color(0.53f, 0.81f, 0.92f);
             camera.clearFlags = CameraClearFlags.SolidColor;
             cameraObject.transform.position = new Vector3(0f, 1f, -10f);

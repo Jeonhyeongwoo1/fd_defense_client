@@ -30,8 +30,8 @@ namespace Game.Editor
         private const string IconPausePath = KitRoot + "Shared/Icons/PictoIcon/128/pause_round.png";
         private const string PetIconRoot = "Assets/Layer Lab/2D Characters-PetPack1/Sprites/ImageSequence/";
 
-        private static readonly string[] PetNames = { "Chick", "Pug", "Bat", "Ghost", "Titan" };
-        private static readonly string[] UnitIds = { "pet_chick", "pet_pug", "pet_bat", "pet_ghost", "pet_titan" };
+        private static readonly string[] PetNames = { "Goldfish", "Chick", "Bat", "Bomb", "Flower", "Pug", "Ghost", "Melody", "Sword", "Titan" };
+        private static readonly string[] UnitIds = { "pet_goldfish", "pet_chick", "pet_bat", "pet_bomb", "pet_flower", "pet_pug", "pet_ghost", "pet_melody", "pet_sword", "pet_titan" };
         private static readonly string[] StageIds = { "stage_001", "stage_002", "stage_003" };
 
         public static void BuildAllUiPrefabs()
@@ -408,11 +408,19 @@ namespace Game.Editor
         private static UI_UnitSpawnButtonView[] CreateUnitButtons(RectTransform parent, TMP_FontAsset font)
         {
             var buttons = new UI_UnitSpawnButtonView[UnitIds.Length];
-            var xPositions = new[] { -300f, -150f, 0f, 150f, 300f };
+            const int columnCount = 5;
+            const float spacing = 135f;
+            const float rowHeight = 135f;
+            const float bottomRowY = 90f;
 
             for (var i = 0; i < UnitIds.Length; i++)
             {
-                buttons[i] = CreateUnitButton(parent, new Vector2(xPositions[i], 90), UnitIds[i], PetNames[i], font);
+                var column = i % columnCount;
+                var row = i / columnCount;
+                var x = (column - (columnCount - 1) * 0.5f) * spacing;
+                // 코스트 오름차순 앞 5개가 아랫줄(빠른 접근), 다음 5개가 윗줄
+                var y = bottomRowY + row * rowHeight;
+                buttons[i] = CreateUnitButton(parent, new Vector2(x, y), UnitIds[i], PetNames[i], font);
             }
 
             return buttons;

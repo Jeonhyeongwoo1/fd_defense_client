@@ -24,25 +24,102 @@ MonoBehaviour:
     skillInterval: 10
     skillRange: 3.5
     prefab: {fileID: 6915058908406794251, guid: 473a64f44085042baa40715095c02d07, type: 3}
+  - id: boss_s1_101
+    unitName: Boss_S1_101
+    hp: 3900
+    attackPower: 138
+    attackInterval: 2.42
+    attackRange: 1
+    moveSpeed: 0.55
+    skillDamage: 68
+    skillInterval: 9.6
+    skillRange: 3.6
+    prefab: {fileID: 1420826349175408868, guid: 1f857d3d7d7824f069f4bbab6800334a, type: 3}
   - id: boss_s1_102
     unitName: Boss_S1_102
-    hp: 4500
-    attackPower: 150
-    attackInterval: 2.2
+    hp: 4800
+    attackPower: 156
+    attackInterval: 2.34
+    attackRange: 1
+    moveSpeed: 0.6
+    skillDamage: 76
+    skillInterval: 9.2
+    skillRange: 3.7
+    prefab: {fileID: 8985766304052092308, guid: c5d4554dc86554b498e1823c20c8936b, type: 3}
+  - id: boss_s1_103
+    unitName: Boss_S1_103
+    hp: 5700
+    attackPower: 174
+    attackInterval: 2.26
     attackRange: 1
     moveSpeed: 0.5
-    skillDamage: 70
-    skillInterval: 9
-    skillRange: 3.5
-    prefab: {fileID: 8985766304052092308, guid: c5d4554dc86554b498e1823c20c8936b, type: 3}
-  - id: boss_s2_104
-    unitName: Boss_S2_104
-    hp: 6000
-    attackPower: 180
-    attackInterval: 2
+    skillDamage: 84
+    skillInterval: 8.8
+    skillRange: 3.8
+    prefab: {fileID: 7727376502616182543, guid: 446c7dc5cdd5d4b649da5f1c376ded39, type: 3}
+  - id: boss_s1_104
+    unitName: Boss_S1_104
+    hp: 6600
+    attackPower: 192
+    attackInterval: 2.18
+    attackRange: 1
+    moveSpeed: 0.55
+    skillDamage: 92
+    skillInterval: 8.4
+    skillRange: 3.9
+    prefab: {fileID: 117261811893760072, guid: 912ed32a2c6414aa784a5ec9b6726c27, type: 3}
+  - id: boss_s2_100
+    unitName: Boss_S2_100
+    hp: 7500
+    attackPower: 210
+    attackInterval: 2.1
     attackRange: 1.1
     moveSpeed: 0.6
-    skillDamage: 80
+    skillDamage: 100
     skillInterval: 8
     skillRange: 4
+    prefab: {fileID: 1819502249797108489, guid: 9ec876a7ec2ca4c30b2d77a665ab559a, type: 3}
+  - id: boss_s2_101
+    unitName: Boss_S2_101
+    hp: 8400
+    attackPower: 228
+    attackInterval: 2.02
+    attackRange: 1.1
+    moveSpeed: 0.5
+    skillDamage: 108
+    skillInterval: 7.6
+    skillRange: 4.1
+    prefab: {fileID: 8222811317467809080, guid: cb8f306d082b44f29ac5eea56b539d88, type: 3}
+  - id: boss_s2_102
+    unitName: Boss_S2_102
+    hp: 9300
+    attackPower: 246
+    attackInterval: 1.94
+    attackRange: 1.1
+    moveSpeed: 0.55
+    skillDamage: 116
+    skillInterval: 7.2
+    skillRange: 4.2
+    prefab: {fileID: 3382119650689886350, guid: d11d54915ab0d4aa698d7be45c0c954e, type: 3}
+  - id: boss_s2_103
+    unitName: Boss_S2_103
+    hp: 10200
+    attackPower: 264
+    attackInterval: 1.86
+    attackRange: 1.1
+    moveSpeed: 0.6
+    skillDamage: 124
+    skillInterval: 6.8
+    skillRange: 4.3
+    prefab: {fileID: 8545537023476343288, guid: c11cb9e43246b4d9ea984061dc0578ae, type: 3}
+  - id: boss_s2_104
+    unitName: Boss_S2_104
+    hp: 11100
+    attackPower: 282
+    attackInterval: 1.78
+    attackRange: 1.1
+    moveSpeed: 0.5
+    skillDamage: 132
+    skillInterval: 6.4
+    skillRange: 4.4
     prefab: {fileID: 1366691325256101563, guid: 30b803b984dfc4382838610eea20fbb2, type: 3}

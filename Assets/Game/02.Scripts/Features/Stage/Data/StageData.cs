@@ -16,5 +16,6 @@ namespace Game.Data
         public string bossId;
         public string mapId;
         public int goldReward;
+        public float enemyStatMultiplier;
     }
 }

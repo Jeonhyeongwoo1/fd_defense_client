@@ -10,11 +10,13 @@ namespace Game.Service
 
         private readonly UpgradeTableSO _upgradeTable;
         private readonly GoldService _goldService;
+        private readonly EventBus _eventBus;
 
-        public UpgradeService(UpgradeTableSO upgradeTable, GoldService goldService)
+        public UpgradeService(UpgradeTableSO upgradeTable, GoldService goldService, EventBus eventBus)
         {
             _upgradeTable = upgradeTable;
             _goldService = goldService;
+            _eventBus = eventBus;
         }
 
         public int GetLevel(string unitId)
@@ -65,6 +67,8 @@ namespace Game.Service
             var key = UnitLevelPrefix + unitId;
             PlayerPrefs.SetInt(key, newLevel);
             PlayerPrefs.Save();
+
+            _eventBus.Publish(new UnitUpgradedEvent { UnitId = unitId });
 
             GameLogger.Log($"[UpgradeService] {unitId} upgraded to level {newLevel}");
             return true;

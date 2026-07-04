@@ -116,6 +116,21 @@ namespace Game.Editor
             return instance;
         }
 
+
+        private static Button EnsureButtonComponent(GameObject buttonInstance)
+        {
+            var button = buttonInstance.GetComponent<Button>();
+
+            if (button == null)
+            {
+                // GUI Pro 킷 버튼 프리팹은 순수 이미지 프레임이라 Button 컴포넌트를 사용처에서 부착해야 한다
+                button = buttonInstance.AddComponent<Button>();
+                button.targetGraphic = buttonInstance.GetComponentInChildren<Image>();
+            }
+
+            return button;
+        }
+
         private static GameObject FindTitlePrefab(string keyword)
         {
             var titleGuids = AssetDatabase.FindAssets("t:Prefab", new[] { KitRoot + "Theme_Light/Prefabs/Prefabs_Title" });
@@ -348,13 +363,7 @@ namespace Game.Editor
             buttonRect.anchoredPosition = position;
             buttonRect.sizeDelta = new Vector2(130, 130);
 
-            var button = buttonInstance.GetComponent<Button>();
-
-            if (button == null)
-            {
-                GameLogger.LogError($"[UIPrefabBuilder] Button component not found on {ButtonCirclePath}");
-                return null;
-            }
+            var button = EnsureButtonComponent(buttonInstance);
 
             // 펫 팩은 Idle 프레임만 zero-padding(_00)을 사용한다 (Attack은 _0)
             var unitIconSprite = LoadSprite($"{PetIconRoot}{petName}/Idle/{petName}-Idle_00.png");
@@ -513,13 +522,7 @@ namespace Game.Editor
             buttonRect.anchoredPosition = position;
             buttonRect.sizeDelta = new Vector2(240, 90);
 
-            var button = buttonInstance.GetComponent<Button>();
-
-            if (button == null)
-            {
-                GameLogger.LogError($"[UIPrefabBuilder] Button component not found on {buttonPrefabPath}");
-                return null;
-            }
+            var button = EnsureButtonComponent(buttonInstance);
 
             var labelTMP = buttonInstance.GetComponentInChildren<TMP_Text>();
 
@@ -663,13 +666,7 @@ namespace Game.Editor
             buttonRect.anchoredPosition = position;
             buttonRect.sizeDelta = new Vector2(520, 150);
 
-            var button = buttonInstance.GetComponent<Button>();
-
-            if (button == null)
-            {
-                GameLogger.LogError($"[UIPrefabBuilder] Button component not found on {buttonPrefabPath}");
-                return null;
-            }
+            var button = EnsureButtonComponent(buttonInstance);
 
             var stageNameTMP = buttonInstance.GetComponentInChildren<TMP_Text>();
 

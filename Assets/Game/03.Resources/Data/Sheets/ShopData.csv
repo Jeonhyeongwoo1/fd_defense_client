@@ -1,0 +1,6 @@
+id,productType,targetId,price,displayOrder
+shop_unlock_melody,UnitUnlock,pet_melody,2000,1
+shop_unlock_sword,UnitUnlock,pet_sword,3000,2
+shop_unlock_pumpkin,UnitUnlock,pet_pumpkin,5000,3
+shop_unlock_blackhole,UnitUnlock,pet_blackhole,7000,4
+shop_unlock_titan,UnitUnlock,pet_titan,10000,5

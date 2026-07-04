@@ -1,34 +1,32 @@
 using Game.Core;
 using Game.Data;
-using UnityEngine;
 
 namespace Game.Service
 {
     public class MissionService
     {
-        private const string MissionCountPrefix = "MissionCount_";
-        private const string MissionClaimedPrefix = "MissionClaimed_";
-
         private readonly GoldService _goldService;
+        private readonly UserDataService _userDataService;
 
-        public MissionService(GoldService goldService)
+        public MissionService(GoldService goldService, UserDataService userDataService)
         {
             _goldService = goldService;
+            _userDataService = userDataService;
         }
 
         public void AddProgress(MissionType type, int amount = 1)
         {
-            var key = MissionCountPrefix + type.ToString();
-            var currentCount = PlayerPrefs.GetInt(key, 0);
+            var missionType = type.ToString();
+            var currentCount = _userDataService.GetMissionCount(missionType);
             var newCount = currentCount + amount;
-            PlayerPrefs.SetInt(key, newCount);
-            PlayerPrefs.Save();
+            _userDataService.SetMissionCount(missionType, newCount);
+            _userDataService.Save();
         }
 
         public int GetProgress(MissionType type)
         {
-            var key = MissionCountPrefix + type.ToString();
-            return PlayerPrefs.GetInt(key, 0);
+            var missionType = type.ToString();
+            return _userDataService.GetMissionCount(missionType);
         }
 
         public bool IsCompleted(MissionData data)
@@ -39,8 +37,7 @@ namespace Game.Service
 
         public bool IsClaimed(string missionId)
         {
-            var key = MissionClaimedPrefix + missionId;
-            return PlayerPrefs.GetInt(key, 0) == 1;
+            return _userDataService.IsMissionClaimed(missionId);
         }
 
         public bool TryClaim(string missionId, MissionData data)
@@ -59,9 +56,8 @@ namespace Game.Service
 
             _goldService.Add(data.goldReward);
 
-            var key = MissionClaimedPrefix + missionId;
-            PlayerPrefs.SetInt(key, 1);
-            PlayerPrefs.Save();
+            _userDataService.MarkMissionClaimed(missionId);
+            _userDataService.Save();
 
             GameLogger.Log($"[MissionService] Mission {missionId} claimed: {data.goldReward} gold");
             return true;

@@ -28,6 +28,7 @@ namespace Game.App
             builder.Register<EventBus>(Lifetime.Scoped);
             builder.Register<PoolManager>(Lifetime.Scoped);
             builder.Register<ResourceService>(Lifetime.Scoped);
+            builder.Register<UserDataService>(Lifetime.Scoped);
             builder.Register<StageProgressService>(Lifetime.Scoped);
             builder.Register<SceneLoadService>(Lifetime.Scoped);
 

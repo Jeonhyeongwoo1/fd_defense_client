@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Game.Core;
 using Game.GameState;
+using Game.Model;
 using UniRx;
 using UnityEngine;
 using VContainer.Unity;
@@ -13,14 +14,22 @@ namespace Game.Service
 
         private readonly ReactiveProperty<GameStateType> _currentStateType = new();
         private readonly Dictionary<GameStateType, BaseGameState> _stateDict = new();
+        private readonly BaseService _baseService;
+        private readonly GameResultModel _resultModel;
         private BaseGameState _currentState;
+
+        public GameFlowService(BaseService baseService, GameResultModel resultModel)
+        {
+            _baseService = baseService;
+            _resultModel = resultModel;
+        }
 
         public void Start()
         {
             _stateDict[GameStateType.Ready] = new ReadyState(ChangeState);
-            _stateDict[GameStateType.WavePlaying] = new WavePlayingState(ChangeState);
+            _stateDict[GameStateType.WavePlaying] = new WavePlayingState(ChangeState, _baseService, _resultModel);
             _stateDict[GameStateType.WaveCleared] = new WaveClearedState(ChangeState);
-            _stateDict[GameStateType.Result] = new ResultState(ChangeState);
+            _stateDict[GameStateType.Result] = new ResultState(ChangeState, _resultModel);
 
             ChangeState(GameStateType.Ready);
         }

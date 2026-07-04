@@ -15,6 +15,8 @@ namespace Game.Service
         private readonly GameStateModel _gameStateModel;
         private readonly PoolManager _poolManager;
         private readonly ProjectileService _projectileService;
+        private readonly EffectService _effectService;
+        private readonly BossSkillService _bossSkillService;
         private readonly List<UnitEntry> _allySnapshotList = new();
         private readonly List<UnitEntry> _enemySnapshotList = new();
 
@@ -23,15 +25,20 @@ namespace Game.Service
             BaseService baseService,
             GameStateModel gameStateModel,
             PoolManager poolManager,
-            ProjectileService projectileService)
+            ProjectileService projectileService,
+            EffectService effectService,
+            BossSkillService bossSkillService)
         {
             _unitRegistry = unitRegistry;
             _baseService = baseService;
             _gameStateModel = gameStateModel;
             _poolManager = poolManager;
             _projectileService = projectileService;
+            _effectService = effectService;
+            _bossSkillService = bossSkillService;
 
             _projectileService.OnTargetKilled = HandleDeath;
+            _bossSkillService.OnTargetKilled = HandleDeath;
         }
 
         public void Tick()
@@ -136,6 +143,7 @@ namespace Game.Service
                 else
                 {
                     target.Model.CurrentHp -= attacker.Model.AttackPower;
+                    _effectService.PlayHitEffect(target.View.transform.position);
                 }
 
                 attacker.View.PlayAttack();
@@ -178,17 +186,32 @@ namespace Game.Service
             }
 
             entry.View.PlayDead();
+
+            if (entry.Model.IsBoss)
+            {
+                _effectService.PlayBossDeathEffect(entry.View.transform.position);
+            }
+            else
+            {
+                _effectService.PlayDeathEffect(entry.View.transform.position);
+            }
+
             ReleaseAfterDelayAsync(entry).Forget();
         }
 
         private async UniTaskVoid ReleaseAfterDelayAsync(UnitEntry entry)
         {
+            // Capture generation before delay — prevents double-release if Result cleanup already returned this view or pool recycled it
+            var generation = entry.View.SpawnGeneration;
+
             await UniTask.Delay((int)(Const.UnitDeathDelaySeconds * 1000));
 
-            if (entry.View != null)
+            if (entry.View == null || entry.View.SpawnGeneration != generation)
             {
-                _poolManager.Release(entry.View.gameObject);
+                return;
             }
+
+            _poolManager.Release(entry.View.gameObject);
         }
     }
 }

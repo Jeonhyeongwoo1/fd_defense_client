@@ -10,6 +10,7 @@ namespace Game.Core
         public const float UnitDeathDelaySeconds = 0.8f;
         public const float ProjectileDespawnX = 12f;
         public const float UnitSpawnOffsetX = 1f;
+        public const float EffectLifetimeSeconds = 1.5f;
         public const string DefaultStageId = "stage_001";
     }
 }

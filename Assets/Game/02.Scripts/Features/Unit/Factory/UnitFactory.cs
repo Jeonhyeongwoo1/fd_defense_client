@@ -17,6 +17,31 @@ namespace Game.Service
             _unitRegistry = unitRegistry;
         }
 
+        public UnitEntry SpawnBoss(BossData data, Vector3 position)
+        {
+            var instance = _poolManager.Get(data.prefab, position, Quaternion.identity);
+
+            var view = instance.GetComponent<UnitView>();
+            if (view == null)
+            {
+                view = instance.AddComponent<UnitView>();
+            }
+
+            var model = new UnitModel(data, UnitSide.Enemy);
+
+            var entry = new UnitEntry
+            {
+                Model = model,
+                View = view
+            };
+
+            view.Initialize(UnitSide.Enemy);
+            _unitRegistry.Register(entry);
+            view.PlayWalk();
+
+            return entry;
+        }
+
         public UnitEntry SpawnAlly(UnitData data, Vector3 position)
         {
             var instance = _poolManager.Get(data.prefab, position, Quaternion.identity);

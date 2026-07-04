@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a24f96c4c6dca488fb8c35ac4bf78b3c, type: 3}
+  m_Name: EffectConfig
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Data.EffectConfigSO
+  hitEffectPrefab: {fileID: 1148272302963948007, guid: 0b66d375aedf61046bfea8c0a2c57975, type: 3}
+  deathEffectPrefab: {fileID: 5003057537259632177, guid: 4fdd0cea9eb05c346915ed0c08c43d54, type: 3}
+  bossSkillEffectPrefab: {fileID: 9011013547866541684, guid: 96f48d323ab6af24e9ba1d03b81dac81, type: 3}
+  bossDeathEffectPrefab: {fileID: 5220071264055085988, guid: c93dc48481d669a4ba63a532f130505d, type: 3}

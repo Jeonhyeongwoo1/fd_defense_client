@@ -17,8 +17,10 @@ namespace Game.Editor
     {
         private const string UnitTablePath = "Assets/Game/03.Resources/Data/UnitTable.asset";
         private const string EnemyTablePath = "Assets/Game/03.Resources/Data/EnemyTable.asset";
+        private const string BossTablePath = "Assets/Game/03.Resources/Data/BossTable.asset";
         private const string StageTablePath = "Assets/Game/03.Resources/Data/StageTable.asset";
         private const string WaveTablePath = "Assets/Game/03.Resources/Data/WaveTable.asset";
+        private const string EffectConfigPath = "Assets/Game/03.Resources/Data/EffectConfig.asset";
         private const string ScenePath = "Assets/Game/01.Scene/GameScene.unity";
 
         public static void BuildGameScene()
@@ -52,6 +54,18 @@ namespace Game.Editor
             {
                 GameLogger.LogWarning($"[VerticalSliceSceneBuilder] UnitTable not found. Importing sheets...");
                 CsvSheetImporter.ImportAllSheets();
+            }
+
+            if (!AssetDatabase.AssetPathExists(BossTablePath))
+            {
+                GameLogger.LogWarning($"[VerticalSliceSceneBuilder] BossTable not found. Importing sheets...");
+                CsvSheetImporter.ImportAllSheets();
+            }
+
+            if (!AssetDatabase.AssetPathExists(EffectConfigPath))
+            {
+                GameLogger.LogWarning($"[VerticalSliceSceneBuilder] EffectConfig not found. Creating...");
+                EffectConfigBuilder.CreateEffectConfig();
             }
         }
 
@@ -149,17 +163,21 @@ namespace Game.Editor
 
             var unitTable = AssetDatabase.LoadAssetAtPath<UnitTableSO>(UnitTablePath);
             var enemyTable = AssetDatabase.LoadAssetAtPath<EnemyTableSO>(EnemyTablePath);
+            var bossTable = AssetDatabase.LoadAssetAtPath<BossTableSO>(BossTablePath);
             var stageTable = AssetDatabase.LoadAssetAtPath<StageTableSO>(StageTablePath);
             var waveTable = AssetDatabase.LoadAssetAtPath<WaveTableSO>(WaveTablePath);
+            var effectConfig = AssetDatabase.LoadAssetAtPath<EffectConfigSO>(EffectConfigPath);
 
             var serializedObject = new SerializedObject(lifetimeScope);
             serializedObject.FindProperty("unitTable").objectReferenceValue = unitTable;
             serializedObject.FindProperty("enemyTable").objectReferenceValue = enemyTable;
+            serializedObject.FindProperty("bossTable").objectReferenceValue = bossTable;
             serializedObject.FindProperty("stageTable").objectReferenceValue = stageTable;
             serializedObject.FindProperty("waveTable").objectReferenceValue = waveTable;
+            serializedObject.FindProperty("effectConfig").objectReferenceValue = effectConfig;
             serializedObject.ApplyModifiedProperties();
 
-            if (unitTable == null || enemyTable == null || stageTable == null || waveTable == null)
+            if (unitTable == null || enemyTable == null || bossTable == null || stageTable == null || waveTable == null || effectConfig == null)
             {
                 GameLogger.LogError("[VerticalSliceSceneBuilder] Failed to assign one or more SO tables to LifetimeScope.");
             }

@@ -14,8 +14,10 @@ namespace Game.App
     {
         [SerializeField] private UnitTableSO unitTable;
         [SerializeField] private EnemyTableSO enemyTable;
+        [SerializeField] private BossTableSO bossTable;
         [SerializeField] private StageTableSO stageTable;
         [SerializeField] private WaveTableSO waveTable;
+        [SerializeField] private EffectConfigSO effectConfig;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -25,8 +27,10 @@ namespace Game.App
 
             builder.RegisterInstance(unitTable);
             builder.RegisterInstance(enemyTable);
+            builder.RegisterInstance(bossTable);
             builder.RegisterInstance(stageTable);
             builder.RegisterInstance(waveTable);
+            builder.RegisterInstance(effectConfig);
 
             builder.Register<UnitRegistry>(Lifetime.Scoped);
             builder.Register<UnitFactory>(Lifetime.Scoped);
@@ -35,6 +39,7 @@ namespace Game.App
             builder.Register<GameStateModel>(Lifetime.Scoped);
             builder.Register<WalletModel>(Lifetime.Scoped);
             builder.Register<BaseService>(Lifetime.Scoped);
+            builder.Register<EffectService>(Lifetime.Scoped);
 
             builder.RegisterComponentInHierarchy<UI_GameHudView>();
 
@@ -42,6 +47,7 @@ namespace Game.App
             builder.RegisterEntryPoint<WalletService>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<WaveProgressService>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<ProjectileService>(Lifetime.Scoped).AsSelf();
+            builder.RegisterEntryPoint<BossSkillService>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<UnitBattleService>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<GameFlowService>(Lifetime.Scoped);
             builder.RegisterEntryPoint<GameHudPresenter>(Lifetime.Scoped);

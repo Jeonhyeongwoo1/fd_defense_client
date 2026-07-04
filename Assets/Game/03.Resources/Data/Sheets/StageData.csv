@@ -1,2 +1,2 @@
-id,allyBaseHp,enemyBaseHp,startMoney,moneyPerSecond,waveIds,waveIntervalSeconds
-stage_001,1000,1000,100,20,wave_001;wave_002;wave_003;wave_004;wave_005,5.0
+id,allyBaseHp,enemyBaseHp,startMoney,moneyPerSecond,waveIds,waveIntervalSeconds,bossId
+stage_001,1000,1000,100,20,wave_001;wave_002;wave_003;wave_004;wave_005,5.0,boss_s1_100

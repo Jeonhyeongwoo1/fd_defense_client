@@ -26,7 +26,7 @@ namespace Game.GameState
 
         public override void Enter()
         {
-            _waveProgressService.StartWave(_waveProgressService.CurrentWaveIndex.Value + 1);
+            _waveProgressService.StartNextPhase();
             GameLogger.Log("[WavePlayingState] Entered");
         }
 
@@ -48,6 +48,10 @@ namespace Game.GameState
 
             if (_waveProgressService.IsCurrentWaveCleared)
             {
+                if (_waveProgressService.IsBossWave.Value)
+                {
+                    _waveProgressService.MarkBossWaveCleared();
+                }
                 RequestStateChange(GameStateType.WaveCleared);
             }
         }

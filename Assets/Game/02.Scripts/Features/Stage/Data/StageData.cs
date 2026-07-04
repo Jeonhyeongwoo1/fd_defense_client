@@ -11,13 +11,7 @@ namespace Game.Data
         public int enemyBaseHp;
         public int startMoney;
         public float moneyPerSecond;
-        public List<SpawnEntry> SpawnEntryList = new();
-    }
-
-    [Serializable]
-    public class SpawnEntry
-    {
-        public string enemyId;
-        public float interval;
+        public List<string> WaveIdList = new();
+        public float waveIntervalSeconds;
     }
 }

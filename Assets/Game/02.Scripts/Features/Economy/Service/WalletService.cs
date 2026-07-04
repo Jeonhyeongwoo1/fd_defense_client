@@ -8,15 +8,15 @@ namespace Game.Service
     public class WalletService : ITickable
     {
         private readonly WalletModel _walletModel;
-        private readonly GameFlowService _gameFlowService;
+        private readonly GameStateModel _gameStateModel;
 
         private float _moneyPerSecond;
         private float _fractionalMoney;
 
-        public WalletService(WalletModel walletModel, GameFlowService gameFlowService)
+        public WalletService(WalletModel walletModel, GameStateModel gameStateModel)
         {
             _walletModel = walletModel;
-            _gameFlowService = gameFlowService;
+            _gameStateModel = gameStateModel;
         }
 
         public void Initialize(int startMoney, float ratePerSecond)
@@ -28,7 +28,7 @@ namespace Game.Service
 
         public void Tick()
         {
-            if (_gameFlowService.CurrentStateType.Value != GameStateType.WavePlaying)
+            if (_gameStateModel.CurrentStateType.Value != GameStateType.WavePlaying)
             {
                 return;
             }

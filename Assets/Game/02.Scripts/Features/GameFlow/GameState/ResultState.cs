@@ -9,16 +9,21 @@ namespace Game.GameState
         public override GameStateType StateType => GameStateType.Result;
 
         private readonly GameResultModel _resultModel;
+        private readonly Action _onEnterCleanup;
 
         public ResultState(
             Action<GameStateType> requestStateChange,
-            GameResultModel resultModel) : base(requestStateChange)
+            GameResultModel resultModel,
+            Action onEnterCleanup) : base(requestStateChange)
         {
             _resultModel = resultModel;
+            _onEnterCleanup = onEnterCleanup;
         }
 
         public override void Enter()
         {
+            _onEnterCleanup.Invoke();
+
             if (_resultModel.Winner == null)
             {
                 GameLogger.LogWarning("[ResultState] Winner is null");

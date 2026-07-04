@@ -44,7 +44,7 @@ namespace Game.Service
                 return false;
             }
 
-            var position = new Vector3(Const.AllyBaseX + 1f, Const.GroundY, 0);
+            var position = new Vector3(Const.AllyBaseX + Const.UnitSpawnOffsetX, Const.GroundY, 0);
             _unitFactory.SpawnAlly(data, position);
 
             _nextSpawnTimeDict[unitId] = Time.time + data.cooldown;

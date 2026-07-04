@@ -1,5 +1,7 @@
 using System;
 using Game.Core;
+using Game.Model;
+using Game.Service;
 
 namespace Game.GameState
 {
@@ -7,35 +9,41 @@ namespace Game.GameState
     {
         public override GameStateType StateType => GameStateType.WaveCleared;
 
-        private const float TransitionDelay = 1.0f;
-        private const int MaxWaves = 3;
+        private readonly WaveProgressService _waveProgressService;
+        private readonly StageService _stageService;
+        private readonly GameResultModel _resultModel;
         private float _elapsedTime;
-        private int _clearedWaveCount;
 
-        public WaveClearedState(Action<GameStateType> requestStateChange) : base(requestStateChange)
+        public WaveClearedState(
+            Action<GameStateType> requestStateChange,
+            WaveProgressService waveProgressService,
+            StageService stageService,
+            GameResultModel resultModel) : base(requestStateChange)
         {
+            _waveProgressService = waveProgressService;
+            _stageService = stageService;
+            _resultModel = resultModel;
         }
 
         public override void Enter()
         {
-            _clearedWaveCount++;
-            GameLogger.Log($"[WaveClearedState] Entered - Wave {_clearedWaveCount} cleared");
+            GameLogger.Log($"[WaveClearedState] Wave {_waveProgressService.CurrentWaveIndex.Value + 1} cleared");
             _elapsedTime = 0f;
         }
 
         public override void Tick(float deltaTime)
         {
-            // Phase 3: Replace with actual next-wave or result condition
             _elapsedTime += deltaTime;
 
-            if (_elapsedTime >= TransitionDelay)
+            if (_elapsedTime >= _stageService.CurrentStage.waveIntervalSeconds)
             {
-                if (_clearedWaveCount < MaxWaves)
+                if (_waveProgressService.HasNextWave)
                 {
-                    RequestStateChange(GameStateType.Ready);
+                    RequestStateChange(GameStateType.WavePlaying);
                 }
                 else
                 {
+                    _resultModel.SetWinner(UnitSide.Ally);
                     RequestStateChange(GameStateType.Result);
                 }
             }

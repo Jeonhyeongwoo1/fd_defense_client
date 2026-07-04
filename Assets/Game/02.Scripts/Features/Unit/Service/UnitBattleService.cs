@@ -12,26 +12,31 @@ namespace Game.Service
     {
         private readonly UnitRegistry _unitRegistry;
         private readonly BaseService _baseService;
-        private readonly GameFlowService _gameFlowService;
+        private readonly GameStateModel _gameStateModel;
         private readonly PoolManager _poolManager;
+        private readonly ProjectileService _projectileService;
         private readonly List<UnitEntry> _allySnapshotList = new();
         private readonly List<UnitEntry> _enemySnapshotList = new();
 
         public UnitBattleService(
             UnitRegistry unitRegistry,
             BaseService baseService,
-            GameFlowService gameFlowService,
-            PoolManager poolManager)
+            GameStateModel gameStateModel,
+            PoolManager poolManager,
+            ProjectileService projectileService)
         {
             _unitRegistry = unitRegistry;
             _baseService = baseService;
-            _gameFlowService = gameFlowService;
+            _gameStateModel = gameStateModel;
             _poolManager = poolManager;
+            _projectileService = projectileService;
+
+            _projectileService.OnTargetKilled = HandleDeath;
         }
 
         public void Tick()
         {
-            if (_gameFlowService.CurrentStateType.Value != GameStateType.WavePlaying)
+            if (_gameStateModel.CurrentStateType.Value != GameStateType.WavePlaying)
             {
                 return;
             }
@@ -98,13 +103,41 @@ namespace Game.Service
             }
         }
 
+        public void ReleaseAllUnits()
+        {
+            var allySnapshot = new List<UnitEntry>(_unitRegistry.GetEntryList(UnitSide.Ally));
+            var enemySnapshot = new List<UnitEntry>(_unitRegistry.GetEntryList(UnitSide.Enemy));
+
+            foreach (var entry in allySnapshot)
+            {
+                _unitRegistry.Unregister(entry);
+                _poolManager.Release(entry.View.gameObject);
+            }
+
+            foreach (var entry in enemySnapshot)
+            {
+                _unitRegistry.Unregister(entry);
+                _poolManager.Release(entry.View.gameObject);
+            }
+
+            _projectileService.ReleaseAll();
+        }
+
         private void AttackTarget(UnitEntry attacker, UnitEntry target, float deltaTime)
         {
             attacker.Model.AttackTimer -= deltaTime;
 
             if (attacker.Model.AttackTimer <= 0f)
             {
-                target.Model.CurrentHp -= attacker.Model.AttackPower;
+                if (attacker.Model.IsRanged)
+                {
+                    _projectileService.Fire(attacker, target, attacker.Model.AttackPower, attacker.Model.ProjectileSpeed, attacker.Model.ProjectileSprite);
+                }
+                else
+                {
+                    target.Model.CurrentHp -= attacker.Model.AttackPower;
+                }
+
                 attacker.View.PlayAttack();
                 attacker.Model.AttackTimer = attacker.Model.AttackInterval;
 
@@ -139,7 +172,11 @@ namespace Game.Service
 
         private void HandleDeath(UnitEntry entry)
         {
-            _unitRegistry.Unregister(entry);
+            if (!_unitRegistry.Unregister(entry))
+            {
+                return;
+            }
+
             entry.View.PlayDead();
             ReleaseAfterDelayAsync(entry).Forget();
         }

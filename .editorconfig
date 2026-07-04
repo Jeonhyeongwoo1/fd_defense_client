@@ -1,0 +1,23 @@
+# Unity naming conventions for Rider/ReSharper
+[*.cs]
+# Define naming rules
+dotnet_naming_rule.private_fields_with_underscore.symbols = private_fields
+dotnet_naming_rule.private_fields_with_underscore.style = underscore_prefix
+dotnet_naming_rule.private_fields_with_underscore.severity = suggestion
+
+dotnet_naming_rule.unity_serialized_fields_with_underscore.symbols = unity_serialized_fields
+dotnet_naming_rule.unity_serialized_fields_with_underscore.style = underscore_prefix
+dotnet_naming_rule.unity_serialized_fields_with_underscore.severity = suggestion
+
+# Define symbols
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private, protected
+dotnet_naming_symbols.private_fields.required_modifiers = 
+
+# Specific for Unity serialized fields (Rider extension)
+dotnet_naming_symbols.unity_serialized_fields.applicable_kinds = unity_serialized_field
+dotnet_naming_symbols.unity_serialized_fields.applicable_accessibilities = *
+
+# Rider-specific settings to enforce it
+resharper_unity_serialized_field_naming_rule = _lowerCamelCase
+resharper_private_instance_fields_naming_rule = _lowerCamelCase

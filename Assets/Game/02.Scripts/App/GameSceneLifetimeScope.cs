@@ -24,6 +24,8 @@ namespace Game.App
             builder.Register<EventBus>(Lifetime.Scoped);
             builder.Register<PoolManager>(Lifetime.Scoped);
             builder.Register<ResourceService>(Lifetime.Scoped);
+            builder.Register<StageProgressService>(Lifetime.Scoped);
+            builder.Register<SceneLoadService>(Lifetime.Scoped);
 
             builder.RegisterInstance(unitTable);
             builder.RegisterInstance(enemyTable);
@@ -42,6 +44,7 @@ namespace Game.App
             builder.Register<EffectService>(Lifetime.Scoped);
 
             builder.RegisterComponentInHierarchy<UI_GameHudView>();
+            builder.RegisterComponentInHierarchy<UI_ResultPopupView>();
 
             builder.RegisterEntryPoint<StageService>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<WalletService>(Lifetime.Scoped).AsSelf();
@@ -51,6 +54,7 @@ namespace Game.App
             builder.RegisterEntryPoint<UnitBattleService>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<GameFlowService>(Lifetime.Scoped);
             builder.RegisterEntryPoint<GameHudPresenter>(Lifetime.Scoped);
+            builder.RegisterEntryPoint<ResultPresenter>(Lifetime.Scoped);
         }
     }
 }

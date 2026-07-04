@@ -1,2 +1,4 @@
 id,unitName,hp,attackPower,attackInterval,attackRange,moveSpeed,skillDamage,skillInterval,skillRange,prefabPath
 boss_s1_100,Boss_S1_100,3000,120,2.5,1.0,0.5,60,10.0,3.5,Assets/Game/03.Resources/Units/Bosses/Boss_S1_100/Boss_S1_100.prefab
+boss_s1_102,Boss_S1_102,4500,150,2.2,1.0,0.5,70,9.0,3.5,Assets/Game/03.Resources/Units/Bosses/Boss_S1_102/Boss_S1_102.prefab
+boss_s2_104,Boss_S2_104,6000,180,2.0,1.1,0.6,80,8.0,4.0,Assets/Game/03.Resources/Units/Bosses/Boss_S2_104/Boss_S2_104.prefab

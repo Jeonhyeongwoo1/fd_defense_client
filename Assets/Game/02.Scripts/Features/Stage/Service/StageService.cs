@@ -12,27 +12,36 @@ namespace Game.Service
         private readonly BaseService _baseService;
         private readonly WalletService _walletService;
         private readonly WaveProgressService _waveProgressService;
+        private readonly StageProgressService _stageProgressService;
 
         public StageService(
             StageTableSO stageTable,
             BaseService baseService,
             WalletService walletService,
-            WaveProgressService waveProgressService)
+            WaveProgressService waveProgressService,
+            StageProgressService stageProgressService)
         {
             _stageTable = stageTable;
             _baseService = baseService;
             _walletService = walletService;
             _waveProgressService = waveProgressService;
+            _stageProgressService = stageProgressService;
         }
 
         public void Start()
         {
-            CurrentStage = _stageTable.GetById(Const.DefaultStageId);
+            var selectedStageId = _stageProgressService.GetSelectedStageId();
+            CurrentStage = _stageTable.GetById(selectedStageId);
 
             if (CurrentStage == null)
             {
-                GameLogger.LogError($"[StageService] Stage '{Const.DefaultStageId}' not found");
-                return;
+                GameLogger.LogError($"[StageService] Stage '{selectedStageId}' not found, fallback to default");
+                CurrentStage = _stageTable.GetById(Const.DefaultStageId);
+                if (CurrentStage == null)
+                {
+                    GameLogger.LogError($"[StageService] Default stage '{Const.DefaultStageId}' not found");
+                    return;
+                }
             }
 
             _baseService.Initialize(CurrentStage);
@@ -40,6 +49,18 @@ namespace Game.Service
             _waveProgressService.SetStage(CurrentStage);
 
             GameLogger.Log($"[StageService] Stage loaded: {CurrentStage.id}");
+        }
+
+        public void MarkCurrentStageCleared()
+        {
+            if (CurrentStage == null)
+            {
+                GameLogger.LogWarning("[StageService] MarkCurrentStageCleared called but CurrentStage is null");
+                return;
+            }
+
+            _stageProgressService.MarkStageCleared(CurrentStage.id);
+            GameLogger.Log($"[StageService] Stage cleared: {CurrentStage.id}");
         }
     }
 }

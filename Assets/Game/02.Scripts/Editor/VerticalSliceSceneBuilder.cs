@@ -1,4 +1,3 @@
-using System.Linq;
 using Game.App;
 using Game.Core;
 using Game.Data;
@@ -46,6 +45,8 @@ namespace Game.Editor
             {
                 GameLogger.Log($"[VerticalSliceSceneBuilder] Scene built and saved: {ScenePath}");
             }
+
+            BuildSettingsRegistrar.RegisterScenes();
         }
 
         private static void EnsureDataTables()
@@ -216,6 +217,8 @@ namespace Game.Editor
                 serializedObject.FindProperty("spawnButtons").GetArrayElementAtIndex(i).objectReferenceValue = spawnButtons[i];
             }
             serializedObject.ApplyModifiedProperties();
+
+            CreateResultPopup(canvasObject.transform, tmpFont);
         }
 
         private static TMP_FontAsset FindTMPFont()
@@ -393,6 +396,99 @@ namespace Game.Editor
             serializedObject.ApplyModifiedProperties();
 
             return buttonView;
+        }
+
+        private static void CreateResultPopup(Transform canvasTransform, TMP_FontAsset font)
+        {
+            var resultPopupRoot = new GameObject("ResultPopupRoot");
+            resultPopupRoot.transform.SetParent(canvasTransform, false);
+
+            var rootRectTransform = resultPopupRoot.AddComponent<RectTransform>();
+            rootRectTransform.anchorMin = Vector2.zero;
+            rootRectTransform.anchorMax = Vector2.one;
+            rootRectTransform.offsetMin = Vector2.zero;
+            rootRectTransform.offsetMax = Vector2.zero;
+
+            var backgroundImage = resultPopupRoot.AddComponent<Image>();
+            backgroundImage.color = new Color(0, 0, 0, 0.7f);
+            backgroundImage.raycastTarget = true;
+
+            var panelObject = new GameObject("Panel");
+            panelObject.transform.SetParent(resultPopupRoot.transform, false);
+
+            var panelRectTransform = panelObject.AddComponent<RectTransform>();
+            panelRectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+            panelRectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+            panelRectTransform.pivot = new Vector2(0.5f, 0.5f);
+            panelRectTransform.anchoredPosition = Vector2.zero;
+            panelRectTransform.sizeDelta = new Vector2(700, 450);
+
+            var panelImage = panelObject.AddComponent<Image>();
+            panelImage.color = new Color(0.2f, 0.2f, 0.2f, 1f);
+
+            var resultTextObject = new GameObject("ResultText");
+            resultTextObject.transform.SetParent(panelObject.transform, false);
+
+            var resultTextRectTransform = resultTextObject.AddComponent<RectTransform>();
+            resultTextRectTransform.anchorMin = new Vector2(0.5f, 0.7f);
+            resultTextRectTransform.anchorMax = new Vector2(0.5f, 0.7f);
+            resultTextRectTransform.pivot = new Vector2(0.5f, 0.5f);
+            resultTextRectTransform.anchoredPosition = Vector2.zero;
+            resultTextRectTransform.sizeDelta = new Vector2(600, 150);
+
+            var resultText = resultTextObject.AddComponent<TextMeshProUGUI>();
+            resultText.text = "VICTORY";
+            resultText.fontSize = 80;
+            resultText.alignment = TextAlignmentOptions.Center;
+            resultText.font = font;
+
+            var retryButton = CreateResultButton(panelObject.transform, "RetryButton", new Vector2(-140, 60), "RETRY", font);
+            var stageSelectButton = CreateResultButton(panelObject.transform, "StageSelectButton", new Vector2(140, 60), "STAGES", font);
+
+            var resultPopupView = canvasTransform.gameObject.AddComponent<UI_ResultPopupView>();
+            var serializedObject = new SerializedObject(resultPopupView);
+            serializedObject.FindProperty("root").objectReferenceValue = resultPopupRoot;
+            serializedObject.FindProperty("resultText").objectReferenceValue = resultText;
+            serializedObject.FindProperty("retryButton").objectReferenceValue = retryButton;
+            serializedObject.FindProperty("stageSelectButton").objectReferenceValue = stageSelectButton;
+            serializedObject.ApplyModifiedProperties();
+
+            resultPopupRoot.SetActive(false);
+        }
+
+        private static Button CreateResultButton(Transform parent, string name, Vector2 position, string labelText, TMP_FontAsset font)
+        {
+            var buttonObject = new GameObject(name);
+            buttonObject.transform.SetParent(parent, false);
+
+            var rectTransform = buttonObject.AddComponent<RectTransform>();
+            rectTransform.anchorMin = new Vector2(0.5f, 0);
+            rectTransform.anchorMax = new Vector2(0.5f, 0);
+            rectTransform.pivot = new Vector2(0.5f, 0);
+            rectTransform.anchoredPosition = position;
+            rectTransform.sizeDelta = new Vector2(260, 100);
+
+            var image = buttonObject.AddComponent<Image>();
+            image.color = new Color(0.3f, 0.5f, 0.8f, 1f);
+
+            var button = buttonObject.AddComponent<Button>();
+
+            var labelObject = new GameObject("Label");
+            labelObject.transform.SetParent(buttonObject.transform, false);
+
+            var labelRectTransform = labelObject.AddComponent<RectTransform>();
+            labelRectTransform.anchorMin = Vector2.zero;
+            labelRectTransform.anchorMax = Vector2.one;
+            labelRectTransform.offsetMin = Vector2.zero;
+            labelRectTransform.offsetMax = Vector2.zero;
+
+            var labelTextComponent = labelObject.AddComponent<TextMeshProUGUI>();
+            labelTextComponent.text = labelText;
+            labelTextComponent.fontSize = 40;
+            labelTextComponent.alignment = TextAlignmentOptions.Center;
+            labelTextComponent.font = font;
+
+            return button;
         }
 
         private static void CreateEventSystem()

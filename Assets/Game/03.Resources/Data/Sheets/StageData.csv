@@ -1,2 +1,4 @@
 id,allyBaseHp,enemyBaseHp,startMoney,moneyPerSecond,waveIds,waveIntervalSeconds,bossId
 stage_001,1000,1000,100,20,wave_001;wave_002;wave_003;wave_004;wave_005,5.0,boss_s1_100
+stage_002,1200,1200,120,22,wave_006;wave_007;wave_008;wave_009;wave_010,5.0,boss_s1_102
+stage_003,1500,1500,150,25,wave_011;wave_012;wave_013;wave_014;wave_015,4.0,boss_s2_104

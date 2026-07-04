@@ -24,3 +24,25 @@ MonoBehaviour:
     skillInterval: 10
     skillRange: 3.5
     prefab: {fileID: 6915058908406794251, guid: 473a64f44085042baa40715095c02d07, type: 3}
+  - id: boss_s1_102
+    unitName: Boss_S1_102
+    hp: 4500
+    attackPower: 150
+    attackInterval: 2.2
+    attackRange: 1
+    moveSpeed: 0.5
+    skillDamage: 70
+    skillInterval: 9
+    skillRange: 3.5
+    prefab: {fileID: 8985766304052092308, guid: c5d4554dc86554b498e1823c20c8936b, type: 3}
+  - id: boss_s2_104
+    unitName: Boss_S2_104
+    hp: 6000
+    attackPower: 180
+    attackInterval: 2
+    attackRange: 1.1
+    moveSpeed: 0.6
+    skillDamage: 80
+    skillInterval: 8
+    skillRange: 4
+    prefab: {fileID: 1366691325256101563, guid: 30b803b984dfc4382838610eea20fbb2, type: 3}

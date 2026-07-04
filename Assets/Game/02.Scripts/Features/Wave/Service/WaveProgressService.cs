@@ -13,13 +13,28 @@ namespace Game.Service
     public class WaveProgressService : ITickable
     {
         public IReadOnlyReactiveProperty<int> CurrentWaveIndex => _currentWaveIndex;
+        public IReadOnlyReactiveProperty<bool> IsBossWave => _isBossWave;
         public int TotalWaveCount { get; private set; }
         public bool HasNextWave => _currentWaveIndex.Value + 1 < TotalWaveCount;
+        public bool HasBossWave => !string.IsNullOrEmpty(_currentStage?.bossId);
+        public bool IsStageCompleted
+        {
+            get
+            {
+                var allWavesCleared = _currentWaveIndex.Value >= TotalWaveCount - 1 && IsCurrentWaveCleared;
+                if (!HasBossWave)
+                {
+                    return allWavesCleared;
+                }
+                return allWavesCleared && _isBossWaveCleared;
+            }
+        }
+        public bool IsBossWavePending => _isBossWavePending;
         public bool IsCurrentWaveCleared
         {
             get
             {
-                if (_currentWaveData == null)
+                if (_currentWaveData == null && !_isBossWave.Value)
                 {
                     return false;
                 }
@@ -38,8 +53,10 @@ namespace Game.Service
         }
 
         private readonly ReactiveProperty<int> _currentWaveIndex = new(-1);
+        private readonly ReactiveProperty<bool> _isBossWave = new(false);
         private readonly WaveTableSO _waveTable;
         private readonly EnemyTableSO _enemyTable;
+        private readonly BossTableSO _bossTable;
         private readonly UnitFactory _unitFactory;
         private readonly UnitRegistry _unitRegistry;
         private readonly GameStateModel _gameStateModel;
@@ -47,6 +64,8 @@ namespace Game.Service
         private StageData _currentStage;
         private WaveData _currentWaveData;
         private readonly List<EntryState> _entryStateList = new();
+        private bool _isBossWaveCleared;
+        private bool _isBossWavePending;
 
         private class EntryState
         {
@@ -58,12 +77,14 @@ namespace Game.Service
         public WaveProgressService(
             WaveTableSO waveTable,
             EnemyTableSO enemyTable,
+            BossTableSO bossTable,
             UnitFactory unitFactory,
             UnitRegistry unitRegistry,
             GameStateModel gameStateModel)
         {
             _waveTable = waveTable;
             _enemyTable = enemyTable;
+            _bossTable = bossTable;
             _unitFactory = unitFactory;
             _unitRegistry = unitRegistry;
             _gameStateModel = gameStateModel;
@@ -74,6 +95,55 @@ namespace Game.Service
             _currentStage = data;
             TotalWaveCount = data.WaveIdList.Count;
             _currentWaveIndex.Value = -1;
+            _isBossWave.Value = false;
+            _isBossWaveCleared = false;
+            _isBossWavePending = false;
+        }
+
+        public void StartBossWave()
+        {
+            if (string.IsNullOrEmpty(_currentStage?.bossId))
+            {
+                GameLogger.LogError("[WaveProgressService] No boss assigned to current stage.");
+                return;
+            }
+
+            var bossData = _bossTable.GetById(_currentStage.bossId);
+            if (bossData == null)
+            {
+                GameLogger.LogError($"[WaveProgressService] Boss not found: {_currentStage.bossId}");
+                return;
+            }
+
+            var position = new Vector3(Const.EnemyBaseX - Const.UnitSpawnOffsetX, Const.GroundY, 0);
+            _unitFactory.SpawnBoss(bossData, position);
+            _isBossWave.Value = true;
+            _isBossWavePending = false;
+            _entryStateList.Clear();
+
+            GameLogger.Log($"[WaveProgressService] Boss wave started: {_currentStage.bossId}");
+        }
+
+        public void StartNextPhase()
+        {
+            if (_isBossWavePending)
+            {
+                StartBossWave();
+            }
+            else
+            {
+                StartWave(_currentWaveIndex.Value + 1);
+            }
+        }
+
+        public void ScheduleBossWave()
+        {
+            _isBossWavePending = true;
+        }
+
+        public void MarkBossWaveCleared()
+        {
+            _isBossWaveCleared = true;
         }
 
         public void StartWave(int index)

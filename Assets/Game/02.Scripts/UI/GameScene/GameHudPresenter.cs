@@ -46,6 +46,20 @@ namespace Game.Presenter
                 .Subscribe(index => _view.UpdateWave(index + 1, _waveProgressService.TotalWaveCount))
                 .AddTo(_disposables);
 
+            _waveProgressService.IsBossWave
+                .Subscribe(isBoss =>
+                {
+                    if (isBoss)
+                    {
+                        _view.UpdateBossWave();
+                    }
+                    else
+                    {
+                        _view.UpdateWave(_waveProgressService.CurrentWaveIndex.Value + 1, _waveProgressService.TotalWaveCount);
+                    }
+                })
+                .AddTo(_disposables);
+
             var allyBase = _baseService.GetBase(UnitSide.Ally);
             allyBase.CurrentHp
                 .Subscribe(hp => _view.UpdateAllyBaseHp((float)hp / allyBase.MaxHp))

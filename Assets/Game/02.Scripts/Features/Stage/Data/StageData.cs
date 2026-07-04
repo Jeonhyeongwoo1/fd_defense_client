@@ -13,5 +13,6 @@ namespace Game.Data
         public float moneyPerSecond;
         public List<string> WaveIdList = new();
         public float waveIntervalSeconds;
+        public string bossId;
     }
 }

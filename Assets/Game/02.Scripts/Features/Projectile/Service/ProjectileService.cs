@@ -16,6 +16,7 @@ namespace Game.Service
         private readonly PoolManager _poolManager;
         private readonly UnitRegistry _unitRegistry;
         private readonly BaseService _baseService;
+        private readonly EffectService _effectService;
         private readonly List<ProjectileEntry> _activeProjectileList = new();
         private readonly Dictionary<string, GameObject> _templateDict = new();
 
@@ -32,11 +33,13 @@ namespace Game.Service
         public ProjectileService(
             PoolManager poolManager,
             UnitRegistry unitRegistry,
-            BaseService baseService)
+            BaseService baseService,
+            EffectService effectService)
         {
             _poolManager = poolManager;
             _unitRegistry = unitRegistry;
             _baseService = baseService;
+            _effectService = effectService;
         }
 
         public void Fire(UnitEntry shooter, UnitEntry target, int damage, float speed, Sprite sprite)
@@ -82,6 +85,7 @@ namespace Game.Service
                     if (hasPassed)
                     {
                         entry.TargetEntry.Model.CurrentHp -= entry.Damage;
+                        _effectService.PlayHitEffect(entry.TargetEntry.View.transform.position);
 
                         if (!entry.TargetEntry.Model.IsAlive)
                         {

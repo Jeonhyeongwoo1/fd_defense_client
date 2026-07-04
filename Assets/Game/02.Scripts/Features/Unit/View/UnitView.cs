@@ -10,10 +10,14 @@ namespace Game.View
         private static readonly int AttackHash = Animator.StringToHash("Attack");
         private static readonly int IdleHash = Animator.StringToHash("Idle");
         private static readonly int DeadHash = Animator.StringToHash("Dead");
+        private static readonly int SkillHash = Animator.StringToHash("Skill");
 
         private Animator _animator;
         private SpriteRenderer _spriteRenderer;
         private int _currentStateHash;
+
+        // Incremented on each Initialize call to detect pool reuse — prevents delayed Release from double-releasing a recycled view
+        public int SpawnGeneration { get; private set; }
 
         public void Initialize(UnitSide side)
         {
@@ -31,6 +35,7 @@ namespace Game.View
             }
 
             _currentStateHash = 0; // Reset state hash for pool reuse — prevents stale state from skipping PlayAnimation
+            SpawnGeneration++;
             SetFacing(side == UnitSide.Ally);
         }
 
@@ -52,6 +57,11 @@ namespace Game.View
         public void PlayDead()
         {
             PlayAnimation(DeadHash);
+        }
+
+        public void PlaySkill()
+        {
+            PlayAnimation(SkillHash);
         }
 
         private void SetFacing(bool isFacingRight)

@@ -12,11 +12,13 @@ namespace Game.Editor
     {
         private const string UnitCsvPath = "Assets/Game/03.Resources/Data/Sheets/UnitData.csv";
         private const string EnemyCsvPath = "Assets/Game/03.Resources/Data/Sheets/EnemyData.csv";
+        private const string BossCsvPath = "Assets/Game/03.Resources/Data/Sheets/BossData.csv";
         private const string StageCsvPath = "Assets/Game/03.Resources/Data/Sheets/StageData.csv";
         private const string WaveCsvPath = "Assets/Game/03.Resources/Data/Sheets/WaveData.csv";
 
         private const string UnitTablePath = "Assets/Game/03.Resources/Data/UnitTable.asset";
         private const string EnemyTablePath = "Assets/Game/03.Resources/Data/EnemyTable.asset";
+        private const string BossTablePath = "Assets/Game/03.Resources/Data/BossTable.asset";
         private const string StageTablePath = "Assets/Game/03.Resources/Data/StageTable.asset";
         private const string WaveTablePath = "Assets/Game/03.Resources/Data/WaveTable.asset";
 
@@ -26,6 +28,7 @@ namespace Game.Editor
 
             importedCount += ImportUnitData();
             importedCount += ImportEnemyData();
+            importedCount += ImportBossData();
             importedCount += ImportWaveData();
             importedCount += ImportStageData();
 
@@ -188,6 +191,80 @@ namespace Game.Editor
             return 1;
         }
 
+        private static int ImportBossData()
+        {
+            if (!File.Exists(BossCsvPath))
+            {
+                GameLogger.LogError($"[CsvSheetImporter] CSV not found: {BossCsvPath}");
+                return 0;
+            }
+
+            var lines = File.ReadAllLines(BossCsvPath);
+            if (lines.Length < 2)
+            {
+                GameLogger.LogWarning($"[CsvSheetImporter] No data rows in {BossCsvPath}");
+                return 0;
+            }
+
+            var bossDataList = new List<BossData>();
+            var skippedCount = 0;
+
+            for (var i = 1; i < lines.Length; i++)
+            {
+                var line = lines[i].Trim();
+                if (string.IsNullOrEmpty(line))
+                {
+                    continue;
+                }
+
+                var columns = line.Split(',');
+                if (columns.Length < 11)
+                {
+                    GameLogger.LogError($"[CsvSheetImporter] Invalid BossData row {i}: insufficient columns");
+                    skippedCount++;
+                    continue;
+                }
+
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(columns[10]);
+                if (prefab == null)
+                {
+                    GameLogger.LogError($"[CsvSheetImporter] Failed to load prefab: {columns[10]} (row {i})");
+                    skippedCount++;
+                    continue;
+                }
+
+                var data = new BossData
+                {
+                    id = columns[0],
+                    unitName = columns[1],
+                    hp = int.Parse(columns[2]),
+                    attackPower = int.Parse(columns[3]),
+                    attackInterval = float.Parse(columns[4], CultureInfo.InvariantCulture),
+                    attackRange = float.Parse(columns[5], CultureInfo.InvariantCulture),
+                    moveSpeed = float.Parse(columns[6], CultureInfo.InvariantCulture),
+                    skillDamage = int.Parse(columns[7]),
+                    skillInterval = float.Parse(columns[8], CultureInfo.InvariantCulture),
+                    skillRange = float.Parse(columns[9], CultureInfo.InvariantCulture),
+                    prefab = prefab
+                };
+
+                bossDataList.Add(data);
+            }
+
+            var table = AssetDatabase.LoadAssetAtPath<BossTableSO>(BossTablePath);
+            if (table == null)
+            {
+                table = ScriptableObject.CreateInstance<BossTableSO>();
+                AssetDatabase.CreateAsset(table, BossTablePath);
+            }
+
+            table.BossDataList = bossDataList;
+            EditorUtility.SetDirty(table);
+
+            GameLogger.Log($"[CsvSheetImporter] BossData imported: {bossDataList.Count} entries ({skippedCount} skipped)");
+            return 1;
+        }
+
         private static int ImportStageData()
         {
             if (!File.Exists(StageCsvPath))
@@ -215,7 +292,7 @@ namespace Game.Editor
                 }
 
                 var columns = line.Split(',');
-                if (columns.Length < 7)
+                if (columns.Length < 8)
                 {
                     GameLogger.LogError($"[CsvSheetImporter] Invalid StageData row {i}: insufficient columns");
                     skippedCount++;
@@ -244,7 +321,8 @@ namespace Game.Editor
                     startMoney = int.Parse(columns[3]),
                     moneyPerSecond = float.Parse(columns[4], CultureInfo.InvariantCulture),
                     WaveIdList = waveIdList,
-                    waveIntervalSeconds = float.Parse(columns[6], CultureInfo.InvariantCulture)
+                    waveIntervalSeconds = float.Parse(columns[6], CultureInfo.InvariantCulture),
+                    bossId = columns[7]
                 };
 
                 stageDataList.Add(data);
@@ -315,6 +393,10 @@ namespace Game.Editor
                                 interval = float.Parse(parts[2], CultureInfo.InvariantCulture)
                             };
                             spawnEntryList.Add(spawnEntry);
+                        }
+                        else
+                        {
+                            GameLogger.LogWarning($"[CsvSheetImporter] Malformed WaveData spawn entry at row {i}: '{entry}' (expected format: enemyId:count:interval)");
                         }
                     }
                 }

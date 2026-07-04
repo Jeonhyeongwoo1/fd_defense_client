@@ -41,6 +41,11 @@ namespace Game.GameState
                 {
                     RequestStateChange(GameStateType.WavePlaying);
                 }
+                else if (!_waveProgressService.IsStageCompleted)
+                {
+                    _waveProgressService.ScheduleBossWave();
+                    RequestStateChange(GameStateType.WavePlaying);
+                }
                 else
                 {
                     _resultModel.SetWinner(UnitSide.Ally);

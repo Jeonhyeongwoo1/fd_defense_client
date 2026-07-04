@@ -25,6 +25,11 @@ namespace Game.View
             waveText.text = $"Wave {currentWave}/{totalWave}";
         }
 
+        public void UpdateBossWave()
+        {
+            waveText.text = "BOSS WAVE";
+        }
+
         public void UpdateAllyBaseHp(float ratio)
         {
             allyBaseHpFillImage.fillAmount = ratio;

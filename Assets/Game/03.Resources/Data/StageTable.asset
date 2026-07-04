@@ -25,3 +25,4 @@ MonoBehaviour:
     - wave_004
     - wave_005
     waveIntervalSeconds: 5
+    bossId: boss_s1_100

@@ -18,6 +18,11 @@ namespace Game.Service
             _userDataService = userDataService;
         }
 
+        public bool IsUnitOwned(string unitId)
+        {
+            return _userDataService.IsUnitOwned(unitId);
+        }
+
         public IReadOnlyList<string> GetDeck()
         {
             var deckUnitIds = _userDataService.Data.deckUnitIds;
@@ -39,6 +44,12 @@ namespace Game.Service
                 if (data == null)
                 {
                     GameLogger.LogWarning($"[DeckService] Corrupted deck data (unit '{unitId}' not found). Using default deck.");
+                    return GetDefaultDeck();
+                }
+
+                if (!IsUnitOwned(unitId))
+                {
+                    GameLogger.LogWarning($"[DeckService] Corrupted deck data (unit '{unitId}' not owned). Using default deck.");
                     return GetDefaultDeck();
                 }
             }
@@ -80,6 +91,7 @@ namespace Game.Service
         private IReadOnlyList<string> GetDefaultDeck()
         {
             var sortedUnits = _unitTable.UnitDataList
+                .Where(u => IsUnitOwned(u.id))
                 .OrderBy(u => u.cost)
                 .Take(DeckSize)
                 .Select(u => u.id)

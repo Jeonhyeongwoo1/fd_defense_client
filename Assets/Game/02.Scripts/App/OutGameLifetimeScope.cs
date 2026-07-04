@@ -17,6 +17,7 @@ namespace Game.App
         [SerializeField] private UpgradeTableSO upgradeTable;
         [SerializeField] private DailyRewardTableSO dailyRewardTable;
         [SerializeField] private MissionTableSO missionTable;
+        [SerializeField] private ShopTableSO shopTable;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -25,6 +26,7 @@ namespace Game.App
             builder.RegisterInstance(upgradeTable);
             builder.RegisterInstance(dailyRewardTable);
             builder.RegisterInstance(missionTable);
+            builder.RegisterInstance(shopTable);
 
             builder.Register<EventBus>(Lifetime.Scoped);
             builder.Register<UserDataService>(Lifetime.Scoped);
@@ -36,6 +38,7 @@ namespace Game.App
             builder.Register<DailyRewardService>(Lifetime.Scoped);
             builder.Register<MissionService>(Lifetime.Scoped);
             builder.Register<SettingsService>(Lifetime.Scoped);
+            builder.Register<ShopService>(Lifetime.Scoped);
 
             builder.RegisterComponentInHierarchy<UI_StageSelectView>();
             builder.RegisterComponentInHierarchy<UI_OutGameHomeView>();
@@ -44,6 +47,7 @@ namespace Game.App
             builder.RegisterComponentInHierarchy<UI_MissionPanelView>();
             builder.RegisterComponentInHierarchy<UI_DailyRewardPopupView>();
             builder.RegisterComponentInHierarchy<UI_SettingsPopupView>();
+            builder.RegisterComponentInHierarchy<UI_ShopPanelView>();
 
             builder.RegisterEntryPoint<StageSelectPresenter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<DeckPresenter>(Lifetime.Scoped);
@@ -51,6 +55,7 @@ namespace Game.App
             builder.RegisterEntryPoint<MissionPanelPresenter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<DailyRewardPresenter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<SettingsPresenter>(Lifetime.Scoped);
+            builder.RegisterEntryPoint<ShopPanelPresenter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<OutGameHomePresenter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<MissionProgressController>(Lifetime.Scoped);
         }

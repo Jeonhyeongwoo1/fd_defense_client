@@ -16,4 +16,9 @@ namespace Game.Core
     {
         public string UnitId;
     }
+
+    public struct UnitUnlockedEvent
+    {
+        public string UnitId;
+    }
 }

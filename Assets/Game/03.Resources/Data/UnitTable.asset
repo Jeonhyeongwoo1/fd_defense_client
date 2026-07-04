@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65078f5cf819841f29282cf1e9f91afa, type: 3}
+  m_Name: UnitTable
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Data.UnitTableSO
+  UnitDataList:
+  - id: pet_chick
+    unitName: Chick
+    hp: 100
+    attackPower: 20
+    attackInterval: 1
+    attackRange: 0.6
+    moveSpeed: 1.5
+    cost: 50
+    cooldown: 2
+    prefab: {fileID: 5306234697238941939, guid: 15788831f5b0a47ecb448295a61f5f1d, type: 3}
+  - id: pet_pug
+    unitName: Pug
+    hp: 300
+    attackPower: 35
+    attackInterval: 1.5
+    attackRange: 0.6
+    moveSpeed: 1
+    cost: 120
+    cooldown: 5
+    prefab: {fileID: 3409834589855295391, guid: 7e40a81ed5f18498cbd5b45b60ffcba3, type: 3}

@@ -1,5 +1,7 @@
 using System;
 using Game.Core;
+using Game.Model;
+using Game.Service;
 
 namespace Game.GameState
 {
@@ -7,27 +9,36 @@ namespace Game.GameState
     {
         public override GameStateType StateType => GameStateType.WavePlaying;
 
-        private const float TransitionDelay = 2.0f;
-        private float _elapsedTime;
+        private readonly BaseService _baseService;
+        private readonly GameResultModel _resultModel;
 
-        public WavePlayingState(Action<GameStateType> requestStateChange) : base(requestStateChange)
+        public WavePlayingState(
+            Action<GameStateType> requestStateChange,
+            BaseService baseService,
+            GameResultModel resultModel) : base(requestStateChange)
         {
+            _baseService = baseService;
+            _resultModel = resultModel;
         }
 
         public override void Enter()
         {
             GameLogger.Log("[WavePlayingState] Entered");
-            _elapsedTime = 0f;
         }
 
         public override void Tick(float deltaTime)
         {
-            // Phase 3: Replace with actual wave completion condition
-            _elapsedTime += deltaTime;
-
-            if (_elapsedTime >= TransitionDelay)
+            if (_baseService.IsBaseDestroyed(UnitSide.Enemy))
             {
-                RequestStateChange(GameStateType.WaveCleared);
+                _resultModel.SetWinner(UnitSide.Ally);
+                RequestStateChange(GameStateType.Result);
+                return;
+            }
+
+            if (_baseService.IsBaseDestroyed(UnitSide.Ally))
+            {
+                _resultModel.SetWinner(UnitSide.Enemy);
+                RequestStateChange(GameStateType.Result);
             }
         }
     }

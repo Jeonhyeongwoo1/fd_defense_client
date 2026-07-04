@@ -1,3 +1,4 @@
+using Game.Controller;
 using Game.Core;
 using Game.Data;
 using Game.Model;
@@ -20,6 +21,7 @@ namespace Game.App
         [SerializeField] private EffectConfigSO effectConfig;
         [SerializeField] private MapTableSO mapTable;
         [SerializeField] private UpgradeTableSO upgradeTable;
+        [SerializeField] private MissionTableSO missionTable;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -37,6 +39,7 @@ namespace Game.App
             builder.RegisterInstance(effectConfig);
             builder.RegisterInstance(mapTable);
             builder.RegisterInstance(upgradeTable);
+            builder.RegisterInstance(missionTable);
 
             builder.Register<UnitRegistry>(Lifetime.Scoped);
             builder.Register<UnitFactory>(Lifetime.Scoped);
@@ -51,6 +54,7 @@ namespace Game.App
             builder.Register<GoldService>(Lifetime.Scoped);
             builder.Register<UpgradeService>(Lifetime.Scoped);
             builder.Register<DeckService>(Lifetime.Scoped);
+            builder.Register<MissionService>(Lifetime.Scoped);
 
             builder.RegisterComponentInHierarchy<UI_GameHudView>();
             builder.RegisterComponentInHierarchy<UI_ResultPopupView>();
@@ -66,6 +70,7 @@ namespace Game.App
             builder.RegisterEntryPoint<GameHudPresenter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<ResultPresenter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<PausePresenter>(Lifetime.Scoped);
+            builder.RegisterEntryPoint<MissionProgressController>(Lifetime.Scoped);
         }
     }
 }

@@ -17,6 +17,8 @@ namespace Game.Service
         private readonly MapBuilderService _mapBuilderService;
         private readonly GoldService _goldService;
         private readonly GameResultModel _resultModel;
+        private readonly UnitFactory _unitFactory;
+        private readonly EventBus _eventBus;
 
         public StageService(
             StageTableSO stageTable,
@@ -26,7 +28,9 @@ namespace Game.Service
             StageProgressService stageProgressService,
             MapBuilderService mapBuilderService,
             GoldService goldService,
-            GameResultModel resultModel)
+            GameResultModel resultModel,
+            UnitFactory unitFactory,
+            EventBus eventBus)
         {
             _stageTable = stageTable;
             _baseService = baseService;
@@ -36,6 +40,8 @@ namespace Game.Service
             _mapBuilderService = mapBuilderService;
             _goldService = goldService;
             _resultModel = resultModel;
+            _unitFactory = unitFactory;
+            _eventBus = eventBus;
         }
 
         public void Start()
@@ -54,12 +60,13 @@ namespace Game.Service
                 }
             }
 
+            _unitFactory.SetEnemyStatMultiplier(CurrentStage.enemyStatMultiplier);
             _mapBuilderService.BuildMap(CurrentStage.mapId);
             _baseService.Initialize(CurrentStage);
             _walletService.Initialize(CurrentStage.startMoney, CurrentStage.moneyPerSecond);
             _waveProgressService.SetStage(CurrentStage);
 
-            GameLogger.Log($"[StageService] Stage loaded: {CurrentStage.id}");
+            GameLogger.Log($"[StageService] Stage loaded: {CurrentStage.id}, enemy stat multiplier: {CurrentStage.enemyStatMultiplier}");
         }
 
         public void MarkCurrentStageCleared()
@@ -73,6 +80,8 @@ namespace Game.Service
             _stageProgressService.MarkStageCleared(CurrentStage.id);
             _goldService.Add(CurrentStage.goldReward);
             _resultModel.SetEarnedGold(CurrentStage.goldReward);
+
+            _eventBus.Publish(new StageClearedEvent { StageId = CurrentStage.id });
 
             GameLogger.Log($"[StageService] Stage cleared: {CurrentStage.id}, gold rewarded: {CurrentStage.goldReward}");
         }

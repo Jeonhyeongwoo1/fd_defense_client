@@ -17,6 +17,7 @@ namespace Game.Service
         private readonly ProjectileService _projectileService;
         private readonly EffectService _effectService;
         private readonly BossSkillService _bossSkillService;
+        private readonly EventBus _eventBus;
         private readonly List<UnitEntry> _allySnapshotList = new();
         private readonly List<UnitEntry> _enemySnapshotList = new();
 
@@ -27,7 +28,8 @@ namespace Game.Service
             PoolManager poolManager,
             ProjectileService projectileService,
             EffectService effectService,
-            BossSkillService bossSkillService)
+            BossSkillService bossSkillService,
+            EventBus eventBus)
         {
             _unitRegistry = unitRegistry;
             _baseService = baseService;
@@ -36,6 +38,7 @@ namespace Game.Service
             _projectileService = projectileService;
             _effectService = effectService;
             _bossSkillService = bossSkillService;
+            _eventBus = eventBus;
 
             _projectileService.OnTargetKilled = HandleDeath;
             _bossSkillService.OnTargetKilled = HandleDeath;
@@ -183,6 +186,11 @@ namespace Game.Service
             if (!_unitRegistry.Unregister(entry))
             {
                 return;
+            }
+
+            if (entry.Model.Side == UnitSide.Enemy)
+            {
+                _eventBus.Publish(new EnemyKilledEvent { IsBoss = entry.Model.IsBoss });
             }
 
             entry.View.PlayDead();

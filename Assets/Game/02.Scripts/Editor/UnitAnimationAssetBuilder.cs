@@ -18,7 +18,7 @@ namespace Game.Editor
 
         private static readonly string[] PetAnimations = { "Idle", "Walk", "Attack" };
         private static readonly string[] BossAnimations = { "Idle_12f", "Walk_12f", "Attack_12f", "Skill_12f", "Die_12f" };
-        private static readonly HashSet<string> LoopingAnimations = new HashSet<string> { "Idle", "Walk" };
+        private static readonly HashSet<string> LoopingAnimationSet = new HashSet<string> { "Idle", "Walk" };
 
         public static void BuildAllUnitAssets()
         {
@@ -31,7 +31,7 @@ namespace Game.Editor
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            GameLogger.Log($"[UnitAnimationAssetBuilder] Build complete: {totalUnits} units, {totalClips} animation clips.");
+            GameLogger.Log($"[UnitAnimationAssetBuilder] Build complete: {totalUnits} units, {totalClips} animation clipList.");
         }
 
         private static void BuildPets(ref int totalUnits, ref int totalClips)
@@ -74,11 +74,11 @@ namespace Game.Editor
                     continue;
                 }
 
-                var clipsCreated = BuildUnit(petName, animationDict, outputFolder);
-                totalClips += clipsCreated;
+                var clipListCreated = BuildUnit(petName, animationDict, outputFolder);
+                totalClips += clipListCreated;
                 totalUnits++;
 
-                GameLogger.Log($"[UnitAnimationAssetBuilder] Built pet: {petName} ({clipsCreated} clips)");
+                GameLogger.Log($"[UnitAnimationAssetBuilder] Built pet: {petName} ({clipListCreated} clipList)");
             }
         }
 
@@ -145,11 +145,11 @@ namespace Game.Editor
                         continue;
                     }
 
-                    var clipsCreated = BuildUnit(unitName, animationDict, outputFolder);
-                    totalClips += clipsCreated;
+                    var clipListCreated = BuildUnit(unitName, animationDict, outputFolder);
+                    totalClips += clipListCreated;
                     totalUnits++;
 
-                    GameLogger.Log($"[UnitAnimationAssetBuilder] Built boss: {unitName} ({clipsCreated} clips)");
+                    GameLogger.Log($"[UnitAnimationAssetBuilder] Built boss: {unitName} ({clipListCreated} clipList)");
                 }
             }
         }
@@ -158,7 +158,7 @@ namespace Game.Editor
         {
             EnsureFolder(outputFolder);
 
-            var clipsCreated = 0;
+            var clipListCreated = 0;
             var createdClipList = new List<AnimationClip>();
 
             foreach (var kvp in animationDict)
@@ -167,13 +167,10 @@ namespace Game.Editor
                 var sprites = kvp.Value;
 
                 var clipPath = Path.Combine(outputFolder, $"{unitName}_{animName}.anim");
-                var clip = CreateOrUpdateAnimationClip(clipPath, sprites, LoopingAnimations.Contains(animName));
+                var clip = CreateOrUpdateAnimationClip(clipPath, sprites, LoopingAnimationSet.Contains(animName));
 
-                if (clip != null)
-                {
-                    createdClipList.Add(clip);
-                    clipsCreated++;
-                }
+                createdClipList.Add(clip);
+                clipListCreated++;
             }
 
             var controllerPath = Path.Combine(outputFolder, $"{unitName}.controller");
@@ -182,7 +179,7 @@ namespace Game.Editor
             var prefabPath = Path.Combine(outputFolder, $"{unitName}.prefab");
             CreateOrUpdatePrefab(prefabPath, unitName, animationDict["Idle"][0], controller);
 
-            return clipsCreated;
+            return clipListCreated;
         }
 
         // Pet sprites are non-zero-padded (_0, _1, ... _10), so string sort breaks. Parse and sort numerically.
@@ -269,7 +266,7 @@ namespace Game.Editor
             return clip;
         }
 
-        private static AnimatorController CreateOrUpdateAnimatorController(string controllerPath, List<AnimationClip> clips)
+        private static AnimatorController CreateOrUpdateAnimatorController(string controllerPath, List<AnimationClip> clipList)
         {
             var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(controllerPath);
 
@@ -295,7 +292,7 @@ namespace Game.Editor
             var rootStateMachine = controller.layers[0].stateMachine;
             AnimatorState defaultState = null;
 
-            foreach (var clip in clips)
+            foreach (var clip in clipList)
             {
                 var state = rootStateMachine.AddState(clip.name.Split('_').Last());
                 state.motion = clip;
@@ -329,12 +326,20 @@ namespace Game.Editor
                 {
                     spriteRenderer.sprite = defaultSprite;
                 }
+                else
+                {
+                    GameLogger.LogWarning($"[UnitAnimationAssetBuilder] Prefab {unitName} has no SpriteRenderer component.");
+                }
 
                 var animator = instance.GetComponent<Animator>();
 
                 if (animator != null)
                 {
                     animator.runtimeAnimatorController = controller;
+                }
+                else
+                {
+                    GameLogger.LogWarning($"[UnitAnimationAssetBuilder] Prefab {unitName} has no Animator component.");
                 }
 
                 PrefabUtility.SaveAsPrefabAsset(instance, prefabPath);

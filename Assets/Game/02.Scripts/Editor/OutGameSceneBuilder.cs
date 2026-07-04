@@ -13,6 +13,8 @@ namespace Game.Editor
     public static class OutGameSceneBuilder
     {
         private const string StageTablePath = "Assets/Game/03.Resources/Data/StageTable.asset";
+        private const string UnitTablePath = "Assets/Game/03.Resources/Data/UnitTable.asset";
+        private const string UpgradeTablePath = "Assets/Game/03.Resources/Data/UpgradeTable.asset";
         private const string ScenePath = "Assets/Game/01.Scene/OutGameScene.unity";
         private const string StageSelectScreenPrefabPath = "Assets/Game/03.Resources/UI/StageSelectScreen.prefab";
 
@@ -43,9 +45,11 @@ namespace Game.Editor
 
         private static void EnsureDataTables()
         {
-            if (!AssetDatabase.AssetPathExists(StageTablePath))
+            if (!AssetDatabase.AssetPathExists(StageTablePath) ||
+                !AssetDatabase.AssetPathExists(UnitTablePath) ||
+                !AssetDatabase.AssetPathExists(UpgradeTablePath))
             {
-                GameLogger.LogWarning($"[OutGameSceneBuilder] StageTable not found. Importing sheets...");
+                GameLogger.LogWarning("[OutGameSceneBuilder] Data tables not found. Importing sheets...");
                 CsvSheetImporter.ImportAllSheets();
             }
         }
@@ -122,14 +126,28 @@ namespace Game.Editor
             var lifetimeScope = lifetimeScopeObject.AddComponent<OutGameLifetimeScope>();
 
             var stageTable = AssetDatabase.LoadAssetAtPath<StageTableSO>(StageTablePath);
+            var unitTable = AssetDatabase.LoadAssetAtPath<UnitTableSO>(UnitTablePath);
+            var upgradeTable = AssetDatabase.LoadAssetAtPath<UpgradeTableSO>(UpgradeTablePath);
 
             var serializedObject = new SerializedObject(lifetimeScope);
             serializedObject.FindProperty("stageTable").objectReferenceValue = stageTable;
+            serializedObject.FindProperty("unitTable").objectReferenceValue = unitTable;
+            serializedObject.FindProperty("upgradeTable").objectReferenceValue = upgradeTable;
             serializedObject.ApplyModifiedProperties();
 
             if (stageTable == null)
             {
                 GameLogger.LogError("[OutGameSceneBuilder] Failed to assign StageTable to LifetimeScope.");
+            }
+
+            if (unitTable == null)
+            {
+                GameLogger.LogError("[OutGameSceneBuilder] Failed to assign UnitTable to LifetimeScope.");
+            }
+
+            if (upgradeTable == null)
+            {
+                GameLogger.LogError("[OutGameSceneBuilder] Failed to assign UpgradeTable to LifetimeScope.");
             }
         }
     }

@@ -19,6 +19,7 @@ namespace Game.App
         [SerializeField] private WaveTableSO waveTable;
         [SerializeField] private EffectConfigSO effectConfig;
         [SerializeField] private MapTableSO mapTable;
+        [SerializeField] private UpgradeTableSO upgradeTable;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -35,6 +36,7 @@ namespace Game.App
             builder.RegisterInstance(waveTable);
             builder.RegisterInstance(effectConfig);
             builder.RegisterInstance(mapTable);
+            builder.RegisterInstance(upgradeTable);
 
             builder.Register<UnitRegistry>(Lifetime.Scoped);
             builder.Register<UnitFactory>(Lifetime.Scoped);
@@ -46,6 +48,9 @@ namespace Game.App
             builder.Register<EffectService>(Lifetime.Scoped);
             builder.Register<MapBuilderService>(Lifetime.Scoped);
             builder.Register<PauseService>(Lifetime.Scoped);
+            builder.Register<GoldService>(Lifetime.Scoped);
+            builder.Register<UpgradeService>(Lifetime.Scoped);
+            builder.Register<DeckService>(Lifetime.Scoped);
 
             builder.RegisterComponentInHierarchy<UI_GameHudView>();
             builder.RegisterComponentInHierarchy<UI_ResultPopupView>();

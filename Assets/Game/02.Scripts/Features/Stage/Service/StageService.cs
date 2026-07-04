@@ -1,5 +1,6 @@
 using Game.Core;
 using Game.Data;
+using Game.Model;
 using VContainer.Unity;
 
 namespace Game.Service
@@ -14,6 +15,8 @@ namespace Game.Service
         private readonly WaveProgressService _waveProgressService;
         private readonly StageProgressService _stageProgressService;
         private readonly MapBuilderService _mapBuilderService;
+        private readonly GoldService _goldService;
+        private readonly GameResultModel _resultModel;
 
         public StageService(
             StageTableSO stageTable,
@@ -21,7 +24,9 @@ namespace Game.Service
             WalletService walletService,
             WaveProgressService waveProgressService,
             StageProgressService stageProgressService,
-            MapBuilderService mapBuilderService)
+            MapBuilderService mapBuilderService,
+            GoldService goldService,
+            GameResultModel resultModel)
         {
             _stageTable = stageTable;
             _baseService = baseService;
@@ -29,6 +34,8 @@ namespace Game.Service
             _waveProgressService = waveProgressService;
             _stageProgressService = stageProgressService;
             _mapBuilderService = mapBuilderService;
+            _goldService = goldService;
+            _resultModel = resultModel;
         }
 
         public void Start()
@@ -64,7 +71,10 @@ namespace Game.Service
             }
 
             _stageProgressService.MarkStageCleared(CurrentStage.id);
-            GameLogger.Log($"[StageService] Stage cleared: {CurrentStage.id}");
+            _goldService.Add(CurrentStage.goldReward);
+            _resultModel.SetEarnedGold(CurrentStage.goldReward);
+
+            GameLogger.Log($"[StageService] Stage cleared: {CurrentStage.id}, gold rewarded: {CurrentStage.goldReward}");
         }
     }
 }

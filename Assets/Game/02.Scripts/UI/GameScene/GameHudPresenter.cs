@@ -20,6 +20,7 @@ namespace Game.Presenter
         private readonly UnitTableSO _unitTable;
         private readonly WaveProgressService _waveProgressService;
         private readonly BaseService _baseService;
+        private readonly DeckService _deckService;
         private readonly CompositeDisposable _disposables = new();
         private readonly List<(UI_UnitSpawnButtonView view, UnitData data)> _buttonEntryList = new();
 
@@ -29,7 +30,8 @@ namespace Game.Presenter
             UnitSpawnService unitSpawnService,
             UnitTableSO unitTable,
             WaveProgressService waveProgressService,
-            BaseService baseService)
+            BaseService baseService,
+            DeckService deckService)
         {
             _view = view;
             _walletModel = walletModel;
@@ -37,6 +39,7 @@ namespace Game.Presenter
             _unitTable = unitTable;
             _waveProgressService = waveProgressService;
             _baseService = baseService;
+            _deckService = deckService;
         }
 
         public void Start()
@@ -72,22 +75,32 @@ namespace Game.Presenter
                 .Subscribe(hp => _view.UpdateEnemyBaseHp((float)hp / enemyBase.MaxHp))
                 .AddTo(_disposables);
 
-            foreach (var button in _view.SpawnButtonList)
+            var deck = _deckService.GetDeck();
+
+            for (var i = 0; i < _view.SpawnButtonList.Count; i++)
             {
-                var data = _unitTable.GetById(button.UnitId);
+                var button = _view.SpawnButtonList[i];
+
+                if (i >= deck.Count)
+                {
+                    GameLogger.LogWarning($"[GameHudPresenter] Not enough deck entries ({deck.Count}) for button {i}");
+                    break;
+                }
+
+                var unitId = deck[i];
+                var data = _unitTable.GetById(unitId);
                 if (data == null)
                 {
-                    GameLogger.LogError($"[GameHudPresenter] Unit data not found for button: {button.UnitId}");
+                    GameLogger.LogError($"[GameHudPresenter] Unit data not found for deck entry: {unitId}");
                     continue;
                 }
 
+                button.Bind(unitId, data.unitName, data.cost, data.iconSprite);
                 _buttonEntryList.Add((button, data));
 
-                button.UpdateUI(data.unitName, data.cost);
-
-                var unitId = button.UnitId;
+                var boundUnitId = unitId;
                 button.Button.onClick.AsObservable()
-                    .Subscribe(_ => OnSpawnButtonClicked(unitId))
+                    .Subscribe(_ => OnSpawnButtonClicked(boundUnitId))
                     .AddTo(_disposables);
             }
         }

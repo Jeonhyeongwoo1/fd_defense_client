@@ -50,6 +50,11 @@ namespace Game.Presenter
             _disposables.Dispose();
         }
 
+        public void Show()
+        {
+            ShowPopup();
+        }
+
         private void ShowPopup()
         {
             var currentDay = _dailyRewardService.GetCurrentDay();

@@ -19,6 +19,7 @@ namespace Game.Editor
         private const string WaveTablePath = "Assets/Game/03.Resources/Data/WaveTable.asset";
         private const string EffectConfigPath = "Assets/Game/03.Resources/Data/EffectConfig.asset";
         private const string MapTablePath = "Assets/Game/03.Resources/Data/MapTable.asset";
+        private const string MissionTablePath = "Assets/Game/03.Resources/Data/MissionTable.asset";
         private const string ScenePath = "Assets/Game/01.Scene/GameScene.unity";
         private const string GameHudPrefabPath = "Assets/Game/03.Resources/UI/GameHud.prefab";
 
@@ -134,6 +135,7 @@ namespace Game.Editor
             var waveTable = AssetDatabase.LoadAssetAtPath<WaveTableSO>(WaveTablePath);
             var effectConfig = AssetDatabase.LoadAssetAtPath<EffectConfigSO>(EffectConfigPath);
             var mapTable = AssetDatabase.LoadAssetAtPath<MapTableSO>(MapTablePath);
+            var missionTable = AssetDatabase.LoadAssetAtPath<MissionTableSO>(MissionTablePath);
 
             var serializedObject = new SerializedObject(lifetimeScope);
             serializedObject.FindProperty("unitTable").objectReferenceValue = unitTable;
@@ -143,9 +145,10 @@ namespace Game.Editor
             serializedObject.FindProperty("waveTable").objectReferenceValue = waveTable;
             serializedObject.FindProperty("effectConfig").objectReferenceValue = effectConfig;
             serializedObject.FindProperty("mapTable").objectReferenceValue = mapTable;
+            serializedObject.FindProperty("missionTable").objectReferenceValue = missionTable;
             serializedObject.ApplyModifiedProperties();
 
-            if (unitTable == null || enemyTable == null || bossTable == null || stageTable == null || waveTable == null || effectConfig == null || mapTable == null)
+            if (unitTable == null || enemyTable == null || bossTable == null || stageTable == null || waveTable == null || effectConfig == null || mapTable == null || missionTable == null)
             {
                 GameLogger.LogError("[VerticalSliceSceneBuilder] Failed to assign one or more SO tables to LifetimeScope.");
             }

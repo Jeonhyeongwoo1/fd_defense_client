@@ -32,6 +32,15 @@ namespace Game.Editor
         private const string IconArrowUpPath = KitRoot + "Theme_Light/Sprites/Slider_Icon/Slider_Upgrade_01_Icon_Arrow_Up.png";
         private const string CardFrameBluePath = KitRoot + "Theme_Light/Prefabs/Prefabs_Frame/CardFrame/CardFrame_02_Blue.prefab";
         private const string PetIconRoot = "Assets/Layer Lab/2D Characters-PetPack1/Sprites/ImageSequence/";
+        private const string ButtonOrangePath = KitRoot + "Theme_Light/Prefabs/Prefabs_Button/Button_03_Orange.prefab";
+        private const string IconBattlePath = KitRoot + "Shared/Icons/PictoIcon/128/battle.png";
+        private const string IconCardPath = KitRoot + "Shared/Icons/PictoIcon/128/card.png";
+        private const string IconHammerPath = KitRoot + "Shared/Icons/PictoIcon/128/hammer_1.png";
+        private const string IconCheckPath = KitRoot + "Shared/Icons/PictoIcon/128/check_round.png";
+        private const string IconShopPath = KitRoot + "Shared/Icons/PictoIcon/128/shop.png";
+        private const string IconGiftPath = KitRoot + "Shared/Icons/PictoIcon/128/gift.png";
+        private const string AlertDotRedPath = KitRoot + "Theme_Light/Prefabs/Prefabs_HUD/Alert_Dot_01_Red.prefab";
+        private const string ProfileFrameBluePath = KitRoot + "Theme_Light/Prefabs/Prefabs_Frame/ProfileFrame/ProfileFrame_01_l_Blue.prefab";
 
         private static readonly string[] PetNames = { "Goldfish", "Chick", "Bat", "Bomb", "Flower", "Pug", "Ghost", "Melody", "Sword", "Titan" };
         private static readonly string[] UnitIds = { "pet_goldfish", "pet_chick", "pet_bat", "pet_bomb", "pet_flower", "pet_pug", "pet_ghost", "pet_melody", "pet_sword", "pet_titan" };
@@ -57,9 +66,15 @@ namespace Game.Editor
             var pauseIcon = LoadSprite(IconPausePath);
             var goldIcon = LoadSprite(IconGoldPath);
             var arrowIcon = LoadSprite(IconArrowUpPath);
+            var battleIcon = LoadSprite(IconBattlePath);
+            var cardIcon = LoadSprite(IconCardPath);
+            var hammerIcon = LoadSprite(IconHammerPath);
+            var checkIcon = LoadSprite(IconCheckPath);
+            var shopIcon = LoadSprite(IconShopPath);
+            var giftIcon = LoadSprite(IconGiftPath);
 
             BuildGameHudPrefab(font, coinIcon, pauseIcon);
-            BuildStageSelectScreenPrefab(font, starIcon, lockIcon, goldIcon, arrowIcon);
+            BuildStageSelectScreenPrefab(font, starIcon, lockIcon, goldIcon, arrowIcon, battleIcon, cardIcon, hammerIcon, checkIcon, shopIcon, giftIcon);
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -958,7 +973,7 @@ namespace Game.Editor
             return button;
         }
 
-        private static void BuildStageSelectScreenPrefab(TMP_FontAsset font, Sprite starIcon, Sprite lockIcon, Sprite goldIcon, Sprite arrowIcon)
+        private static void BuildStageSelectScreenPrefab(TMP_FontAsset font, Sprite starIcon, Sprite lockIcon, Sprite goldIcon, Sprite arrowIcon, Sprite battleIcon, Sprite cardIcon, Sprite hammerIcon, Sprite checkIcon, Sprite shopIcon, Sprite giftIcon)
         {
             var rootObject = new GameObject("StageSelectScreen");
             var rootRect = rootObject.AddComponent<RectTransform>();
@@ -968,7 +983,17 @@ namespace Game.Editor
             rootRect.offsetMax = Vector2.zero;
 
             var goldText = CreateTopGoldBar(rootRect, goldIcon);
-            var tabButtons = CreateTabButtons(rootRect, font);
+            var statusPanel = CreatePlayerStatusPanel(rootRect, font);
+            var bestStageText = statusPanel.transform.Find("BestStageText")?.GetComponent<TMP_Text>();
+            var unitCountText = statusPanel.transform.Find("UnitCountText")?.GetComponent<TMP_Text>();
+
+            var playButton = CreatePlayButton(rootRect, font, battleIcon);
+            var tabButtons = CreateBottomDockButtons(rootRect, font, cardIcon, hammerIcon, checkIcon, shopIcon);
+            var dailyRewardButton = CreateDailyRewardButton(rootRect, giftIcon);
+
+            var dailyRewardBadge = CreateAlertBadge(dailyRewardButton.transform, new Vector2(30, 30));
+            var missionsBadge = CreateAlertBadge(tabButtons[2].transform, new Vector2(30, 30));
+
             var stagePanelRoot = CreateStagePanel(rootRect, font, starIcon, lockIcon);
             var deckPanel = CreateDeckPanel(rootRect, font, starIcon);
             var upgradePanel = CreateUpgradePanel(rootRect, font, starIcon, goldIcon, arrowIcon);
@@ -984,6 +1009,12 @@ namespace Game.Editor
             }
             var settingsButton = CreateSettingsButton(rootRect, gearIcon);
 
+            stagePanelRoot.SetActive(false);
+            deckPanel.SetActive(false);
+            upgradePanel.SetActive(false);
+            missionPanel.SetActive(false);
+            shopPanel.SetActive(false);
+
             var stageSelectView = stagePanelRoot.GetComponent<UI_StageSelectView>();
             var deckPanelView = deckPanel.GetComponent<UI_DeckPanelView>();
             var upgradePanelView = upgradePanel.GetComponent<UI_UpgradePanelView>();
@@ -994,14 +1025,20 @@ namespace Game.Editor
 
             var outGameHomeView = rootObject.AddComponent<UI_OutGameHomeView>();
             var homeSerializer = new SerializedObject(outGameHomeView);
-            homeSerializer.FindProperty("stageTabButton").objectReferenceValue = tabButtons[0];
-            homeSerializer.FindProperty("deckTabButton").objectReferenceValue = tabButtons[1];
-            homeSerializer.FindProperty("upgradeTabButton").objectReferenceValue = tabButtons[2];
-            homeSerializer.FindProperty("missionsTabButton").objectReferenceValue = tabButtons[3];
-            homeSerializer.FindProperty("shopTabButton").objectReferenceValue = tabButtons[4];
+            homeSerializer.FindProperty("stageTabButton").objectReferenceValue = playButton;
+            homeSerializer.FindProperty("deckTabButton").objectReferenceValue = tabButtons[0];
+            homeSerializer.FindProperty("upgradeTabButton").objectReferenceValue = tabButtons[1];
+            homeSerializer.FindProperty("missionsTabButton").objectReferenceValue = tabButtons[2];
+            homeSerializer.FindProperty("shopTabButton").objectReferenceValue = tabButtons[3];
             homeSerializer.FindProperty("settingsButton").objectReferenceValue = settingsButton;
+            homeSerializer.FindProperty("playButton").objectReferenceValue = playButton;
+            homeSerializer.FindProperty("dailyRewardButton").objectReferenceValue = dailyRewardButton;
             homeSerializer.FindProperty("stagePanelRoot").objectReferenceValue = stagePanelRoot;
             homeSerializer.FindProperty("goldText").objectReferenceValue = goldText;
+            homeSerializer.FindProperty("bestStageText").objectReferenceValue = bestStageText;
+            homeSerializer.FindProperty("unitCountText").objectReferenceValue = unitCountText;
+            homeSerializer.FindProperty("dailyRewardBadge").objectReferenceValue = dailyRewardBadge;
+            homeSerializer.FindProperty("missionsBadge").objectReferenceValue = missionsBadge;
             homeSerializer.ApplyModifiedProperties();
 
             rootObject.AddComponent<UI_StageSelectView>();
@@ -1378,6 +1415,269 @@ namespace Game.Editor
             return textTMP;
         }
 
+        private static GameObject CreatePlayerStatusPanel(RectTransform parent, TMP_FontAsset font)
+        {
+            var profileFramePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(ProfileFrameBluePath);
+            GameObject panelInstance;
+
+            if (profileFramePrefab != null)
+            {
+                panelInstance = PrefabUtility.InstantiatePrefab(profileFramePrefab) as GameObject;
+                panelInstance.transform.SetParent(parent, false);
+            }
+            else
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] ProfileFrame_01_l_Blue not found, using BasicFrame fallback.");
+                var basicFramePath = KitRoot + "Theme_Light/Prefabs/Prefabs_Frame/BasicFrame/BasicFrame_02_Blue.prefab";
+                var basicFrame = AssetDatabase.LoadAssetAtPath<GameObject>(basicFramePath);
+                if (basicFrame != null)
+                {
+                    panelInstance = PrefabUtility.InstantiatePrefab(basicFrame) as GameObject;
+                    panelInstance.transform.SetParent(parent, false);
+                }
+                else
+                {
+                    panelInstance = new GameObject("PlayerStatusPanel");
+                    panelInstance.transform.SetParent(parent, false);
+                    var bgImage = panelInstance.AddComponent<Image>();
+                    bgImage.color = new Color(0.2f, 0.3f, 0.5f, 0.8f);
+                }
+            }
+
+            panelInstance.name = "PlayerStatusPanel";
+            var panelRect = panelInstance.GetComponent<RectTransform>();
+            if (panelRect == null)
+            {
+                panelRect = panelInstance.AddComponent<RectTransform>();
+            }
+
+            panelRect.anchorMin = new Vector2(0.5f, 1);
+            panelRect.anchorMax = new Vector2(0.5f, 1);
+            panelRect.pivot = new Vector2(0.5f, 1);
+            panelRect.anchoredPosition = new Vector2(-100, -50);
+            panelRect.sizeDelta = new Vector2(380, 110);
+
+            foreach (Transform child in panelInstance.transform)
+            {
+                if (child.name.Contains("Icon") || child.name.Contains("Text") || child.name.Contains("Image"))
+                {
+                    child.gameObject.SetActive(false);
+                }
+            }
+
+            var bestStageTextObject = new GameObject("BestStageText");
+            bestStageTextObject.transform.SetParent(panelInstance.transform, false);
+            var bestStageRect = bestStageTextObject.AddComponent<RectTransform>();
+            bestStageRect.anchorMin = new Vector2(0.5f, 1);
+            bestStageRect.anchorMax = new Vector2(0.5f, 1);
+            bestStageRect.pivot = new Vector2(0.5f, 1);
+            bestStageRect.anchoredPosition = new Vector2(0, -20);
+            bestStageRect.sizeDelta = new Vector2(350, 40);
+
+            var bestStageText = bestStageTextObject.AddComponent<TextMeshProUGUI>();
+            bestStageText.text = "BEST STAGE -";
+            bestStageText.fontSize = 30;
+            bestStageText.alignment = TextAlignmentOptions.Center;
+            bestStageText.font = font;
+
+            var unitCountTextObject = new GameObject("UnitCountText");
+            unitCountTextObject.transform.SetParent(panelInstance.transform, false);
+            var unitCountRect = unitCountTextObject.AddComponent<RectTransform>();
+            unitCountRect.anchorMin = new Vector2(0.5f, 1);
+            unitCountRect.anchorMax = new Vector2(0.5f, 1);
+            unitCountRect.pivot = new Vector2(0.5f, 1);
+            unitCountRect.anchoredPosition = new Vector2(0, -65);
+            unitCountRect.sizeDelta = new Vector2(350, 35);
+
+            var unitCountText = unitCountTextObject.AddComponent<TextMeshProUGUI>();
+            unitCountText.text = "UNITS 10/15";
+            unitCountText.fontSize = 26;
+            unitCountText.alignment = TextAlignmentOptions.Center;
+            unitCountText.font = font;
+
+            return panelInstance;
+        }
+
+        private static Button CreatePlayButton(RectTransform parent, TMP_FontAsset font, Sprite battleIcon)
+        {
+            var buttonInstance = InstantiateKitPrefab(ButtonOrangePath, parent);
+            if (buttonInstance == null)
+            {
+                GameLogger.LogError("[UIPrefabBuilder] Failed to create PLAY button.");
+                return null;
+            }
+
+            buttonInstance.name = "PlayButton";
+            var buttonRect = buttonInstance.GetComponent<RectTransform>();
+            buttonRect.anchorMin = new Vector2(0.5f, 0);
+            buttonRect.anchorMax = new Vector2(0.5f, 0);
+            buttonRect.pivot = new Vector2(0.5f, 0);
+            buttonRect.anchoredPosition = new Vector2(0, 140);
+            buttonRect.sizeDelta = new Vector2(360, 176);
+
+            var button = EnsureButtonComponent(buttonInstance);
+
+            var labelTMP = buttonInstance.GetComponentInChildren<TMP_Text>();
+            if (labelTMP != null)
+            {
+                labelTMP.text = "PLAY";
+                labelTMP.fontSize = 60;
+                labelTMP.alignment = TextAlignmentOptions.Center;
+                labelTMP.font = font;
+                var labelRect = labelTMP.GetComponent<RectTransform>();
+                labelRect.anchoredPosition = new Vector2(20, 0);
+            }
+
+            if (battleIcon != null)
+            {
+                var iconObject = new GameObject("BattleIcon");
+                iconObject.transform.SetParent(buttonInstance.transform, false);
+                var iconRect = iconObject.AddComponent<RectTransform>();
+                iconRect.anchorMin = new Vector2(0, 0.5f);
+                iconRect.anchorMax = new Vector2(0, 0.5f);
+                iconRect.pivot = new Vector2(0, 0.5f);
+                iconRect.anchoredPosition = new Vector2(30, 0);
+                iconRect.sizeDelta = new Vector2(60, 60);
+
+                var iconImage = iconObject.AddComponent<Image>();
+                iconImage.sprite = battleIcon;
+                iconImage.raycastTarget = false;
+            }
+
+            return button;
+        }
+
+        private static Button[] CreateBottomDockButtons(RectTransform parent, TMP_FontAsset font, Sprite cardIcon, Sprite hammerIcon, Sprite checkIcon, Sprite shopIcon)
+        {
+            var buttons = new Button[4];
+            var labels = new[] { "DECK", "UPGRADE", "MISSIONS", "SHOP" };
+            var icons = new[] { cardIcon, hammerIcon, checkIcon, shopIcon };
+            var xPositions = new[] { -330f, -500f, 330f, 500f };
+            var yPosition = 120f;
+
+            for (var i = 0; i < 4; i++)
+            {
+                var buttonInstance = InstantiateKitPrefab(ButtonBluePath, parent);
+                if (buttonInstance == null)
+                {
+                    GameLogger.LogError($"[UIPrefabBuilder] Failed to create dock button {i}");
+                    continue;
+                }
+
+                buttonInstance.name = $"DockButton_{labels[i]}";
+                var buttonRect = buttonInstance.GetComponent<RectTransform>();
+                buttonRect.anchorMin = new Vector2(0.5f, 0);
+                buttonRect.anchorMax = new Vector2(0.5f, 0);
+                buttonRect.pivot = new Vector2(0.5f, 0);
+                buttonRect.anchoredPosition = new Vector2(xPositions[i], yPosition);
+                buttonRect.sizeDelta = new Vector2(150, 120);
+
+                var button = EnsureButtonComponent(buttonInstance);
+                buttons[i] = button;
+
+                if (icons[i] != null)
+                {
+                    var iconObject = new GameObject("Icon");
+                    iconObject.transform.SetParent(buttonInstance.transform, false);
+                    var iconRect = iconObject.AddComponent<RectTransform>();
+                    iconRect.anchorMin = new Vector2(0.5f, 1);
+                    iconRect.anchorMax = new Vector2(0.5f, 1);
+                    iconRect.pivot = new Vector2(0.5f, 1);
+                    iconRect.anchoredPosition = new Vector2(0, -10);
+                    iconRect.sizeDelta = new Vector2(48, 48);
+
+                    var iconImage = iconObject.AddComponent<Image>();
+                    iconImage.sprite = icons[i];
+                    iconImage.raycastTarget = false;
+                }
+
+                var labelTextObject = new GameObject("Label");
+                labelTextObject.transform.SetParent(buttonInstance.transform, false);
+                var labelRect = labelTextObject.AddComponent<RectTransform>();
+                labelRect.anchorMin = new Vector2(0, 0);
+                labelRect.anchorMax = new Vector2(1, 0);
+                labelRect.pivot = new Vector2(0.5f, 0);
+                labelRect.anchoredPosition = new Vector2(0, 10);
+                labelRect.sizeDelta = new Vector2(-10, 30);
+
+                var labelText = labelTextObject.AddComponent<TextMeshProUGUI>();
+                labelText.text = labels[i];
+                labelText.fontSize = 24;
+                labelText.alignment = TextAlignmentOptions.Center;
+                labelText.font = font;
+            }
+
+            return buttons;
+        }
+
+        private static Button CreateDailyRewardButton(RectTransform parent, Sprite giftIcon)
+        {
+            var buttonInstance = InstantiateKitPrefab(ButtonCirclePath, parent);
+            if (buttonInstance == null)
+            {
+                GameLogger.LogError("[UIPrefabBuilder] Failed to create daily reward button.");
+                return null;
+            }
+
+            buttonInstance.name = "DailyRewardButton";
+            var buttonRect = buttonInstance.GetComponent<RectTransform>();
+            buttonRect.anchorMin = new Vector2(1, 1);
+            buttonRect.anchorMax = new Vector2(1, 1);
+            buttonRect.pivot = new Vector2(1, 1);
+            buttonRect.anchoredPosition = new Vector2(-80, -190);
+            buttonRect.sizeDelta = new Vector2(90, 90);
+
+            var button = EnsureButtonComponent(buttonInstance);
+
+            if (giftIcon != null)
+            {
+                var iconObject = new GameObject("GiftIcon");
+                iconObject.transform.SetParent(buttonInstance.transform, false);
+                var iconRect = iconObject.AddComponent<RectTransform>();
+                iconRect.anchorMin = new Vector2(0.5f, 0.5f);
+                iconRect.anchorMax = new Vector2(0.5f, 0.5f);
+                iconRect.pivot = new Vector2(0.5f, 0.5f);
+                iconRect.anchoredPosition = Vector2.zero;
+                iconRect.sizeDelta = new Vector2(50, 50);
+
+                var iconImage = iconObject.AddComponent<Image>();
+                iconImage.sprite = giftIcon;
+                iconImage.raycastTarget = false;
+            }
+
+            return button;
+        }
+
+        private static GameObject CreateAlertBadge(Transform parent, Vector2 offset)
+        {
+            var badgeInstance = InstantiateKitPrefab(AlertDotRedPath, parent);
+            if (badgeInstance == null)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] Alert_Dot_01_Red not found, creating fallback badge.");
+                badgeInstance = new GameObject("AlertBadge");
+                badgeInstance.transform.SetParent(parent, false);
+                var bgImage = badgeInstance.AddComponent<Image>();
+                bgImage.color = Color.red;
+            }
+
+            badgeInstance.name = "AlertBadge";
+            var badgeRect = badgeInstance.GetComponent<RectTransform>();
+            if (badgeRect == null)
+            {
+                badgeRect = badgeInstance.AddComponent<RectTransform>();
+            }
+
+            badgeRect.anchorMin = new Vector2(1, 1);
+            badgeRect.anchorMax = new Vector2(1, 1);
+            badgeRect.pivot = new Vector2(0.5f, 0.5f);
+            badgeRect.anchoredPosition = offset;
+            badgeRect.sizeDelta = new Vector2(34, 34);
+
+            badgeInstance.SetActive(false);
+
+            return badgeInstance;
+        }
+
         private static Button[] CreateTabButtons(RectTransform parent, TMP_FontAsset font)
         {
             var buttons = new Button[5];
@@ -1423,10 +1723,13 @@ namespace Game.Editor
             panelObject.transform.SetParent(parent, false);
 
             var panelRect = panelObject.AddComponent<RectTransform>();
-            panelRect.anchorMin = Vector2.zero;
+            panelRect.anchorMin = new Vector2(0, 0.22f);
             panelRect.anchorMax = Vector2.one;
             panelRect.offsetMin = Vector2.zero;
             panelRect.offsetMax = Vector2.zero;
+
+            var bgImage = panelObject.AddComponent<Image>();
+            bgImage.color = new Color(0.1f, 0.1f, 0.15f, 0.95f);
 
             CreateStageTitle(panelRect, font);
             var stageButtons = CreateStageButtons(panelRect, font, starIcon, lockIcon);
@@ -1449,10 +1752,13 @@ namespace Game.Editor
             panelObject.transform.SetParent(parent, false);
 
             var panelRect = panelObject.AddComponent<RectTransform>();
-            panelRect.anchorMin = Vector2.zero;
+            panelRect.anchorMin = new Vector2(0, 0.22f);
             panelRect.anchorMax = Vector2.one;
             panelRect.offsetMin = Vector2.zero;
             panelRect.offsetMax = Vector2.zero;
+
+            var bgImage = panelObject.AddComponent<Image>();
+            bgImage.color = new Color(0.1f, 0.1f, 0.15f, 0.95f);
 
             var cards = new UI_UnitCardView[15];
             const int columns = 5;
@@ -1513,10 +1819,13 @@ namespace Game.Editor
             panelObject.transform.SetParent(parent, false);
 
             var panelRect = panelObject.AddComponent<RectTransform>();
-            panelRect.anchorMin = Vector2.zero;
+            panelRect.anchorMin = new Vector2(0, 0.22f);
             panelRect.anchorMax = Vector2.one;
             panelRect.offsetMin = Vector2.zero;
             panelRect.offsetMax = Vector2.zero;
+
+            var bgImage = panelObject.AddComponent<Image>();
+            bgImage.color = new Color(0.1f, 0.1f, 0.15f, 0.95f);
 
             var cards = new UI_UnitCardView[15];
             const int columns = 5;
@@ -1801,10 +2110,13 @@ namespace Game.Editor
             panelObject.transform.SetParent(parent, false);
 
             var panelRect = panelObject.AddComponent<RectTransform>();
-            panelRect.anchorMin = Vector2.zero;
+            panelRect.anchorMin = new Vector2(0, 0.22f);
             panelRect.anchorMax = Vector2.one;
             panelRect.offsetMin = Vector2.zero;
             panelRect.offsetMax = Vector2.zero;
+
+            var bgImage = panelObject.AddComponent<Image>();
+            bgImage.color = new Color(0.1f, 0.1f, 0.15f, 0.95f);
 
             var shopItems = new UI_ShopItemView[5];
             const float itemHeight = 120f;
@@ -1977,10 +2289,13 @@ namespace Game.Editor
             panelObject.transform.SetParent(parent, false);
 
             var panelRect = panelObject.AddComponent<RectTransform>();
-            panelRect.anchorMin = Vector2.zero;
+            panelRect.anchorMin = new Vector2(0, 0.22f);
             panelRect.anchorMax = Vector2.one;
             panelRect.offsetMin = Vector2.zero;
             panelRect.offsetMax = Vector2.zero;
+
+            var bgImage = panelObject.AddComponent<Image>();
+            bgImage.color = new Color(0.1f, 0.1f, 0.15f, 0.95f);
 
             var rows = new UI_MissionRowView[10];
             const float rowHeight = 80f;

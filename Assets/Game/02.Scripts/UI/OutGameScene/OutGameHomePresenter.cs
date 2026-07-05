@@ -1,4 +1,5 @@
 using System;
+using Game.Data;
 using Game.Service;
 using Game.View;
 using UniRx;
@@ -6,8 +7,10 @@ using VContainer.Unity;
 
 namespace Game.Presenter
 {
-    public class OutGameHomePresenter : IStartable, IDisposable
+    public class OutGameHomePresenter : IStartable, ITickable, IDisposable
     {
+        private const float BadgeRefreshIntervalSeconds = 1f;
+
         private readonly UI_OutGameHomeView _view;
         private readonly GoldService _goldService;
         private readonly UI_DeckPanelView _deckPanelView;
@@ -19,7 +22,16 @@ namespace Game.Presenter
         private readonly MissionPanelPresenter _missionPanelPresenter;
         private readonly ShopPanelPresenter _shopPanelPresenter;
         private readonly SettingsPresenter _settingsPresenter;
+        private readonly DailyRewardPresenter _dailyRewardPresenter;
+        private readonly DailyRewardService _dailyRewardService;
+        private readonly MissionService _missionService;
+        private readonly MissionTableSO _missionTable;
+        private readonly StageTableSO _stageTable;
+        private readonly StageProgressService _stageProgressService;
+        private readonly UnitTableSO _unitTable;
+        private readonly UserDataService _userDataService;
         private readonly CompositeDisposable _disposables = new();
+        private float _badgeRefreshTimer;
 
         public OutGameHomePresenter(
             UI_OutGameHomeView view,
@@ -32,7 +44,15 @@ namespace Game.Presenter
             UpgradePresenter upgradePresenter,
             MissionPanelPresenter missionPanelPresenter,
             ShopPanelPresenter shopPanelPresenter,
-            SettingsPresenter settingsPresenter)
+            SettingsPresenter settingsPresenter,
+            DailyRewardPresenter dailyRewardPresenter,
+            DailyRewardService dailyRewardService,
+            MissionService missionService,
+            MissionTableSO missionTable,
+            StageTableSO stageTable,
+            StageProgressService stageProgressService,
+            UnitTableSO unitTable,
+            UserDataService userDataService)
         {
             _view = view;
             _goldService = goldService;
@@ -45,6 +65,14 @@ namespace Game.Presenter
             _missionPanelPresenter = missionPanelPresenter;
             _shopPanelPresenter = shopPanelPresenter;
             _settingsPresenter = settingsPresenter;
+            _dailyRewardPresenter = dailyRewardPresenter;
+            _dailyRewardService = dailyRewardService;
+            _missionService = missionService;
+            _missionTable = missionTable;
+            _stageTable = stageTable;
+            _stageProgressService = stageProgressService;
+            _unitTable = unitTable;
+            _userDataService = userDataService;
         }
 
         public void Start()
@@ -52,6 +80,10 @@ namespace Game.Presenter
             _goldService.Gold.Subscribe(gold => _view.UpdateGold(gold)).AddTo(_disposables);
 
             _view.StageTabButton.onClick.AsObservable()
+                .Subscribe(_ => OnStageTabClicked())
+                .AddTo(_disposables);
+
+            _view.PlayButton.onClick.AsObservable()
                 .Subscribe(_ => OnStageTabClicked())
                 .AddTo(_disposables);
 
@@ -75,7 +107,33 @@ namespace Game.Presenter
                 .Subscribe(_ => OnSettingsClicked())
                 .AddTo(_disposables);
 
-            OnStageTabClicked();
+            _view.DailyRewardButton.onClick.AsObservable()
+                .Subscribe(_ => OnDailyRewardClicked())
+                .AddTo(_disposables);
+
+            UpdatePlayerStats();
+            RefreshBadges();
+
+            if (_view.StagePanelRoot != null)
+            {
+                _view.StagePanelRoot.SetActive(false);
+            }
+
+            _deckPanelView.Hide();
+            _upgradePanelView.Hide();
+            _missionPanelView.Hide();
+            _shopPanelView.Hide();
+        }
+
+        public void Tick()
+        {
+            _badgeRefreshTimer += UnityEngine.Time.deltaTime;
+
+            if (_badgeRefreshTimer >= BadgeRefreshIntervalSeconds)
+            {
+                _badgeRefreshTimer = 0f;
+                RefreshBadges();
+            }
         }
 
         public void Dispose()
@@ -154,11 +212,78 @@ namespace Game.Presenter
             _shopPanelView.Show();
 
             _shopPanelPresenter.Refresh();
+            UpdatePlayerStats();
         }
 
         private void OnSettingsClicked()
         {
             _settingsPresenter.Show();
+        }
+
+        private void OnDailyRewardClicked()
+        {
+            _dailyRewardPresenter.Show();
+        }
+
+        private void UpdatePlayerStats()
+        {
+            var bestStageNumber = 0;
+
+            foreach (var stageData in _stageTable.StageDataList)
+            {
+                if (_stageProgressService.IsStageCleared(stageData.id))
+                {
+                    if (int.TryParse(stageData.id.Replace("stage_", ""), out var stageNumber))
+                    {
+                        if (stageNumber > bestStageNumber)
+                        {
+                            bestStageNumber = stageNumber;
+                        }
+                    }
+                }
+            }
+
+            var bestStageLabel = bestStageNumber > 0 ? $"BEST STAGE {bestStageNumber}" : "BEST STAGE -";
+
+            var ownedCount = 0;
+            foreach (var unitData in _unitTable.UnitDataList)
+            {
+                if (_userDataService.IsUnitOwned(unitData.id))
+                {
+                    ownedCount++;
+                }
+            }
+
+            var totalCount = _unitTable.UnitDataList.Count;
+
+            _view.UpdatePlayerStats(bestStageLabel, ownedCount, totalCount);
+        }
+
+        private void RefreshBadges()
+        {
+            var canClaimDaily = _dailyRewardService.CanClaim();
+            if (_view.DailyRewardBadge != null)
+            {
+                _view.DailyRewardBadge.SetActive(canClaimDaily);
+            }
+
+            var hasClaimableMission = false;
+            foreach (var missionData in _missionTable.MissionDataList)
+            {
+                var isCompleted = _missionService.IsCompleted(missionData);
+                var isClaimed = _missionService.IsClaimed(missionData.id);
+
+                if (isCompleted && !isClaimed)
+                {
+                    hasClaimableMission = true;
+                    break;
+                }
+            }
+
+            if (_view.MissionsBadge != null)
+            {
+                _view.MissionsBadge.SetActive(hasClaimableMission);
+            }
         }
     }
 }

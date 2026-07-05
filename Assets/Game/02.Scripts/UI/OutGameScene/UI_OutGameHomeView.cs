@@ -18,6 +18,8 @@ namespace Game.View
         [SerializeField] private TMP_Text goldText;
         [SerializeField] private TMP_Text bestStageText;
         [SerializeField] private TMP_Text unitCountText;
+        [SerializeField] private TMP_Text stageNumberText;
+        [SerializeField] private TMP_Text stageNameText;
         [SerializeField] private GameObject dailyRewardBadge;
         [SerializeField] private GameObject missionsBadge;
 
@@ -52,6 +54,18 @@ namespace Game.View
             {
                 unitCountText.text = $"UNITS {ownedCount}/{totalCount}";
             }
+        }
+
+        public void UpdateSelectedStage(string numberLabel, string stageName)
+        {
+            if (stageNumberText == null || stageNameText == null)
+            {
+                Game.Core.GameLogger.LogWarning("[UI_OutGameHomeView] Stage title texts not wired, skipping UpdateSelectedStage.");
+                return;
+            }
+
+            stageNumberText.text = numberLabel;
+            stageNameText.text = stageName;
         }
     }
 }

@@ -17,5 +17,6 @@ namespace Game.Data
         public string mapId;
         public int goldReward;
         public float enemyStatMultiplier;
+        public string stageName;
     }
 }

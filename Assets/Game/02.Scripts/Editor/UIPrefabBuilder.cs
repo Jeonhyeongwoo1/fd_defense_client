@@ -99,6 +99,41 @@ namespace Game.Editor
             }
         }
 
+        /// <summary>버튼의 "Icon" 자식(재귀)에 스프라이트를 적용 — 첫 Image가 이펙트·배경인 킷 버튼 대응.</summary>
+        private static void SwapIconSprite(Transform button, Sprite sprite)
+        {
+            if (sprite == null)
+            {
+                return;
+            }
+
+            var iconTransform = button.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name == "Icon");
+            var iconImage = iconTransform != null ? iconTransform.GetComponent<Image>() : button.GetComponentInChildren<Image>(true);
+
+            if (iconImage == null)
+            {
+                GameLogger.LogWarning($"[UIPrefabBuilder] Icon image not found under {button.name}.");
+                return;
+            }
+
+            iconImage.sprite = sprite;
+        }
+
+        private static bool HasAncestorNamed(Transform target, Transform stopAt, string nameFragment)
+        {
+            var current = target;
+            while (current != null && current != stopAt)
+            {
+                if (current.name.Contains(nameFragment))
+                {
+                    return true;
+                }
+                current = current.parent;
+            }
+            return false;
+        }
+
         private static void DisableDemoDescendants(GameObject root, string[] nameFragments)
         {
             var contractNames = new HashSet<string>
@@ -1202,16 +1237,16 @@ namespace Game.Editor
             TMP_Text bestStageText;
             TMP_Text unitCountText;
 
-            const string lobby02Path = "Assets/Layer Lab/GUI Pro-MinimalGame/Theme_Light/Prefabs/Prefabs~DemoScenes/Lobby_02.prefab";
-            var lobby02Template = AssetDatabase.LoadAssetAtPath<GameObject>(lobby02Path);
+            const string lobbyDefaultPath = "Assets/Layer Lab/GUI Pro-MinimalGame/Theme_Light/Prefabs/Prefabs~DemoScenes/Lobby_Default.prefab";
+            var lobbyDefaultTemplate = AssetDatabase.LoadAssetAtPath<GameObject>(lobbyDefaultPath);
 
-            if (lobby02Template != null && TryBuildHomeFromLobby02(rootRect, lobby02Template, font, battleIcon, cardIcon, hammerIcon, checkIcon, shopIcon, giftIcon, goldIcon, out playButton, out tabButtons, out dailyRewardButton, out settingsButton, out goldText, out dailyRewardBadge, out missionsBadge, out statusPanel, out bestStageText, out unitCountText))
+            if (lobbyDefaultTemplate != null && TryBuildHomeFromLobbyDefault(rootRect, lobbyDefaultTemplate, font, battleIcon, cardIcon, hammerIcon, checkIcon, shopIcon, giftIcon, goldIcon, out playButton, out tabButtons, out dailyRewardButton, out settingsButton, out goldText, out dailyRewardBadge, out missionsBadge, out statusPanel, out bestStageText, out unitCountText))
             {
-                GameLogger.Log("[UIPrefabBuilder] Home UI built from Lobby_02 template.");
+                GameLogger.Log("[UIPrefabBuilder] Home UI built from Lobby_Default template.");
             }
             else
             {
-                GameLogger.LogWarning("[UIPrefabBuilder] Lobby_02 template failed, falling back to legacy creation.");
+                GameLogger.LogWarning("[UIPrefabBuilder] Lobby_Default template failed, falling back to legacy creation.");
                 goldText = CreateTopGoldBar(rootRect, goldIcon);
                 statusPanel = CreatePlayerStatusPanel(rootRect, font);
                 bestStageText = statusPanel.GetComponentsInChildren<Transform>(true)
@@ -1368,7 +1403,7 @@ namespace Game.Editor
             GameLogger.Log($"[UIPrefabBuilder] StageSelectScreen.prefab created at {prefabPath}");
         }
 
-        private static bool TryBuildHomeFromLobby02(RectTransform parent, GameObject lobby02Template, TMP_FontAsset font, Sprite battleIcon, Sprite cardIcon, Sprite hammerIcon, Sprite checkIcon, Sprite shopIcon, Sprite giftIcon, Sprite goldIcon, out Button playButton, out Button[] tabButtons, out Button dailyRewardButton, out Button settingsButton, out TMP_Text goldText, out GameObject dailyRewardBadge, out GameObject missionsBadge, out GameObject statusPanel, out TMP_Text bestStageText, out TMP_Text unitCountText)
+        private static bool TryBuildHomeFromLobbyDefault(RectTransform parent, GameObject lobbyDefaultTemplate, TMP_FontAsset font, Sprite battleIcon, Sprite cardIcon, Sprite hammerIcon, Sprite checkIcon, Sprite shopIcon, Sprite giftIcon, Sprite goldIcon, out Button playButton, out Button[] tabButtons, out Button dailyRewardButton, out Button settingsButton, out TMP_Text goldText, out GameObject dailyRewardBadge, out GameObject missionsBadge, out GameObject statusPanel, out TMP_Text bestStageText, out TMP_Text unitCountText)
         {
             playButton = null;
             tabButtons = new Button[4];
@@ -1383,311 +1418,380 @@ namespace Game.Editor
 
             try
             {
-                var lobbyInstance = PrefabUtility.InstantiatePrefab(lobby02Template) as GameObject;
+                var lobbyInstance = PrefabUtility.InstantiatePrefab(lobbyDefaultTemplate) as GameObject;
                 if (lobbyInstance == null)
                 {
                     return false;
                 }
 
                 lobbyInstance.transform.SetParent(parent, false);
-                lobbyInstance.name = "Lobby02Home";
+                lobbyInstance.name = "LobbyDefaultHome";
                 var lobbyRect = lobbyInstance.GetComponent<RectTransform>();
                 lobbyRect.anchorMin = Vector2.zero;
                 lobbyRect.anchorMax = Vector2.one;
                 lobbyRect.offsetMin = Vector2.zero;
                 lobbyRect.offsetMax = Vector2.zero;
 
-                // 화이트리스트 방식: 우리가 재활용하는 그룹 외 루트 자식은 전부 데모 요소이므로 비활성 (전수 감사 원칙)
-                var usedRootNames = new HashSet<string> { "Group_LeftButtons", "Group_RightButtons", "HambergerMenu" };
-                foreach (Transform rootChild in lobbyInstance.transform)
-                {
-                    if (!usedRootNames.Contains(rootChild.name))
-                    {
-                        rootChild.gameObject.SetActive(false);
-                    }
-                }
-
                 var allChildren = lobbyInstance.GetComponentsInChildren<Transform>(true);
 
-                var groupLeftButtons = allChildren.FirstOrDefault(t => t.name == "Group_LeftButtons");
-                Transform buttonFree = null;
-                Transform buttonADRemove = null;
-                if (groupLeftButtons != null)
+                // 1. goldText: 상단 첫 번째 재화바(골드) TMP 텍스트 재활용
+                Transform goldBar = null;
+                // 재화 바 그룹에서 보석(Gem) 바는 끄고 골드 바에 goldText 배선 — 스프라이트명으로 판별
+                var resourceGroup = allChildren.FirstOrDefault(t => t.name.Contains("ResourceBar_Group")) ?? goldBar;
+                if (resourceGroup != null)
                 {
-                    var leftRect = groupLeftButtons.GetComponent<RectTransform>();
-                    leftRect.anchorMin = new Vector2(0, 0);
-                    leftRect.anchorMax = new Vector2(0, 0);
-                    leftRect.pivot = new Vector2(0, 0);
-                    leftRect.anchoredPosition = new Vector2(140, 150);
+                    foreach (Transform bar in resourceGroup)
+                    {
+                        var hasGemSprite = bar.GetComponentsInChildren<Image>(true)
+                            .Any(img => img.sprite != null && img.sprite.name.Contains("Gem"));
 
-                    buttonFree = groupLeftButtons.Find("Button_Free");
-                    buttonADRemove = groupLeftButtons.Find("Button_ADRemove");
+                        if (hasGemSprite)
+                        {
+                            bar.gameObject.SetActive(false);
+                        }
+                        else if (goldText == null)
+                        {
+                            goldText = bar.GetComponentInChildren<TMP_Text>(true);
+                            if (goldText != null && font != null)
+                            {
+                                goldText.font = font;
+                            }
+                        }
+                    }
                 }
 
-                if (buttonFree != null)
+                // 2. bestStageText + unitCountText: 프로필 카드의 텍스트 재활용
+                Transform profileCard = allChildren.FirstOrDefault(t => t.name.Contains("UserInfo") || t.name.Contains("Profile") || t.name.Contains("Player"));
+                if (profileCard != null)
                 {
-                    buttonFree.name = "DeckTabButton";
-                    var iconTransform = buttonFree.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "Icon");
-                    if (iconTransform != null && cardIcon != null)
+                    // 이름/부제 텍스트 우선 (슬라이더 게이지 "25/55"·레벨 "3" 텍스트 제외)
+                    var profileTexts = profileCard.GetComponentsInChildren<TMP_Text>(true)
+                        .Where(t => !HasAncestorNamed(t.transform, profileCard, "Slider"))
+                        .OrderByDescending(t => t.gameObject.name.Contains("UserName"))
+                        .ToArray();
+                    if (profileTexts.Length >= 2)
                     {
-                        var iconImage = iconTransform.GetComponent<Image>();
-                        if (iconImage != null)
+                        bestStageText = profileTexts[0];
+                        bestStageText.text = "BEST STAGE -";
+                        bestStageText.color = new Color(0.35f, 0.27f, 0.2f);
+                        if (font != null)
                         {
-                            iconImage.sprite = cardIcon;
+                            bestStageText.font = font;
+                        }
+
+                        unitCountText = profileTexts[1];
+                        unitCountText.text = "UNITS 10/15";
+                        if (font != null)
+                        {
+                            unitCountText.font = font;
                         }
                     }
 
-                    var textTransform = buttonFree.GetComponentsInChildren<TMP_Text>(true).FirstOrDefault();
-                    if (textTransform != null)
-                    {
-                        textTransform.text = "DECK";
-                    }
-
-                    var bgImages = buttonFree.GetComponentsInChildren<Image>(true);
-                    var hasActiveBackground = false;
-                    foreach (var img in bgImages)
-                    {
-                        if (img.gameObject.activeSelf && img.gameObject != buttonFree.gameObject)
-                        {
-                            hasActiveBackground = true;
-                            break;
-                        }
-                    }
-                    if (!hasActiveBackground)
-                    {
-                        var circleBg = InstantiateKitPrefab(ButtonCirclePath, buttonFree);
-                        if (circleBg != null)
-                        {
-                            circleBg.transform.SetSiblingIndex(0);
-                            var bgRect = circleBg.GetComponent<RectTransform>();
-                            bgRect.anchorMin = Vector2.zero;
-                            bgRect.anchorMax = Vector2.one;
-                            bgRect.offsetMin = Vector2.zero;
-                            bgRect.offsetMax = Vector2.zero;
-                        }
-                    }
-
-                    tabButtons[0] = EnsureButtonComponent(buttonFree.gameObject);
-                }
-                else
-                {
-                    GameLogger.LogWarning("[UIPrefabBuilder] Button_Free not found in Lobby_02.");
-                    return false;
+                    statusPanel = profileCard.gameObject;
                 }
 
-                if (buttonADRemove != null)
-                {
-                    buttonADRemove.name = "UpgradeTabButton";
-                    var iconTransform = buttonADRemove.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "Icon");
-                    if (iconTransform != null && hammerIcon != null)
-                    {
-                        var iconImage = iconTransform.GetComponent<Image>();
-                        if (iconImage != null)
-                        {
-                            iconImage.sprite = hammerIcon;
-                        }
-                    }
-
-                    var textTransform = buttonADRemove.GetComponentsInChildren<TMP_Text>(true).FirstOrDefault();
-                    if (textTransform != null)
-                    {
-                        textTransform.text = "UPGRADE";
-                    }
-
-                    var sampleEffect = buttonADRemove.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "SampleEffect");
-                    if (sampleEffect != null)
-                    {
-                        sampleEffect.gameObject.SetActive(false);
-                    }
-
-                    var bgImagesUpgrade = buttonADRemove.GetComponentsInChildren<Image>(true);
-                    var hasActiveBackgroundUpgrade = false;
-                    foreach (var img in bgImagesUpgrade)
-                    {
-                        if (img.gameObject.activeSelf && img.gameObject != buttonADRemove.gameObject)
-                        {
-                            hasActiveBackgroundUpgrade = true;
-                            break;
-                        }
-                    }
-                    if (!hasActiveBackgroundUpgrade)
-                    {
-                        var circleBg = InstantiateKitPrefab(ButtonCirclePath, buttonADRemove);
-                        if (circleBg != null)
-                        {
-                            circleBg.transform.SetSiblingIndex(0);
-                            var bgRect = circleBg.GetComponent<RectTransform>();
-                            bgRect.anchorMin = Vector2.zero;
-                            bgRect.anchorMax = Vector2.one;
-                            bgRect.offsetMin = Vector2.zero;
-                            bgRect.offsetMax = Vector2.zero;
-                        }
-                    }
-
-                    tabButtons[1] = EnsureButtonComponent(buttonADRemove.gameObject);
-                }
-                else
-                {
-                    GameLogger.LogWarning("[UIPrefabBuilder] Button_ADRemove not found in Lobby_02.");
-                    return false;
-                }
-
-                var groupRightButtons = allChildren.FirstOrDefault(t => t.name == "Group_RightButtons");
-                Transform buttonInventory = null;
-                if (groupRightButtons != null)
-                {
-                    var rightRect = groupRightButtons.GetComponent<RectTransform>();
-                    rightRect.anchorMin = new Vector2(1, 0);
-                    rightRect.anchorMax = new Vector2(1, 0);
-                    rightRect.pivot = new Vector2(1, 0);
-                    rightRect.anchoredPosition = new Vector2(-140, 150);
-
-                    buttonInventory = groupRightButtons.Find("Button_Inventory");
-                }
-
-                if (buttonInventory != null)
-                {
-                    buttonInventory.name = "MissionsTabButton";
-                    var iconTransform = buttonInventory.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "Icon");
-                    if (iconTransform != null && checkIcon != null)
-                    {
-                        var iconImage = iconTransform.GetComponent<Image>();
-                        if (iconImage != null)
-                        {
-                            iconImage.sprite = checkIcon;
-                        }
-                    }
-
-                    var textTransform = buttonInventory.GetComponentsInChildren<TMP_Text>(true).FirstOrDefault();
-                    if (textTransform != null)
-                    {
-                        textTransform.text = "MISSIONS";
-                    }
-
-                    var bgImagesMissions = buttonInventory.GetComponentsInChildren<Image>(true);
-                    var hasActiveBackgroundMissions = false;
-                    foreach (var img in bgImagesMissions)
-                    {
-                        if (img.gameObject.activeSelf && img.gameObject != buttonInventory.gameObject)
-                        {
-                            hasActiveBackgroundMissions = true;
-                            break;
-                        }
-                    }
-                    if (!hasActiveBackgroundMissions)
-                    {
-                        var circleBg = InstantiateKitPrefab(ButtonCirclePath, buttonInventory);
-                        if (circleBg != null)
-                        {
-                            circleBg.transform.SetSiblingIndex(0);
-                            var bgRect = circleBg.GetComponent<RectTransform>();
-                            bgRect.anchorMin = Vector2.zero;
-                            bgRect.anchorMax = Vector2.one;
-                            bgRect.offsetMin = Vector2.zero;
-                            bgRect.offsetMax = Vector2.zero;
-                        }
-                    }
-
-                    tabButtons[2] = EnsureButtonComponent(buttonInventory.gameObject);
-
-                    missionsBadge = CreateAlertBadge(tabButtons[2].transform, new Vector2(30, 30));
-
-                    var shopButtonClone = Object.Instantiate(buttonInventory.gameObject);
-                    shopButtonClone.name = "ShopTabButton";
-                    shopButtonClone.transform.SetParent(groupRightButtons, false);
-                    var shopRect = shopButtonClone.GetComponent<RectTransform>();
-                    if (shopRect != null)
-                    {
-                        var inventoryRect = buttonInventory.GetComponent<RectTransform>();
-                        shopRect.anchoredPosition = inventoryRect.anchoredPosition + new Vector2(150, 0);
-                    }
-
-                    var shopIconTransform = shopButtonClone.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "Icon");
-                    if (shopIconTransform != null && shopIcon != null)
-                    {
-                        var shopIconImage = shopIconTransform.GetComponent<Image>();
-                        if (shopIconImage != null)
-                        {
-                            shopIconImage.sprite = shopIcon;
-                        }
-                    }
-
-                    var shopTextTransform = shopButtonClone.GetComponentsInChildren<TMP_Text>(true).FirstOrDefault();
-                    if (shopTextTransform != null)
-                    {
-                        shopTextTransform.text = "SHOP";
-                    }
-
-                    var bgImagesShop = shopButtonClone.GetComponentsInChildren<Image>(true);
-                    var hasActiveBackgroundShop = false;
-                    foreach (var img in bgImagesShop)
-                    {
-                        if (img.gameObject.activeSelf && img.gameObject != shopButtonClone)
-                        {
-                            hasActiveBackgroundShop = true;
-                            break;
-                        }
-                    }
-                    if (!hasActiveBackgroundShop)
-                    {
-                        var circleBg = InstantiateKitPrefab(ButtonCirclePath, shopButtonClone.transform);
-                        if (circleBg != null)
-                        {
-                            circleBg.transform.SetSiblingIndex(0);
-                            var bgRect = circleBg.GetComponent<RectTransform>();
-                            bgRect.anchorMin = Vector2.zero;
-                            bgRect.anchorMax = Vector2.one;
-                            bgRect.offsetMin = Vector2.zero;
-                            bgRect.offsetMax = Vector2.zero;
-                        }
-                    }
-
-                    tabButtons[3] = EnsureButtonComponent(shopButtonClone);
-                }
-                else
-                {
-                    GameLogger.LogWarning("[UIPrefabBuilder] Button_Inventory not found in Lobby_02.");
-                    return false;
-                }
-
-                playButton = CreatePlayButton(parent, font, battleIcon);
-
-                var hambergerMenu = allChildren.FirstOrDefault(t => t.name == "HambergerMenu");
+                // 3. settingsButton: 우상단 햄버거 버튼
+                var hambergerMenu = allChildren.FirstOrDefault(t => t.name.Contains("Hamberger") || t.name.Contains("Menu") || t.name.Contains("Setting"));
                 if (hambergerMenu != null)
                 {
-                    hambergerMenu.gameObject.SetActive(false);
+                    hambergerMenu.name = "SettingsButton";
+                    settingsButton = EnsureButtonComponent(hambergerMenu.gameObject);
                 }
 
-                var gearIcon = LoadSprite(KitRoot + "Shared/Icons/PictoIcon/128/headgear.png");
-                if (gearIcon == null)
-                {
-                    gearIcon = LoadSprite(KitRoot + "Shared/Icons/PictoIcon/128/menu_1.png");
-                }
-                settingsButton = CreateSettingsButton(parent, gearIcon);
-                dailyRewardButton = CreateDailyRewardButton(parent, giftIcon);
-                dailyRewardBadge = CreateAlertBadge(dailyRewardButton.transform, new Vector2(30, 30));
-
-                var unusedNames = new[] { "Image_League", "Status_Rune", "Timer", "Text_Time" };
+                // 4. dailyRewardButton: 좌측 상단 타이머 아이콘 버튼
+                Transform timerButton = null;
                 foreach (var child in allChildren)
                 {
-                    if (unusedNames.Any(n => child.name.Contains(n)))
+                    if (child.name.Contains("Ticket") || child.name.Contains("Timer") || child.name.Contains("Time"))
+                    {
+                        var img = child.GetComponent<Image>() != null ? child.GetComponent<Image>() : child.GetComponentInChildren<Image>(true);
+                        if (img != null)
+                        {
+                            timerButton = child;
+                            break;
+                        }
+                    }
+                }
+
+                if (timerButton != null)
+                {
+                    timerButton.name = "DailyRewardButton";
+                    var iconTransform = timerButton.GetComponentsInChildren<Transform>(true).FirstOrDefault(t => t.name == "Icon");
+                    var iconImage = iconTransform != null ? iconTransform.GetComponent<Image>() : timerButton.GetComponent<Image>();
+                    if (iconImage != null && giftIcon != null)
+                    {
+                        iconImage.sprite = giftIcon;
+                    }
+
+                    var timerTexts = timerButton.GetComponentsInChildren<TMP_Text>(true);
+                    foreach (var txt in timerTexts)
+                    {
+                        if (txt.text.Contains("d") || txt.text.Contains("h"))
+                        {
+                            txt.gameObject.SetActive(false);
+                        }
+                        else
+                        {
+                            txt.text = "Reward";
+                            if (font != null)
+                            {
+                                txt.font = font;
+                            }
+                        }
+                    }
+
+                    dailyRewardButton = EnsureButtonComponent(timerButton.gameObject);
+                    dailyRewardBadge = CreateAlertBadge(dailyRewardButton.transform, new Vector2(30, 30));
+                }
+
+                // 5. upgradeTabButton: 좌측 AD Skip 버튼
+                Transform adSkipButton = null;
+                foreach (var child in allChildren)
+                {
+                    if (child.name.Contains("ADSkip") || child.name.Contains("Skip") || child.name.Contains("AD"))
+                    {
+                        var btn = child.GetComponent<Button>();
+                        var img = child.GetComponent<Image>();
+                        if (btn != null || img != null)
+                        {
+                            adSkipButton = child;
+                            break;
+                        }
+                    }
+                }
+
+                if (adSkipButton != null)
+                {
+                    adSkipButton.name = "UpgradeTabButton";
+                    SwapIconSprite(adSkipButton, hammerIcon);
+
+                    var labelText = adSkipButton.GetComponentInChildren<TMP_Text>(true);
+                    if (labelText != null)
+                    {
+                        labelText.text = "Upgrade";
+                        if (font != null)
+                        {
+                            labelText.font = font;
+                        }
+                    }
+
+                    var sampleEffects = adSkipButton.GetComponentsInChildren<Transform>(true);
+                    foreach (var eff in sampleEffects)
+                    {
+                        if (eff.name.Contains("SampleEffect") || eff.name.Contains("Effect") || eff.name.Contains("Glow"))
+                        {
+                            eff.gameObject.SetActive(false);
+                        }
+                    }
+
+                    tabButtons[1] = EnsureButtonComponent(adSkipButton.gameObject);
+                }
+
+                // 6. missionsTabButton: 우측 Mission 두루마리 버튼
+                Transform missionButton = null;
+                foreach (var child in allChildren)
+                {
+                    if (child.name.Contains("Mission") || child.name.Contains("Scroll"))
+                    {
+                        var btn = child.GetComponent<Button>();
+                        var img = child.GetComponent<Image>();
+                        if (btn != null || img != null)
+                        {
+                            missionButton = child;
+                            break;
+                        }
+                    }
+                }
+
+                if (missionButton != null)
+                {
+                    missionButton.name = "MissionsTabButton";
+                    tabButtons[2] = EnsureButtonComponent(missionButton.gameObject);
+                    missionsBadge = CreateAlertBadge(tabButtons[2].transform, new Vector2(30, 30));
+                }
+
+                // 7. deckTabButton: 우측 Inventory 가방 버튼
+                Transform inventoryButton = null;
+                foreach (var child in allChildren)
+                {
+                    if (child.name.Contains("Inventory") || child.name.Contains("Bag"))
+                    {
+                        var btn = child.GetComponent<Button>();
+                        var img = child.GetComponent<Image>();
+                        if (btn != null || img != null)
+                        {
+                            inventoryButton = child;
+                            break;
+                        }
+                    }
+                }
+
+                if (inventoryButton != null)
+                {
+                    inventoryButton.name = "DeckTabButton";
+                    SwapIconSprite(inventoryButton, cardIcon);
+
+                    var labelText = inventoryButton.GetComponentInChildren<TMP_Text>(true);
+                    if (labelText != null)
+                    {
+                        labelText.text = "Deck";
+                        if (font != null)
+                        {
+                            labelText.font = font;
+                        }
+                    }
+
+                    tabButtons[0] = EnsureButtonComponent(inventoryButton.gameObject);
+
+                    // 12. shopTabButton: Inventory 버튼 복제
+                    if (inventoryButton.parent != null)
+                    {
+                        var shopButtonClone = Object.Instantiate(inventoryButton.gameObject);
+                        shopButtonClone.name = "ShopTabButton";
+                        shopButtonClone.transform.SetParent(inventoryButton.parent, false);
+
+                        var shopRect = shopButtonClone.GetComponent<RectTransform>();
+                        var inventoryRect = inventoryButton.GetComponent<RectTransform>();
+                        if (shopRect != null && inventoryRect != null)
+                        {
+                            shopRect.anchoredPosition = inventoryRect.anchoredPosition + new Vector2(0, -150);
+                        }
+
+                        SwapIconSprite(shopButtonClone.transform, shopIcon);
+
+                        var shopLabelText = shopButtonClone.GetComponentInChildren<TMP_Text>(true);
+                        if (shopLabelText != null)
+                        {
+                            shopLabelText.text = "Shop";
+                            if (font != null)
+                            {
+                                shopLabelText.font = font;
+                            }
+                        }
+
+                        tabButtons[3] = EnsureButtonComponent(shopButtonClone);
+                    }
+                }
+
+                // 8. stageTabButton: 중앙 맵 디오라마 버튼화
+                Transform mapDiorama = null;
+                foreach (var child in allChildren)
+                {
+                    if (child.name.Contains("Map") || child.name.Contains("Diorama") || child.name.Contains("SampleImage"))
+                    {
+                        mapDiorama = child;
+                        break;
+                    }
+                }
+
+                if (mapDiorama != null)
+                {
+                    mapDiorama.name = "StageTabButton";
+                    var mapTexts = mapDiorama.GetComponentsInChildren<TMP_Text>(true);
+                    foreach (var txt in mapTexts)
+                    {
+                        if (txt.text.Contains("Battle"))
+                        {
+                            txt.text = "STAGE 1";
+                            if (font != null)
+                            {
+                                txt.font = font;
+                            }
+                        }
+                    }
+
+                    var stageButton = EnsureButtonComponent(mapDiorama.gameObject);
+                    playButton = stageButton;
+                }
+
+                // 9. playButton: 빨간 START 버튼
+                Transform startButton = null;
+                foreach (var child in allChildren)
+                {
+                    if (child.name.Contains("START") || child.name.Contains("Start") || child.name.Contains("Play"))
+                    {
+                        var btn = child.GetComponent<Button>();
+                        if (btn != null)
+                        {
+                            startButton = child;
+                            break;
+                        }
+                    }
+                }
+
+                if (startButton != null)
+                {
+                    startButton.name = "PlayButton";
+                    var labelText = startButton.GetComponentInChildren<TMP_Text>(true);
+                    if (labelText != null)
+                    {
+                        labelText.text = "PLAY";
+                        if (font != null)
+                        {
+                            labelText.font = font;
+                        }
+                    }
+
+                    if (playButton == null)
+                    {
+                        playButton = EnsureButtonComponent(startButton.gameObject);
+                    }
+                }
+
+                // 10. 비활성: 하단 채팅·탭바
+                var disableNames = new[] { "Chat", "chat", "Tab_", "Bubble" };
+                foreach (var child in allChildren)
+                {
+                    if (disableNames.Any(n => child.name.Contains(n)))
                     {
                         child.gameObject.SetActive(false);
                     }
                 }
 
-                goldText = CreateTopGoldBar(parent, goldIcon);
-                statusPanel = CreatePlayerStatusPanel(parent, font);
-                bestStageText = statusPanel.GetComponentsInChildren<Transform>(true)
-                    .FirstOrDefault(t => t.name == "BestStageText")?.GetComponent<TMP_Text>();
-                unitCountText = statusPanel.GetComponentsInChildren<Transform>(true)
-                    .FirstOrDefault(t => t.name == "UnitCountText")?.GetComponent<TMP_Text>();
+                if (goldText == null)
+                {
+                    GameLogger.LogWarning("[UIPrefabBuilder] goldText not found in Lobby_Default, searching alternatives...");
+                    var allTexts = lobbyInstance.GetComponentsInChildren<TMP_Text>(true);
+                    foreach (var txt in allTexts)
+                    {
+                        if (txt.text.Contains("Gold") || txt.text.Contains("Coin") || txt.gameObject.name.Contains("Gold"))
+                        {
+                            goldText = txt;
+                            break;
+                        }
+                    }
+                }
+
+                if (bestStageText == null || unitCountText == null)
+                {
+                    GameLogger.LogWarning("[UIPrefabBuilder] Profile texts not found in Lobby_Default.");
+                }
+
+                if (settingsButton == null)
+                {
+                    GameLogger.LogWarning("[UIPrefabBuilder] settingsButton not found in Lobby_Default.");
+                }
+
+                if (dailyRewardButton == null)
+                {
+                    GameLogger.LogWarning("[UIPrefabBuilder] dailyRewardButton not found in Lobby_Default.");
+                }
+
+                if (tabButtons[0] == null || tabButtons[1] == null || tabButtons[2] == null || tabButtons[3] == null)
+                {
+                    GameLogger.LogWarning("[UIPrefabBuilder] Some tab buttons not found in Lobby_Default.");
+                }
+
+                if (playButton == null)
+                {
+                    GameLogger.LogWarning("[UIPrefabBuilder] playButton not found in Lobby_Default.");
+                }
 
                 return true;
             }
             catch (System.Exception ex)
             {
-                GameLogger.LogError($"[UIPrefabBuilder] TryBuildHomeFromLobby02 failed: {ex.Message}");
+                GameLogger.LogError($"[UIPrefabBuilder] TryBuildHomeFromLobbyDefault failed: {ex.Message}");
                 return false;
             }
         }

@@ -78,7 +78,7 @@ namespace Game.Editor
 
             var camera = cameraObject.AddComponent<Camera>();
             camera.orthographic = true;
-            camera.orthographicSize = 8f;
+            camera.orthographicSize = 10f;
             camera.backgroundColor = new Color(0.53f, 0.81f, 0.92f);
             camera.clearFlags = CameraClearFlags.SolidColor;
             cameraObject.transform.position = new Vector3(0f, 1f, -10f);
@@ -165,7 +165,7 @@ namespace Game.Editor
 
             var canvasScaler = canvasObject.AddComponent<CanvasScaler>();
             canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            canvasScaler.referenceResolution = new Vector2(1920, 1080);
+            canvasScaler.referenceResolution = new Vector2(1080, 1920);
             canvasScaler.matchWidthOrHeight = 0.5f;
 
             canvasObject.AddComponent<GraphicRaycaster>();

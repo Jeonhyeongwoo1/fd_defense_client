@@ -439,7 +439,7 @@ namespace Game.Editor
             var buttons = new UI_UnitSpawnButtonView[UnitIds.Length];
             const int columnCount = 5;
             const float spacing = 135f;
-            const float rowHeight = 135f;
+            const float rowHeight = 140f;
             const float bottomRowY = 90f;
 
             for (var i = 0; i < UnitIds.Length; i++)
@@ -447,7 +447,6 @@ namespace Game.Editor
                 var column = i % columnCount;
                 var row = i / columnCount;
                 var x = (column - (columnCount - 1) * 0.5f) * spacing;
-                // 코스트 오름차순 앞 5개가 아랫줄(빠른 접근), 다음 5개가 윗줄
                 var y = bottomRowY + row * rowHeight;
                 buttons[i] = CreateUnitButton(parent, new Vector2(x, y), UnitIds[i], PetNames[i], font);
             }
@@ -618,7 +617,7 @@ namespace Game.Editor
             bannerRect.anchorMin = new Vector2(0.5f, 1);
             bannerRect.anchorMax = new Vector2(0.5f, 1);
             bannerRect.pivot = new Vector2(0.5f, 1);
-            bannerRect.anchoredPosition = new Vector2(0, -350);
+            bannerRect.anchoredPosition = new Vector2(0, -250);
             bannerRect.sizeDelta = new Vector2(600, 110);
 
             var bannerText = bannerInstance.GetComponentInChildren<TMP_Text>();
@@ -1192,7 +1191,7 @@ namespace Game.Editor
             scrollViewRect.anchorMax = new Vector2(0.5f, 0.5f);
             scrollViewRect.pivot = new Vector2(0.5f, 0.5f);
             scrollViewRect.anchoredPosition = Vector2.zero;
-            scrollViewRect.sizeDelta = new Vector2(1600, 700);
+            scrollViewRect.sizeDelta = new Vector2(1000, 1200);
 
             var scrollRect = scrollViewObject.AddComponent<ScrollRect>();
             scrollRect.horizontal = false;
@@ -1236,15 +1235,15 @@ namespace Game.Editor
                 }
             }
 
-            const int columns = 5;
-            const float buttonWidth = 300f;
-            const float buttonHeight = 110f;
-            const float spacingX = 320f;
-            const float spacingY = 130f;
+            const int columns = 4;
+            const float buttonWidth = 230f;
+            const float buttonHeight = 100f;
+            const float spacingX = 250f;
+            const float spacingY = 120f;
 
             var rows = (stageIds.Length + columns - 1) / columns;
             var contentHeight = rows * spacingY + 50f;
-            contentRect.sizeDelta = new Vector2(1600, contentHeight);
+            contentRect.sizeDelta = new Vector2(1000, contentHeight);
 
             for (var i = 0; i < stageIds.Length; i++)
             {
@@ -1552,7 +1551,7 @@ namespace Game.Editor
             var buttons = new Button[4];
             var labels = new[] { "DECK", "UPGRADE", "MISSIONS", "SHOP" };
             var icons = new[] { cardIcon, hammerIcon, checkIcon, shopIcon };
-            var xPositions = new[] { -330f, -500f, 330f, 500f };
+            var xPositions = new[] { -280f, -430f, 280f, 430f };
             var yPosition = 120f;
 
             for (var i = 0; i < 4; i++)

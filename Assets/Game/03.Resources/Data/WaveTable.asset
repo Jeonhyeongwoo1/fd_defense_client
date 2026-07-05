@@ -16,60 +16,48 @@ MonoBehaviour:
   - id: wave_001
     SpawnEntryList:
     - enemyId: enemy_slime_green
-      count: 4
-      interval: 2.6
-    - enemyId: enemy_slime_purple
-      count: 2
-      interval: 5
+      count: 3
+      interval: 4
   - id: wave_002
     SpawnEntryList:
-    - enemyId: enemy_slime_purple
-      count: 5
-      interval: 2.5
-    - enemyId: enemy_bird_eagle
-      count: 2
-      interval: 5
+    - enemyId: enemy_slime_green
+      count: 4
+      interval: 3.5
   - id: wave_003
     SpawnEntryList:
-    - enemyId: enemy_bird_eagle
-      count: 6
-      interval: 2.4
     - enemyId: enemy_slime_green
-      count: 3
-      interval: 5
+      count: 4
+      interval: 3.5
+    - enemyId: enemy_slime_purple
+      count: 1
+      interval: 8
   - id: wave_004
     SpawnEntryList:
     - enemyId: enemy_slime_green
-      count: 7
-      interval: 2.3
+      count: 5
+      interval: 3.2
+    - enemyId: enemy_slime_purple
+      count: 2
+      interval: 7
+  - id: wave_005
+    SpawnEntryList:
+    - enemyId: enemy_slime_purple
+      count: 4
+      interval: 3
+    - enemyId: enemy_slime_green
+      count: 3
+      interval: 6
+  - id: wave_006
+    SpawnEntryList:
+    - enemyId: enemy_slime_green
+      count: 5
+      interval: 3
     - enemyId: enemy_slime_purple
       count: 3
       interval: 5
     - enemyId: enemy_bird_eagle
-      count: 2
-      interval: 6
-  - id: wave_005
-    SpawnEntryList:
-    - enemyId: enemy_slime_purple
-      count: 8
-      interval: 2.2
-    - enemyId: enemy_bird_eagle
-      count: 4
-      interval: 5
-    - enemyId: enemy_slime_green
-      count: 2
-      interval: 6
-  - id: wave_006
-    SpawnEntryList:
-    - enemyId: enemy_bird_eagle
-      count: 9
-      interval: 2.1
-    - enemyId: enemy_slime_green
-      count: 4
-      interval: 5
-    - enemyId: enemy_slime_purple
-      count: 2
-      interval: 6
+      count: 1
+      interval: 10
   - id: wave_007
     SpawnEntryList:
     - enemyId: enemy_beetle_red

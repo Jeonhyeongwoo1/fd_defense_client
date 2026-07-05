@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Game.View
 {
@@ -6,9 +7,11 @@ namespace Game.View
     {
         [SerializeField] private GameObject root;
         [SerializeField] private UI_MissionRowView[] missionRows;
+        [SerializeField] private Button closeButton;
 
         public GameObject Root => root;
         public UI_MissionRowView[] MissionRows => missionRows;
+        public Button CloseButton => closeButton;
 
         public void Show()
         {

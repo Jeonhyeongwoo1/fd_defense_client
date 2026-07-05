@@ -343,6 +343,12 @@ namespace Game.Editor
                     enemyStatMultiplier = float.Parse(columns[10], CultureInfo.InvariantCulture);
                 }
 
+                var stageName = string.Empty;
+                if (columns.Length > 11 && !string.IsNullOrEmpty(columns[11]))
+                {
+                    stageName = columns[11];
+                }
+
                 var data = new StageData
                 {
                     id = columns[0],
@@ -355,7 +361,8 @@ namespace Game.Editor
                     bossId = columns[7],
                     mapId = columns.Length > 8 ? columns[8] : string.Empty,
                     goldReward = columns.Length > 9 ? int.Parse(columns[9]) : 0,
-                    enemyStatMultiplier = enemyStatMultiplier
+                    enemyStatMultiplier = enemyStatMultiplier,
+                    stageName = stageName
                 };
 
                 stageDataList.Add(data);

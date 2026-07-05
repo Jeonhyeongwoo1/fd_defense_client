@@ -112,6 +112,7 @@ namespace Game.Presenter
                 .AddTo(_disposables);
 
             UpdatePlayerStats();
+            UpdateSelectedStageDisplay();
             RefreshBadges();
 
             if (_view.StagePanelRoot != null)
@@ -257,6 +258,28 @@ namespace Game.Presenter
             var totalCount = _unitTable.UnitDataList.Count;
 
             _view.UpdatePlayerStats(bestStageLabel, ownedCount, totalCount);
+        }
+
+        private void UpdateSelectedStageDisplay()
+        {
+            var selectedStageId = _stageProgressService.GetSelectedStageId();
+            var stageData = _stageTable.GetById(selectedStageId);
+
+            if (stageData == null)
+            {
+                Game.Core.GameLogger.LogWarning($"[OutGameHomePresenter] Selected stage '{selectedStageId}' not found in StageTable.");
+                return;
+            }
+
+            var stageNumber = 0;
+            if (int.TryParse(stageData.id.Replace("stage_", ""), out stageNumber))
+            {
+                _view.UpdateSelectedStage($"STAGE {stageNumber}", stageData.stageName);
+            }
+            else
+            {
+                Game.Core.GameLogger.LogWarning($"[OutGameHomePresenter] Failed to parse stage number from '{stageData.id}'.");
+            }
         }
 
         private void RefreshBadges()

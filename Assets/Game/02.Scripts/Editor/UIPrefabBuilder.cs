@@ -1237,11 +1237,13 @@ namespace Game.Editor
             TMP_Text bestStageText;
             TMP_Text unitCountText;
             Button stageTabHomeButton = null;
+            TMP_Text stageNumberText = null;
+            TMP_Text stageNameText = null;
 
             const string lobbyDefaultPath = "Assets/Layer Lab/GUI Pro-MinimalGame/Theme_Light/Prefabs/Prefabs~DemoScenes/Lobby_Default.prefab";
             var lobbyDefaultTemplate = AssetDatabase.LoadAssetAtPath<GameObject>(lobbyDefaultPath);
 
-            if (lobbyDefaultTemplate != null && TryBuildHomeFromLobbyDefault(rootRect, lobbyDefaultTemplate, font, battleIcon, cardIcon, hammerIcon, checkIcon, shopIcon, giftIcon, goldIcon, out playButton, out tabButtons, out dailyRewardButton, out settingsButton, out goldText, out dailyRewardBadge, out missionsBadge, out statusPanel, out bestStageText, out unitCountText, out stageTabHomeButton))
+            if (lobbyDefaultTemplate != null && TryBuildHomeFromLobbyDefault(rootRect, lobbyDefaultTemplate, font, battleIcon, cardIcon, hammerIcon, checkIcon, shopIcon, giftIcon, goldIcon, out playButton, out tabButtons, out dailyRewardButton, out settingsButton, out goldText, out dailyRewardBadge, out missionsBadge, out statusPanel, out bestStageText, out unitCountText, out stageTabHomeButton, out stageNumberText, out stageNameText))
             {
                 GameLogger.Log("[UIPrefabBuilder] Home UI built from Lobby_Default template.");
             }
@@ -1306,6 +1308,8 @@ namespace Game.Editor
             homeSerializer.FindProperty("goldText").objectReferenceValue = goldText;
             homeSerializer.FindProperty("bestStageText").objectReferenceValue = bestStageText;
             homeSerializer.FindProperty("unitCountText").objectReferenceValue = unitCountText;
+            homeSerializer.FindProperty("stageNumberText").objectReferenceValue = stageNumberText;
+            homeSerializer.FindProperty("stageNameText").objectReferenceValue = stageNameText;
             homeSerializer.FindProperty("dailyRewardBadge").objectReferenceValue = dailyRewardBadge;
             homeSerializer.FindProperty("missionsBadge").objectReferenceValue = missionsBadge;
             homeSerializer.ApplyModifiedProperties();
@@ -1404,7 +1408,7 @@ namespace Game.Editor
             GameLogger.Log($"[UIPrefabBuilder] StageSelectScreen.prefab created at {prefabPath}");
         }
 
-        private static bool TryBuildHomeFromLobbyDefault(RectTransform parent, GameObject lobbyDefaultTemplate, TMP_FontAsset font, Sprite battleIcon, Sprite cardIcon, Sprite hammerIcon, Sprite checkIcon, Sprite shopIcon, Sprite giftIcon, Sprite goldIcon, out Button playButton, out Button[] tabButtons, out Button dailyRewardButton, out Button settingsButton, out TMP_Text goldText, out GameObject dailyRewardBadge, out GameObject missionsBadge, out GameObject statusPanel, out TMP_Text bestStageText, out TMP_Text unitCountText, out Button stageTabButton)
+        private static bool TryBuildHomeFromLobbyDefault(RectTransform parent, GameObject lobbyDefaultTemplate, TMP_FontAsset font, Sprite battleIcon, Sprite cardIcon, Sprite hammerIcon, Sprite checkIcon, Sprite shopIcon, Sprite giftIcon, Sprite goldIcon, out Button playButton, out Button[] tabButtons, out Button dailyRewardButton, out Button settingsButton, out TMP_Text goldText, out GameObject dailyRewardBadge, out GameObject missionsBadge, out GameObject statusPanel, out TMP_Text bestStageText, out TMP_Text unitCountText, out Button stageTabButton, out TMP_Text stageNumberText, out TMP_Text stageNameText)
         {
             playButton = null;
             stageTabButton = null;
@@ -1417,6 +1421,8 @@ namespace Game.Editor
             statusPanel = null;
             bestStageText = null;
             unitCountText = null;
+            stageNumberText = null;
+            stageNameText = null;
 
             // 원본 컬러 아이콘 톤에 맞춰 흰색 픽토그램 대신 UniqueIcon 컬러 세트 사용 (사용자 지시)
             const string uniqueIconRoot = KitRoot + "Shared/Icons/UniqueIcon/128/";
@@ -1520,6 +1526,7 @@ namespace Game.Editor
                     }
 
                     statusPanel = profileCard.gameObject;
+                    statusPanel.SetActive(false);
                 }
 
                 // 3. settingsButton: 우상단 햄버거 버튼
@@ -1644,31 +1651,33 @@ namespace Game.Editor
                 }
 
                 // 8. stageTabButton: 중앙 맵 디오라마 버튼화
-                Transform mapDiorama = null;
-                foreach (var child in allChildren)
+                // 스테이지 타이틀 텍스트는 디오라마가 아니라 루트 타이틀 데코에 있음 — 로비 전체에서 텍스트 값으로 탐색
+                foreach (var txt in lobbyInstance.GetComponentsInChildren<TMP_Text>(true))
                 {
-                    if (child.name.Contains("Map") || child.name.Contains("Diorama") || child.name.Contains("SampleImage"))
+                    if (stageNumberText == null && txt.text.Contains("Battle"))
                     {
-                        mapDiorama = child;
-                        break;
+                        txt.text = "STAGE 1";
+                        txt.gameObject.name = "StageNumberText";
+                        stageNumberText = txt;
+                        if (font != null)
+                        {
+                            txt.font = font;
+                        }
+                    }
+                    else if (stageNameText == null && txt.text.Trim() == "Whisperwood")
+                    {
+                        txt.gameObject.name = "StageNameText";
+                        stageNameText = txt;
+                        if (font != null)
+                        {
+                            txt.font = font;
+                        }
                     }
                 }
 
-                if (mapDiorama != null)
+                if (stageNumberText == null || stageNameText == null)
                 {
-                    // 디오라마는 원본 그대로 데코 유지 — 스테이지 진입은 START(PLAY)가 담당
-                    var mapTexts = mapDiorama.GetComponentsInChildren<TMP_Text>(true);
-                    foreach (var txt in mapTexts)
-                    {
-                        if (txt.text.Contains("Battle"))
-                        {
-                            txt.text = "STAGE 1";
-                            if (font != null)
-                            {
-                                txt.font = font;
-                            }
-                        }
-                    }
+                    GameLogger.LogWarning("[UIPrefabBuilder] Stage title texts not found in Lobby_Default.");
                 }
 
                 // 9. playButton: 빨간 START 버튼

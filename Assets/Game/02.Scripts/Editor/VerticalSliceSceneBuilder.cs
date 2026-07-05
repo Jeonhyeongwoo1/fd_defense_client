@@ -1,6 +1,7 @@
 using Game.App;
 using Game.Core;
 using Game.Data;
+using Game.View;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -88,11 +89,22 @@ namespace Game.Editor
         {
             var stoneSprite = FindSpriteByKeyword("Stone");
 
-            CreateBase("AllyBase", new Vector3(Const.AllyBaseX, Const.GroundY + 0.7f, 0), new Color(0.5f, 0.6f, 1f), stoneSprite);
-            CreateBase("EnemyBase", new Vector3(Const.EnemyBaseX, Const.GroundY + 0.7f, 0), new Color(1f, 0.5f, 0.5f), stoneSprite);
+            var basesParent = new GameObject("Bases");
+            var viewHolder = basesParent.AddComponent<BaseViewHolder>();
+
+            var allyBase = CreateBase("AllyBase", new Vector3(Const.AllyBaseX, Const.GroundY + 0.7f, 0), new Color(0.5f, 0.6f, 1f), stoneSprite);
+            var enemyBase = CreateBase("EnemyBase", new Vector3(Const.EnemyBaseX, Const.GroundY + 0.7f, 0), new Color(1f, 0.5f, 0.5f), stoneSprite);
+
+            allyBase.transform.SetParent(basesParent.transform);
+            enemyBase.transform.SetParent(basesParent.transform);
+
+            var holderSerialized = new SerializedObject(viewHolder);
+            holderSerialized.FindProperty("allyBaseView").objectReferenceValue = allyBase.GetComponent<BaseView>();
+            holderSerialized.FindProperty("enemyBaseView").objectReferenceValue = enemyBase.GetComponent<BaseView>();
+            holderSerialized.ApplyModifiedProperties();
         }
 
-        private static void CreateBase(string name, Vector3 position, Color color, Sprite sprite)
+        private static GameObject CreateBase(string name, Vector3 position, Color color, Sprite sprite)
         {
             var baseObject = new GameObject(name);
             baseObject.transform.position = position;
@@ -102,10 +114,17 @@ namespace Game.Editor
             spriteRenderer.color = color;
             baseObject.transform.localScale = new Vector3(1.5f, 2f, 1f);
 
+            var baseView = baseObject.AddComponent<BaseView>();
+            var viewSerialized = new SerializedObject(baseView);
+            viewSerialized.FindProperty("spriteRenderer").objectReferenceValue = spriteRenderer;
+            viewSerialized.ApplyModifiedProperties();
+
             if (sprite == null)
             {
                 GameLogger.LogWarning($"[VerticalSliceSceneBuilder] Stone sprite not found for {name}.");
             }
+
+            return baseObject;
         }
 
         private static Sprite FindSpriteByKeyword(string keyword)

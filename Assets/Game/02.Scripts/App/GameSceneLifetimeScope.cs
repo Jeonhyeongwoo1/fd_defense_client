@@ -60,6 +60,7 @@ namespace Game.App
             builder.RegisterComponentInHierarchy<UI_GameHudView>();
             builder.RegisterComponentInHierarchy<UI_ResultPopupView>();
             builder.RegisterComponentInHierarchy<UI_PausePopupView>();
+            builder.RegisterComponentInHierarchy<BaseViewHolder>();
 
             builder.RegisterEntryPoint<StageService>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<WalletService>(Lifetime.Scoped).AsSelf();
@@ -72,6 +73,7 @@ namespace Game.App
             builder.RegisterEntryPoint<ResultPresenter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<PausePresenter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<MissionProgressController>(Lifetime.Scoped);
+            builder.RegisterEntryPoint<BaseHitReactionController>(Lifetime.Scoped);
         }
     }
 }

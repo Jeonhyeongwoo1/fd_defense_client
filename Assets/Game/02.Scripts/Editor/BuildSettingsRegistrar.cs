@@ -20,5 +20,18 @@ namespace Game.Editor
 
             GameLogger.Log($"[BuildSettingsRegistrar] Registered build scenes: {OutGameScenePath} (index 0), {GameScenePath} (index 1)");
         }
+
+        public static void ConfigureForPortrait()
+        {
+            PlayerSettings.defaultInterfaceOrientation = UIOrientation.Portrait;
+            PlayerSettings.allowedAutorotateToPortrait = true;
+            PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;
+            PlayerSettings.allowedAutorotateToLandscapeLeft = false;
+            PlayerSettings.allowedAutorotateToLandscapeRight = false;
+            PlayerSettings.defaultScreenWidth = 1080;
+            PlayerSettings.defaultScreenHeight = 1920;
+            AssetDatabase.SaveAssets();
+            GameLogger.Log("[BuildSettingsRegistrar] Portrait orientation configured.");
+        }
     }
 }

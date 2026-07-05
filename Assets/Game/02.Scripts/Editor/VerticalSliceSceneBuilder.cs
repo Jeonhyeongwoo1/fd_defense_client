@@ -20,6 +20,7 @@ namespace Game.Editor
         private const string EffectConfigPath = "Assets/Game/03.Resources/Data/EffectConfig.asset";
         private const string MapTablePath = "Assets/Game/03.Resources/Data/MapTable.asset";
         private const string MissionTablePath = "Assets/Game/03.Resources/Data/MissionTable.asset";
+        private const string UpgradeTablePath = "Assets/Game/03.Resources/Data/UpgradeTable.asset";
         private const string ScenePath = "Assets/Game/01.Scene/GameScene.unity";
         private const string GameHudPrefabPath = "Assets/Game/03.Resources/UI/GameHud.prefab";
 
@@ -136,6 +137,7 @@ namespace Game.Editor
             var effectConfig = AssetDatabase.LoadAssetAtPath<EffectConfigSO>(EffectConfigPath);
             var mapTable = AssetDatabase.LoadAssetAtPath<MapTableSO>(MapTablePath);
             var missionTable = AssetDatabase.LoadAssetAtPath<MissionTableSO>(MissionTablePath);
+            var upgradeTable = AssetDatabase.LoadAssetAtPath<UpgradeTableSO>(UpgradeTablePath);
 
             var serializedObject = new SerializedObject(lifetimeScope);
             serializedObject.FindProperty("unitTable").objectReferenceValue = unitTable;
@@ -146,9 +148,10 @@ namespace Game.Editor
             serializedObject.FindProperty("effectConfig").objectReferenceValue = effectConfig;
             serializedObject.FindProperty("mapTable").objectReferenceValue = mapTable;
             serializedObject.FindProperty("missionTable").objectReferenceValue = missionTable;
+            serializedObject.FindProperty("upgradeTable").objectReferenceValue = upgradeTable;
             serializedObject.ApplyModifiedProperties();
 
-            if (unitTable == null || enemyTable == null || bossTable == null || stageTable == null || waveTable == null || effectConfig == null || mapTable == null || missionTable == null)
+            if (unitTable == null || enemyTable == null || bossTable == null || stageTable == null || waveTable == null || effectConfig == null || mapTable == null || missionTable == null || upgradeTable == null)
             {
                 GameLogger.LogError("[VerticalSliceSceneBuilder] Failed to assign one or more SO tables to LifetimeScope.");
             }

@@ -15,10 +15,12 @@ namespace Game.View
         [SerializeField] private TMP_Text costText;
         [SerializeField] private Button upgradeButton;
         [SerializeField] private GameObject maxLevelMark;
+        [SerializeField] private Button closeButton;
 
         public GameObject Root => root;
         public UI_UnitCardView[] UnitCards => unitCards;
         public Button UpgradeButton => upgradeButton;
+        public Button CloseButton => closeButton;
 
         public void Show()
         {

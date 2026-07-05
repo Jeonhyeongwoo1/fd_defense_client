@@ -1049,6 +1049,8 @@ namespace Game.Editor
             {
                 stageSerializer.FindProperty("stageButtons").GetArrayElementAtIndex(i).objectReferenceValue = originalButtons[i];
             }
+            stageSerializer.FindProperty("closeButton").objectReferenceValue = stageSelectView.CloseButton;
+            stageSerializer.FindProperty("root").objectReferenceValue = stagePanelRoot;
             stageSerializer.ApplyModifiedProperties();
 
             Object.DestroyImmediate(stageSelectView);
@@ -1062,6 +1064,7 @@ namespace Game.Editor
             {
                 missionSerializer.FindProperty("missionRows").GetArrayElementAtIndex(i).objectReferenceValue = missionPanelView.MissionRows[i];
             }
+            missionSerializer.FindProperty("closeButton").objectReferenceValue = missionPanelView.CloseButton;
             missionSerializer.ApplyModifiedProperties();
 
             Object.DestroyImmediate(missionPanelView);
@@ -1118,6 +1121,7 @@ namespace Game.Editor
             {
                 shopSerializer.FindProperty("shopItems").GetArrayElementAtIndex(i).objectReferenceValue = shopPanelView.ShopItems[i];
             }
+            shopSerializer.FindProperty("closeButton").objectReferenceValue = shopPanelView.CloseButton;
             shopSerializer.ApplyModifiedProperties();
 
             Object.DestroyImmediate(shopPanelView);
@@ -1733,6 +1737,34 @@ namespace Game.Editor
             CreateStageTitle(panelRect, font);
             var stageButtons = CreateStageButtons(panelRect, font, starIcon, lockIcon);
 
+            var closeButtonInstance = InstantiateKitPrefab(ButtonCirclePath, panelObject.transform);
+            if (closeButtonInstance != null)
+            {
+                closeButtonInstance.name = "CloseButton";
+                var closeButtonRect = closeButtonInstance.GetComponent<RectTransform>();
+                closeButtonRect.anchorMin = new Vector2(1, 1);
+                closeButtonRect.anchorMax = new Vector2(1, 1);
+                closeButtonRect.pivot = new Vector2(1, 1);
+                closeButtonRect.anchoredPosition = new Vector2(-70, -70);
+                closeButtonRect.sizeDelta = new Vector2(90, 90);
+
+                var closeIconObject = new GameObject("CloseIcon");
+                closeIconObject.transform.SetParent(closeButtonInstance.transform, false);
+                var closeIconRect = closeIconObject.AddComponent<RectTransform>();
+                closeIconRect.anchorMin = new Vector2(0.5f, 0.5f);
+                closeIconRect.anchorMax = new Vector2(0.5f, 0.5f);
+                closeIconRect.pivot = new Vector2(0.5f, 0.5f);
+                closeIconRect.anchoredPosition = Vector2.zero;
+                closeIconRect.sizeDelta = new Vector2(50, 50);
+
+                var closeIconImage = closeIconObject.AddComponent<Image>();
+                var closeIcon = LoadSprite("Assets/Layer Lab/GUI Pro-MinimalGame/Shared/Icons/PictoIcon/128/arrow_back.png");
+                closeIconImage.sprite = closeIcon;
+                closeIconImage.raycastTarget = false;
+            }
+
+            var closeButton = EnsureButtonComponent(closeButtonInstance);
+
             var stageSelectView = panelObject.AddComponent<UI_StageSelectView>();
             var serializedObject = new SerializedObject(stageSelectView);
             serializedObject.FindProperty("stageButtons").arraySize = stageButtons.Length;
@@ -1740,6 +1772,7 @@ namespace Game.Editor
             {
                 serializedObject.FindProperty("stageButtons").GetArrayElementAtIndex(i).objectReferenceValue = stageButtons[i];
             }
+            serializedObject.FindProperty("closeButton").objectReferenceValue = closeButton;
             serializedObject.ApplyModifiedProperties();
 
             return panelObject;
@@ -1795,6 +1828,34 @@ namespace Game.Editor
 
             var confirmButton = CreatePausePopupButton(panelObject.transform, "ConfirmButton", new Vector2(0, 50), "CONFIRM", ButtonGreenPath, font);
 
+            var closeButtonInstance = InstantiateKitPrefab(ButtonCirclePath, panelObject.transform);
+            if (closeButtonInstance != null)
+            {
+                closeButtonInstance.name = "CloseButton";
+                var closeButtonRect = closeButtonInstance.GetComponent<RectTransform>();
+                closeButtonRect.anchorMin = new Vector2(1, 1);
+                closeButtonRect.anchorMax = new Vector2(1, 1);
+                closeButtonRect.pivot = new Vector2(1, 1);
+                closeButtonRect.anchoredPosition = new Vector2(-70, -70);
+                closeButtonRect.sizeDelta = new Vector2(90, 90);
+
+                var closeIconObject = new GameObject("CloseIcon");
+                closeIconObject.transform.SetParent(closeButtonInstance.transform, false);
+                var closeIconRect = closeIconObject.AddComponent<RectTransform>();
+                closeIconRect.anchorMin = new Vector2(0.5f, 0.5f);
+                closeIconRect.anchorMax = new Vector2(0.5f, 0.5f);
+                closeIconRect.pivot = new Vector2(0.5f, 0.5f);
+                closeIconRect.anchoredPosition = Vector2.zero;
+                closeIconRect.sizeDelta = new Vector2(50, 50);
+
+                var closeIconImage = closeIconObject.AddComponent<Image>();
+                var closeIcon = LoadSprite("Assets/Layer Lab/GUI Pro-MinimalGame/Shared/Icons/PictoIcon/128/arrow_back.png");
+                closeIconImage.sprite = closeIcon;
+                closeIconImage.raycastTarget = false;
+            }
+
+            var closeButton = EnsureButtonComponent(closeButtonInstance);
+
             var deckPanelView = panelObject.AddComponent<UI_DeckPanelView>();
             var serializedObject = new SerializedObject(deckPanelView);
             serializedObject.FindProperty("root").objectReferenceValue = panelObject;
@@ -1805,6 +1866,7 @@ namespace Game.Editor
             }
             serializedObject.FindProperty("deckCountText").objectReferenceValue = deckCountText;
             serializedObject.FindProperty("confirmButton").objectReferenceValue = confirmButton;
+            serializedObject.FindProperty("closeButton").objectReferenceValue = closeButton;
             serializedObject.ApplyModifiedProperties();
 
             panelObject.SetActive(false);
@@ -1829,11 +1891,11 @@ namespace Game.Editor
             var cards = new UI_UnitCardView[15];
             const int columns = 5;
             const int rows = 3;
-            const float cardWidth = 140f;
-            const float cardHeight = 170f;
-            const float spacingX = 155f;
-            const float spacingY = 190f;
-            const float startX = -320f;
+            const float cardWidth = 130f;
+            const float cardHeight = 160f;
+            const float spacingX = 133f;
+            const float spacingY = 180f;
+            const float startX = -385f;
             const float startY = 200f;
 
             for (var i = 0; i < 15; i++)
@@ -1856,6 +1918,34 @@ namespace Game.Editor
             var upgradeButton = detailPanel.transform.Find("UpgradeButton")?.GetComponent<Button>();
             var maxLevelMark = detailPanel.transform.Find("MaxLevelMark")?.gameObject;
 
+            var closeButtonInstance = InstantiateKitPrefab(ButtonCirclePath, panelObject.transform);
+            if (closeButtonInstance != null)
+            {
+                closeButtonInstance.name = "CloseButton";
+                var closeButtonRect = closeButtonInstance.GetComponent<RectTransform>();
+                closeButtonRect.anchorMin = new Vector2(1, 1);
+                closeButtonRect.anchorMax = new Vector2(1, 1);
+                closeButtonRect.pivot = new Vector2(1, 1);
+                closeButtonRect.anchoredPosition = new Vector2(-70, -70);
+                closeButtonRect.sizeDelta = new Vector2(90, 90);
+
+                var closeIconObject = new GameObject("CloseIcon");
+                closeIconObject.transform.SetParent(closeButtonInstance.transform, false);
+                var closeIconRect = closeIconObject.AddComponent<RectTransform>();
+                closeIconRect.anchorMin = new Vector2(0.5f, 0.5f);
+                closeIconRect.anchorMax = new Vector2(0.5f, 0.5f);
+                closeIconRect.pivot = new Vector2(0.5f, 0.5f);
+                closeIconRect.anchoredPosition = Vector2.zero;
+                closeIconRect.sizeDelta = new Vector2(50, 50);
+
+                var closeIconImage = closeIconObject.AddComponent<Image>();
+                var closeIcon = LoadSprite("Assets/Layer Lab/GUI Pro-MinimalGame/Shared/Icons/PictoIcon/128/arrow_back.png");
+                closeIconImage.sprite = closeIcon;
+                closeIconImage.raycastTarget = false;
+            }
+
+            var closeButton = EnsureButtonComponent(closeButtonInstance);
+
             var upgradePanelView = panelObject.AddComponent<UI_UpgradePanelView>();
             var serializedObject = new SerializedObject(upgradePanelView);
             serializedObject.FindProperty("root").objectReferenceValue = panelObject;
@@ -1871,6 +1961,7 @@ namespace Game.Editor
             serializedObject.FindProperty("costText").objectReferenceValue = costText;
             serializedObject.FindProperty("upgradeButton").objectReferenceValue = upgradeButton;
             serializedObject.FindProperty("maxLevelMark").objectReferenceValue = maxLevelMark;
+            serializedObject.FindProperty("closeButton").objectReferenceValue = closeButton;
             serializedObject.ApplyModifiedProperties();
 
             panelObject.SetActive(false);
@@ -1990,8 +2081,8 @@ namespace Game.Editor
             detailRect.anchorMin = new Vector2(1, 0.5f);
             detailRect.anchorMax = new Vector2(1, 0.5f);
             detailRect.pivot = new Vector2(1, 0.5f);
-            detailRect.anchoredPosition = new Vector2(-50, 0);
-            detailRect.sizeDelta = new Vector2(400, 600);
+            detailRect.anchoredPosition = new Vector2(-20, 0);
+            detailRect.sizeDelta = new Vector2(300, 600);
 
             var detailNameTextObject = new GameObject("DetailNameText");
             detailNameTextObject.transform.SetParent(detailPanel.transform, false);
@@ -2129,6 +2220,34 @@ namespace Game.Editor
                 shopItems[i] = CreateShopItem(panelRect, new Vector2(0, y), new Vector2(itemWidth, itemHeight), font, goldIcon, i);
             }
 
+            var closeButtonInstance = InstantiateKitPrefab(ButtonCirclePath, panelObject.transform);
+            if (closeButtonInstance != null)
+            {
+                closeButtonInstance.name = "CloseButton";
+                var closeButtonRect = closeButtonInstance.GetComponent<RectTransform>();
+                closeButtonRect.anchorMin = new Vector2(1, 1);
+                closeButtonRect.anchorMax = new Vector2(1, 1);
+                closeButtonRect.pivot = new Vector2(1, 1);
+                closeButtonRect.anchoredPosition = new Vector2(-70, -70);
+                closeButtonRect.sizeDelta = new Vector2(90, 90);
+
+                var closeIconObject = new GameObject("CloseIcon");
+                closeIconObject.transform.SetParent(closeButtonInstance.transform, false);
+                var closeIconRect = closeIconObject.AddComponent<RectTransform>();
+                closeIconRect.anchorMin = new Vector2(0.5f, 0.5f);
+                closeIconRect.anchorMax = new Vector2(0.5f, 0.5f);
+                closeIconRect.pivot = new Vector2(0.5f, 0.5f);
+                closeIconRect.anchoredPosition = Vector2.zero;
+                closeIconRect.sizeDelta = new Vector2(50, 50);
+
+                var closeIconImage = closeIconObject.AddComponent<Image>();
+                var closeIcon = LoadSprite("Assets/Layer Lab/GUI Pro-MinimalGame/Shared/Icons/PictoIcon/128/arrow_back.png");
+                closeIconImage.sprite = closeIcon;
+                closeIconImage.raycastTarget = false;
+            }
+
+            var closeButton = EnsureButtonComponent(closeButtonInstance);
+
             var shopPanelView = panelObject.AddComponent<UI_ShopPanelView>();
             var serializedObject = new SerializedObject(shopPanelView);
             serializedObject.FindProperty("root").objectReferenceValue = panelObject;
@@ -2137,6 +2256,7 @@ namespace Game.Editor
             {
                 serializedObject.FindProperty("shopItems").GetArrayElementAtIndex(i).objectReferenceValue = shopItems[i];
             }
+            serializedObject.FindProperty("closeButton").objectReferenceValue = closeButton;
             serializedObject.ApplyModifiedProperties();
 
             panelObject.SetActive(false);
@@ -2308,6 +2428,34 @@ namespace Game.Editor
                 rows[i] = CreateMissionRow(panelRect, new Vector2(0, y), new Vector2(rowWidth, rowHeight), font, goldIcon, i);
             }
 
+            var closeButtonInstance = InstantiateKitPrefab(ButtonCirclePath, panelObject.transform);
+            if (closeButtonInstance != null)
+            {
+                closeButtonInstance.name = "CloseButton";
+                var closeButtonRect = closeButtonInstance.GetComponent<RectTransform>();
+                closeButtonRect.anchorMin = new Vector2(1, 1);
+                closeButtonRect.anchorMax = new Vector2(1, 1);
+                closeButtonRect.pivot = new Vector2(1, 1);
+                closeButtonRect.anchoredPosition = new Vector2(-70, -70);
+                closeButtonRect.sizeDelta = new Vector2(90, 90);
+
+                var closeIconObject = new GameObject("CloseIcon");
+                closeIconObject.transform.SetParent(closeButtonInstance.transform, false);
+                var closeIconRect = closeIconObject.AddComponent<RectTransform>();
+                closeIconRect.anchorMin = new Vector2(0.5f, 0.5f);
+                closeIconRect.anchorMax = new Vector2(0.5f, 0.5f);
+                closeIconRect.pivot = new Vector2(0.5f, 0.5f);
+                closeIconRect.anchoredPosition = Vector2.zero;
+                closeIconRect.sizeDelta = new Vector2(50, 50);
+
+                var closeIconImage = closeIconObject.AddComponent<Image>();
+                var closeIcon = LoadSprite("Assets/Layer Lab/GUI Pro-MinimalGame/Shared/Icons/PictoIcon/128/arrow_back.png");
+                closeIconImage.sprite = closeIcon;
+                closeIconImage.raycastTarget = false;
+            }
+
+            var closeButton = EnsureButtonComponent(closeButtonInstance);
+
             var missionPanelView = panelObject.AddComponent<UI_MissionPanelView>();
             var serializedObject = new SerializedObject(missionPanelView);
             serializedObject.FindProperty("root").objectReferenceValue = panelObject;
@@ -2316,6 +2464,7 @@ namespace Game.Editor
             {
                 serializedObject.FindProperty("missionRows").GetArrayElementAtIndex(i).objectReferenceValue = rows[i];
             }
+            serializedObject.FindProperty("closeButton").objectReferenceValue = closeButton;
             serializedObject.ApplyModifiedProperties();
 
             panelObject.SetActive(false);

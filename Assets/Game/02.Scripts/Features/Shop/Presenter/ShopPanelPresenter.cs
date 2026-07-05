@@ -60,6 +60,10 @@ namespace Game.Presenter
             }
 
             _goldService.Gold.Subscribe(_ => RefreshButtons()).AddTo(_disposables);
+
+            _view.CloseButton.onClick.AsObservable()
+                .Subscribe(_ => OnCloseButtonClicked())
+                .AddTo(_disposables);
         }
 
         public void Refresh()
@@ -120,6 +124,11 @@ namespace Game.Presenter
                     shopItems[i].SetBuyButtonInteractable(canAfford);
                 }
             }
+        }
+
+        private void OnCloseButtonClicked()
+        {
+            _view.Hide();
         }
     }
 }

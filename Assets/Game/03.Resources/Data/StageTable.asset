@@ -16,15 +16,15 @@ MonoBehaviour:
   - id: stage_001
     allyBaseHp: 1000
     enemyBaseHp: 1000
-    startMoney: 100
-    moneyPerSecond: 20
+    startMoney: 150
+    moneyPerSecond: 24
     WaveIdList:
     - wave_002
     - wave_003
     - wave_004
     - wave_005
     - wave_006
-    waveIntervalSeconds: 5
+    waveIntervalSeconds: 6
     bossId: 
     mapId: map_forest
     goldReward: 300
@@ -32,784 +32,784 @@ MonoBehaviour:
   - id: stage_002
     allyBaseHp: 1040
     enemyBaseHp: 1040
-    startMoney: 102
-    moneyPerSecond: 20
-    WaveIdList:
-    - wave_003
-    - wave_004
-    - wave_005
-    - wave_006
-    - wave_001
-    waveIntervalSeconds: 5
-    bossId: 
-    mapId: map_desert
-    goldReward: 340
-    enemyStatMultiplier: 1.05
-  - id: stage_003
-    allyBaseHp: 1080
-    enemyBaseHp: 1080
-    startMoney: 104
-    moneyPerSecond: 20
-    WaveIdList:
-    - wave_004
-    - wave_005
-    - wave_006
-    - wave_001
-    - wave_002
-    waveIntervalSeconds: 5
-    bossId: boss_s1_102
-    mapId: map_autumn
-    goldReward: 380
-    enemyStatMultiplier: 1.1
-  - id: stage_004
-    allyBaseHp: 1120
-    enemyBaseHp: 1120
-    startMoney: 106
-    moneyPerSecond: 20
-    WaveIdList:
-    - wave_005
-    - wave_006
-    - wave_001
-    - wave_002
-    - wave_003
-    waveIntervalSeconds: 5
-    bossId: boss_s1_103
-    mapId: map_forest
-    goldReward: 420
-    enemyStatMultiplier: 1.15
-  - id: stage_005
-    allyBaseHp: 1160
-    enemyBaseHp: 1160
-    startMoney: 108
-    moneyPerSecond: 20
-    WaveIdList:
-    - wave_006
-    - wave_001
-    - wave_002
-    - wave_003
-    - wave_004
-    waveIntervalSeconds: 5
-    bossId: boss_s1_104
-    mapId: map_desert
-    goldReward: 460
-    enemyStatMultiplier: 1.2
-  - id: stage_006
-    allyBaseHp: 1200
-    enemyBaseHp: 1200
-    startMoney: 110
-    moneyPerSecond: 20
-    WaveIdList:
-    - wave_001
-    - wave_002
-    - wave_003
-    - wave_004
-    - wave_005
-    waveIntervalSeconds: 5
-    bossId: boss_s2_100
-    mapId: map_autumn
-    goldReward: 500
-    enemyStatMultiplier: 1.25
-  - id: stage_007
-    allyBaseHp: 1240
-    enemyBaseHp: 1240
-    startMoney: 112
-    moneyPerSecond: 20
-    WaveIdList:
-    - wave_002
-    - wave_003
-    - wave_004
-    - wave_005
-    - wave_006
-    waveIntervalSeconds: 5
-    bossId: boss_s2_101
-    mapId: map_forest
-    goldReward: 540
-    enemyStatMultiplier: 1.3
-  - id: stage_008
-    allyBaseHp: 1280
-    enemyBaseHp: 1280
-    startMoney: 114
-    moneyPerSecond: 20
-    WaveIdList:
-    - wave_003
-    - wave_004
-    - wave_005
-    - wave_006
-    - wave_001
-    waveIntervalSeconds: 5
-    bossId: boss_s2_102
-    mapId: map_desert
-    goldReward: 580
-    enemyStatMultiplier: 1.35
-  - id: stage_009
-    allyBaseHp: 1320
-    enemyBaseHp: 1320
-    startMoney: 116
-    moneyPerSecond: 20
-    WaveIdList:
-    - wave_004
-    - wave_005
-    - wave_006
-    - wave_001
-    - wave_002
-    waveIntervalSeconds: 5
-    bossId: boss_s2_103
-    mapId: map_autumn
-    goldReward: 620
-    enemyStatMultiplier: 1.4
-  - id: stage_010
-    allyBaseHp: 1360
-    enemyBaseHp: 1360
-    startMoney: 118
-    moneyPerSecond: 20
-    WaveIdList:
-    - wave_005
-    - wave_006
-    - wave_001
-    - wave_002
-    - wave_003
-    waveIntervalSeconds: 5
-    bossId: boss_s2_104
-    mapId: map_forest
-    goldReward: 660
-    enemyStatMultiplier: 1.45
-  - id: stage_011
-    allyBaseHp: 1400
-    enemyBaseHp: 1400
-    startMoney: 120
-    moneyPerSecond: 22
-    WaveIdList:
-    - wave_012
-    - wave_007
-    - wave_008
-    - wave_009
-    - wave_010
-    waveIntervalSeconds: 4.7
-    bossId: boss_s1_100
-    mapId: map_desert
-    goldReward: 700
-    enemyStatMultiplier: 1.5
-  - id: stage_012
-    allyBaseHp: 1440
-    enemyBaseHp: 1440
-    startMoney: 122
-    moneyPerSecond: 22
-    WaveIdList:
-    - wave_007
-    - wave_008
-    - wave_009
-    - wave_010
-    - wave_011
-    waveIntervalSeconds: 4.7
-    bossId: boss_s1_101
-    mapId: map_autumn
-    goldReward: 740
-    enemyStatMultiplier: 1.55
-  - id: stage_013
-    allyBaseHp: 1480
-    enemyBaseHp: 1480
-    startMoney: 124
-    moneyPerSecond: 22
-    WaveIdList:
-    - wave_008
-    - wave_009
-    - wave_010
-    - wave_011
-    - wave_012
-    waveIntervalSeconds: 4.7
-    bossId: boss_s1_102
-    mapId: map_forest
-    goldReward: 780
-    enemyStatMultiplier: 1.6
-  - id: stage_014
-    allyBaseHp: 1520
-    enemyBaseHp: 1520
-    startMoney: 126
-    moneyPerSecond: 22
-    WaveIdList:
-    - wave_009
-    - wave_010
-    - wave_011
-    - wave_012
-    - wave_007
-    waveIntervalSeconds: 4.7
-    bossId: boss_s1_103
-    mapId: map_desert
-    goldReward: 820
-    enemyStatMultiplier: 1.65
-  - id: stage_015
-    allyBaseHp: 1560
-    enemyBaseHp: 1560
-    startMoney: 128
-    moneyPerSecond: 22
-    WaveIdList:
-    - wave_010
-    - wave_011
-    - wave_012
-    - wave_007
-    - wave_008
-    waveIntervalSeconds: 4.7
-    bossId: boss_s1_104
-    mapId: map_autumn
-    goldReward: 860
-    enemyStatMultiplier: 1.7
-  - id: stage_016
-    allyBaseHp: 1600
-    enemyBaseHp: 1600
-    startMoney: 130
-    moneyPerSecond: 22
-    WaveIdList:
-    - wave_011
-    - wave_012
-    - wave_007
-    - wave_008
-    - wave_009
-    waveIntervalSeconds: 4.7
-    bossId: boss_s2_100
-    mapId: map_forest
-    goldReward: 900
-    enemyStatMultiplier: 1.75
-  - id: stage_017
-    allyBaseHp: 1640
-    enemyBaseHp: 1640
-    startMoney: 132
-    moneyPerSecond: 22
-    WaveIdList:
-    - wave_012
-    - wave_007
-    - wave_008
-    - wave_009
-    - wave_010
-    waveIntervalSeconds: 4.7
-    bossId: boss_s2_101
-    mapId: map_desert
-    goldReward: 940
-    enemyStatMultiplier: 1.8
-  - id: stage_018
-    allyBaseHp: 1680
-    enemyBaseHp: 1680
-    startMoney: 134
-    moneyPerSecond: 22
-    WaveIdList:
-    - wave_007
-    - wave_008
-    - wave_009
-    - wave_010
-    - wave_011
-    waveIntervalSeconds: 4.7
-    bossId: boss_s2_102
-    mapId: map_autumn
-    goldReward: 980
-    enemyStatMultiplier: 1.85
-  - id: stage_019
-    allyBaseHp: 1720
-    enemyBaseHp: 1720
-    startMoney: 136
-    moneyPerSecond: 22
-    WaveIdList:
-    - wave_008
-    - wave_009
-    - wave_010
-    - wave_011
-    - wave_012
-    waveIntervalSeconds: 4.7
-    bossId: boss_s2_103
-    mapId: map_forest
-    goldReward: 1020
-    enemyStatMultiplier: 1.9
-  - id: stage_020
-    allyBaseHp: 1760
-    enemyBaseHp: 1760
-    startMoney: 138
-    moneyPerSecond: 22
-    WaveIdList:
-    - wave_009
-    - wave_010
-    - wave_011
-    - wave_012
-    - wave_007
-    waveIntervalSeconds: 4.7
-    bossId: boss_s2_104
-    mapId: map_desert
-    goldReward: 1060
-    enemyStatMultiplier: 1.95
-  - id: stage_021
-    allyBaseHp: 1800
-    enemyBaseHp: 1800
-    startMoney: 140
-    moneyPerSecond: 24
-    WaveIdList:
-    - wave_016
-    - wave_017
-    - wave_018
-    - wave_013
-    - wave_014
-    waveIntervalSeconds: 4.4
-    bossId: boss_s1_100
-    mapId: map_autumn
-    goldReward: 1100
-    enemyStatMultiplier: 2
-  - id: stage_022
-    allyBaseHp: 1840
-    enemyBaseHp: 1840
-    startMoney: 142
-    moneyPerSecond: 24
-    WaveIdList:
-    - wave_017
-    - wave_018
-    - wave_013
-    - wave_014
-    - wave_015
-    waveIntervalSeconds: 4.4
-    bossId: boss_s1_101
-    mapId: map_forest
-    goldReward: 1140
-    enemyStatMultiplier: 2.05
-  - id: stage_023
-    allyBaseHp: 1880
-    enemyBaseHp: 1880
-    startMoney: 144
-    moneyPerSecond: 24
-    WaveIdList:
-    - wave_018
-    - wave_013
-    - wave_014
-    - wave_015
-    - wave_016
-    waveIntervalSeconds: 4.4
-    bossId: boss_s1_102
-    mapId: map_desert
-    goldReward: 1180
-    enemyStatMultiplier: 2.1
-  - id: stage_024
-    allyBaseHp: 1920
-    enemyBaseHp: 1920
-    startMoney: 146
-    moneyPerSecond: 24
-    WaveIdList:
-    - wave_013
-    - wave_014
-    - wave_015
-    - wave_016
-    - wave_017
-    waveIntervalSeconds: 4.4
-    bossId: boss_s1_103
-    mapId: map_autumn
-    goldReward: 1220
-    enemyStatMultiplier: 2.15
-  - id: stage_025
-    allyBaseHp: 1960
-    enemyBaseHp: 1960
-    startMoney: 148
-    moneyPerSecond: 24
-    WaveIdList:
-    - wave_014
-    - wave_015
-    - wave_016
-    - wave_017
-    - wave_018
-    waveIntervalSeconds: 4.4
-    bossId: boss_s1_104
-    mapId: map_forest
-    goldReward: 1260
-    enemyStatMultiplier: 2.2
-  - id: stage_026
-    allyBaseHp: 2000
-    enemyBaseHp: 2000
-    startMoney: 150
-    moneyPerSecond: 24
-    WaveIdList:
-    - wave_015
-    - wave_016
-    - wave_017
-    - wave_018
-    - wave_013
-    waveIntervalSeconds: 4.4
-    bossId: boss_s2_100
-    mapId: map_desert
-    goldReward: 1300
-    enemyStatMultiplier: 2.25
-  - id: stage_027
-    allyBaseHp: 2040
-    enemyBaseHp: 2040
     startMoney: 152
     moneyPerSecond: 24
     WaveIdList:
-    - wave_016
-    - wave_017
-    - wave_018
-    - wave_013
-    - wave_014
-    waveIntervalSeconds: 4.4
-    bossId: boss_s2_101
-    mapId: map_autumn
-    goldReward: 1340
-    enemyStatMultiplier: 2.3
-  - id: stage_028
-    allyBaseHp: 2080
-    enemyBaseHp: 2080
+    - wave_003
+    - wave_004
+    - wave_005
+    - wave_006
+    - wave_001
+    waveIntervalSeconds: 6
+    bossId: 
+    mapId: map_desert
+    goldReward: 340
+    enemyStatMultiplier: 1.04
+  - id: stage_003
+    allyBaseHp: 1080
+    enemyBaseHp: 1080
     startMoney: 154
     moneyPerSecond: 24
     WaveIdList:
-    - wave_017
-    - wave_018
-    - wave_013
-    - wave_014
-    - wave_015
-    waveIntervalSeconds: 4.4
-    bossId: boss_s2_102
-    mapId: map_forest
-    goldReward: 1380
-    enemyStatMultiplier: 2.35
-  - id: stage_029
-    allyBaseHp: 2120
-    enemyBaseHp: 2120
+    - wave_004
+    - wave_005
+    - wave_006
+    - wave_001
+    - wave_002
+    waveIntervalSeconds: 6
+    bossId: boss_s1_102
+    mapId: map_autumn
+    goldReward: 380
+    enemyStatMultiplier: 1.08
+  - id: stage_004
+    allyBaseHp: 1120
+    enemyBaseHp: 1120
     startMoney: 156
     moneyPerSecond: 24
     WaveIdList:
+    - wave_005
+    - wave_006
+    - wave_001
+    - wave_002
+    - wave_003
+    waveIntervalSeconds: 6
+    bossId: boss_s1_103
+    mapId: map_forest
+    goldReward: 420
+    enemyStatMultiplier: 1.12
+  - id: stage_005
+    allyBaseHp: 1160
+    enemyBaseHp: 1160
+    startMoney: 158
+    moneyPerSecond: 24
+    WaveIdList:
+    - wave_006
+    - wave_001
+    - wave_002
+    - wave_003
+    - wave_004
+    waveIntervalSeconds: 6
+    bossId: boss_s1_104
+    mapId: map_desert
+    goldReward: 460
+    enemyStatMultiplier: 1.16
+  - id: stage_006
+    allyBaseHp: 1200
+    enemyBaseHp: 1200
+    startMoney: 160
+    moneyPerSecond: 24
+    WaveIdList:
+    - wave_001
+    - wave_002
+    - wave_003
+    - wave_004
+    - wave_005
+    waveIntervalSeconds: 6
+    bossId: boss_s2_100
+    mapId: map_autumn
+    goldReward: 500
+    enemyStatMultiplier: 1.2
+  - id: stage_007
+    allyBaseHp: 1240
+    enemyBaseHp: 1240
+    startMoney: 162
+    moneyPerSecond: 24
+    WaveIdList:
+    - wave_002
+    - wave_003
+    - wave_004
+    - wave_005
+    - wave_006
+    waveIntervalSeconds: 6
+    bossId: boss_s2_101
+    mapId: map_forest
+    goldReward: 540
+    enemyStatMultiplier: 1.24
+  - id: stage_008
+    allyBaseHp: 1280
+    enemyBaseHp: 1280
+    startMoney: 164
+    moneyPerSecond: 24
+    WaveIdList:
+    - wave_003
+    - wave_004
+    - wave_005
+    - wave_006
+    - wave_001
+    waveIntervalSeconds: 6
+    bossId: boss_s2_102
+    mapId: map_desert
+    goldReward: 580
+    enemyStatMultiplier: 1.28
+  - id: stage_009
+    allyBaseHp: 1320
+    enemyBaseHp: 1320
+    startMoney: 166
+    moneyPerSecond: 24
+    WaveIdList:
+    - wave_004
+    - wave_005
+    - wave_006
+    - wave_001
+    - wave_002
+    waveIntervalSeconds: 6
+    bossId: boss_s2_103
+    mapId: map_autumn
+    goldReward: 620
+    enemyStatMultiplier: 1.32
+  - id: stage_010
+    allyBaseHp: 1360
+    enemyBaseHp: 1360
+    startMoney: 168
+    moneyPerSecond: 24
+    WaveIdList:
+    - wave_005
+    - wave_006
+    - wave_001
+    - wave_002
+    - wave_003
+    waveIntervalSeconds: 6
+    bossId: boss_s2_104
+    mapId: map_forest
+    goldReward: 660
+    enemyStatMultiplier: 1.36
+  - id: stage_011
+    allyBaseHp: 1400
+    enemyBaseHp: 1400
+    startMoney: 170
+    moneyPerSecond: 26
+    WaveIdList:
+    - wave_012
+    - wave_007
+    - wave_008
+    - wave_009
+    - wave_010
+    waveIntervalSeconds: 5
+    bossId: boss_s1_100
+    mapId: map_desert
+    goldReward: 700
+    enemyStatMultiplier: 1.4
+  - id: stage_012
+    allyBaseHp: 1440
+    enemyBaseHp: 1440
+    startMoney: 172
+    moneyPerSecond: 26
+    WaveIdList:
+    - wave_007
+    - wave_008
+    - wave_009
+    - wave_010
+    - wave_011
+    waveIntervalSeconds: 5
+    bossId: boss_s1_101
+    mapId: map_autumn
+    goldReward: 740
+    enemyStatMultiplier: 1.44
+  - id: stage_013
+    allyBaseHp: 1480
+    enemyBaseHp: 1480
+    startMoney: 174
+    moneyPerSecond: 26
+    WaveIdList:
+    - wave_008
+    - wave_009
+    - wave_010
+    - wave_011
+    - wave_012
+    waveIntervalSeconds: 5
+    bossId: boss_s1_102
+    mapId: map_forest
+    goldReward: 780
+    enemyStatMultiplier: 1.48
+  - id: stage_014
+    allyBaseHp: 1520
+    enemyBaseHp: 1520
+    startMoney: 176
+    moneyPerSecond: 26
+    WaveIdList:
+    - wave_009
+    - wave_010
+    - wave_011
+    - wave_012
+    - wave_007
+    waveIntervalSeconds: 5
+    bossId: boss_s1_103
+    mapId: map_desert
+    goldReward: 820
+    enemyStatMultiplier: 1.52
+  - id: stage_015
+    allyBaseHp: 1560
+    enemyBaseHp: 1560
+    startMoney: 178
+    moneyPerSecond: 26
+    WaveIdList:
+    - wave_010
+    - wave_011
+    - wave_012
+    - wave_007
+    - wave_008
+    waveIntervalSeconds: 5
+    bossId: boss_s1_104
+    mapId: map_autumn
+    goldReward: 860
+    enemyStatMultiplier: 1.56
+  - id: stage_016
+    allyBaseHp: 1600
+    enemyBaseHp: 1600
+    startMoney: 180
+    moneyPerSecond: 26
+    WaveIdList:
+    - wave_011
+    - wave_012
+    - wave_007
+    - wave_008
+    - wave_009
+    waveIntervalSeconds: 5
+    bossId: boss_s2_100
+    mapId: map_forest
+    goldReward: 900
+    enemyStatMultiplier: 1.6
+  - id: stage_017
+    allyBaseHp: 1640
+    enemyBaseHp: 1640
+    startMoney: 182
+    moneyPerSecond: 26
+    WaveIdList:
+    - wave_012
+    - wave_007
+    - wave_008
+    - wave_009
+    - wave_010
+    waveIntervalSeconds: 5
+    bossId: boss_s2_101
+    mapId: map_desert
+    goldReward: 940
+    enemyStatMultiplier: 1.64
+  - id: stage_018
+    allyBaseHp: 1680
+    enemyBaseHp: 1680
+    startMoney: 184
+    moneyPerSecond: 26
+    WaveIdList:
+    - wave_007
+    - wave_008
+    - wave_009
+    - wave_010
+    - wave_011
+    waveIntervalSeconds: 5
+    bossId: boss_s2_102
+    mapId: map_autumn
+    goldReward: 980
+    enemyStatMultiplier: 1.68
+  - id: stage_019
+    allyBaseHp: 1720
+    enemyBaseHp: 1720
+    startMoney: 186
+    moneyPerSecond: 26
+    WaveIdList:
+    - wave_008
+    - wave_009
+    - wave_010
+    - wave_011
+    - wave_012
+    waveIntervalSeconds: 5
+    bossId: boss_s2_103
+    mapId: map_forest
+    goldReward: 1020
+    enemyStatMultiplier: 1.72
+  - id: stage_020
+    allyBaseHp: 1760
+    enemyBaseHp: 1760
+    startMoney: 188
+    moneyPerSecond: 26
+    WaveIdList:
+    - wave_009
+    - wave_010
+    - wave_011
+    - wave_012
+    - wave_007
+    waveIntervalSeconds: 5
+    bossId: boss_s2_104
+    mapId: map_desert
+    goldReward: 1060
+    enemyStatMultiplier: 1.76
+  - id: stage_021
+    allyBaseHp: 1800
+    enemyBaseHp: 1800
+    startMoney: 190
+    moneyPerSecond: 28
+    WaveIdList:
+    - wave_016
+    - wave_017
+    - wave_018
+    - wave_013
+    - wave_014
+    waveIntervalSeconds: 5
+    bossId: boss_s1_100
+    mapId: map_autumn
+    goldReward: 1100
+    enemyStatMultiplier: 1.8
+  - id: stage_022
+    allyBaseHp: 1840
+    enemyBaseHp: 1840
+    startMoney: 192
+    moneyPerSecond: 28
+    WaveIdList:
+    - wave_017
+    - wave_018
+    - wave_013
+    - wave_014
+    - wave_015
+    waveIntervalSeconds: 5
+    bossId: boss_s1_101
+    mapId: map_forest
+    goldReward: 1140
+    enemyStatMultiplier: 1.84
+  - id: stage_023
+    allyBaseHp: 1880
+    enemyBaseHp: 1880
+    startMoney: 194
+    moneyPerSecond: 28
+    WaveIdList:
     - wave_018
     - wave_013
     - wave_014
     - wave_015
     - wave_016
-    waveIntervalSeconds: 4.4
-    bossId: boss_s2_103
+    waveIntervalSeconds: 5
+    bossId: boss_s1_102
     mapId: map_desert
-    goldReward: 1420
-    enemyStatMultiplier: 2.4
-  - id: stage_030
-    allyBaseHp: 2160
-    enemyBaseHp: 2160
-    startMoney: 158
-    moneyPerSecond: 24
+    goldReward: 1180
+    enemyStatMultiplier: 1.88
+  - id: stage_024
+    allyBaseHp: 1920
+    enemyBaseHp: 1920
+    startMoney: 196
+    moneyPerSecond: 28
     WaveIdList:
     - wave_013
     - wave_014
     - wave_015
     - wave_016
     - wave_017
-    waveIntervalSeconds: 4.4
-    bossId: boss_s2_104
-    mapId: map_autumn
-    goldReward: 1460
-    enemyStatMultiplier: 2.45
-  - id: stage_031
-    allyBaseHp: 2200
-    enemyBaseHp: 2200
-    startMoney: 160
-    moneyPerSecond: 26
-    WaveIdList:
-    - wave_020
-    - wave_021
-    - wave_022
-    - wave_023
-    - wave_024
-    waveIntervalSeconds: 4.1
-    bossId: boss_s1_100
-    mapId: map_forest
-    goldReward: 1500
-    enemyStatMultiplier: 2.5
-  - id: stage_032
-    allyBaseHp: 2240
-    enemyBaseHp: 2240
-    startMoney: 162
-    moneyPerSecond: 26
-    WaveIdList:
-    - wave_021
-    - wave_022
-    - wave_023
-    - wave_024
-    - wave_019
-    waveIntervalSeconds: 4.1
-    bossId: boss_s1_101
-    mapId: map_desert
-    goldReward: 1540
-    enemyStatMultiplier: 2.55
-  - id: stage_033
-    allyBaseHp: 2280
-    enemyBaseHp: 2280
-    startMoney: 164
-    moneyPerSecond: 26
-    WaveIdList:
-    - wave_022
-    - wave_023
-    - wave_024
-    - wave_019
-    - wave_020
-    waveIntervalSeconds: 4.1
-    bossId: boss_s1_102
-    mapId: map_autumn
-    goldReward: 1580
-    enemyStatMultiplier: 2.6
-  - id: stage_034
-    allyBaseHp: 2320
-    enemyBaseHp: 2320
-    startMoney: 166
-    moneyPerSecond: 26
-    WaveIdList:
-    - wave_023
-    - wave_024
-    - wave_019
-    - wave_020
-    - wave_021
-    waveIntervalSeconds: 4.1
+    waveIntervalSeconds: 5
     bossId: boss_s1_103
-    mapId: map_forest
-    goldReward: 1620
-    enemyStatMultiplier: 2.65
-  - id: stage_035
-    allyBaseHp: 2360
-    enemyBaseHp: 2360
-    startMoney: 168
-    moneyPerSecond: 26
-    WaveIdList:
-    - wave_024
-    - wave_019
-    - wave_020
-    - wave_021
-    - wave_022
-    waveIntervalSeconds: 4.1
-    bossId: boss_s1_104
-    mapId: map_desert
-    goldReward: 1660
-    enemyStatMultiplier: 2.7
-  - id: stage_036
-    allyBaseHp: 2400
-    enemyBaseHp: 2400
-    startMoney: 170
-    moneyPerSecond: 26
-    WaveIdList:
-    - wave_019
-    - wave_020
-    - wave_021
-    - wave_022
-    - wave_023
-    waveIntervalSeconds: 4.1
-    bossId: boss_s2_100
     mapId: map_autumn
-    goldReward: 1700
-    enemyStatMultiplier: 2.75
-  - id: stage_037
-    allyBaseHp: 2440
-    enemyBaseHp: 2440
-    startMoney: 172
-    moneyPerSecond: 26
-    WaveIdList:
-    - wave_020
-    - wave_021
-    - wave_022
-    - wave_023
-    - wave_024
-    waveIntervalSeconds: 4.1
-    bossId: boss_s2_101
-    mapId: map_forest
-    goldReward: 1740
-    enemyStatMultiplier: 2.8
-  - id: stage_038
-    allyBaseHp: 2480
-    enemyBaseHp: 2480
-    startMoney: 174
-    moneyPerSecond: 26
-    WaveIdList:
-    - wave_021
-    - wave_022
-    - wave_023
-    - wave_024
-    - wave_019
-    waveIntervalSeconds: 4.1
-    bossId: boss_s2_102
-    mapId: map_desert
-    goldReward: 1780
-    enemyStatMultiplier: 2.85
-  - id: stage_039
-    allyBaseHp: 2520
-    enemyBaseHp: 2520
-    startMoney: 176
-    moneyPerSecond: 26
-    WaveIdList:
-    - wave_022
-    - wave_023
-    - wave_024
-    - wave_019
-    - wave_020
-    waveIntervalSeconds: 4.1
-    bossId: boss_s2_103
-    mapId: map_autumn
-    goldReward: 1820
-    enemyStatMultiplier: 2.9
-  - id: stage_040
-    allyBaseHp: 2560
-    enemyBaseHp: 2560
-    startMoney: 178
-    moneyPerSecond: 26
-    WaveIdList:
-    - wave_023
-    - wave_024
-    - wave_019
-    - wave_020
-    - wave_021
-    waveIntervalSeconds: 4.1
-    bossId: boss_s2_104
-    mapId: map_forest
-    goldReward: 1860
-    enemyStatMultiplier: 2.95
-  - id: stage_041
-    allyBaseHp: 2600
-    enemyBaseHp: 2600
-    startMoney: 180
-    moneyPerSecond: 28
-    WaveIdList:
-    - wave_030
-    - wave_025
-    - wave_026
-    - wave_027
-    - wave_028
-    waveIntervalSeconds: 3.8
-    bossId: boss_s1_100
-    mapId: map_desert
-    goldReward: 1900
-    enemyStatMultiplier: 3
-  - id: stage_042
-    allyBaseHp: 2640
-    enemyBaseHp: 2640
-    startMoney: 182
-    moneyPerSecond: 28
-    WaveIdList:
-    - wave_025
-    - wave_026
-    - wave_027
-    - wave_028
-    - wave_029
-    waveIntervalSeconds: 3.8
-    bossId: boss_s1_101
-    mapId: map_autumn
-    goldReward: 1940
-    enemyStatMultiplier: 3.05
-  - id: stage_043
-    allyBaseHp: 2680
-    enemyBaseHp: 2680
-    startMoney: 184
-    moneyPerSecond: 28
-    WaveIdList:
-    - wave_026
-    - wave_027
-    - wave_028
-    - wave_029
-    - wave_030
-    waveIntervalSeconds: 3.8
-    bossId: boss_s1_102
-    mapId: map_forest
-    goldReward: 1980
-    enemyStatMultiplier: 3.1
-  - id: stage_044
-    allyBaseHp: 2720
-    enemyBaseHp: 2720
-    startMoney: 186
-    moneyPerSecond: 28
-    WaveIdList:
-    - wave_027
-    - wave_028
-    - wave_029
-    - wave_030
-    - wave_025
-    waveIntervalSeconds: 3.8
-    bossId: boss_s1_103
-    mapId: map_desert
-    goldReward: 2020
-    enemyStatMultiplier: 3.15
-  - id: stage_045
-    allyBaseHp: 2760
-    enemyBaseHp: 2760
-    startMoney: 188
-    moneyPerSecond: 28
-    WaveIdList:
-    - wave_028
-    - wave_029
-    - wave_030
-    - wave_025
-    - wave_026
-    waveIntervalSeconds: 3.8
-    bossId: boss_s1_104
-    mapId: map_autumn
-    goldReward: 2060
-    enemyStatMultiplier: 3.2
-  - id: stage_046
-    allyBaseHp: 2800
-    enemyBaseHp: 2800
-    startMoney: 190
-    moneyPerSecond: 28
-    WaveIdList:
-    - wave_029
-    - wave_030
-    - wave_025
-    - wave_026
-    - wave_027
-    waveIntervalSeconds: 3.8
-    bossId: boss_s2_100
-    mapId: map_forest
-    goldReward: 2100
-    enemyStatMultiplier: 3.25
-  - id: stage_047
-    allyBaseHp: 2840
-    enemyBaseHp: 2840
-    startMoney: 192
-    moneyPerSecond: 28
-    WaveIdList:
-    - wave_030
-    - wave_025
-    - wave_026
-    - wave_027
-    - wave_028
-    waveIntervalSeconds: 3.8
-    bossId: boss_s2_101
-    mapId: map_desert
-    goldReward: 2140
-    enemyStatMultiplier: 3.3
-  - id: stage_048
-    allyBaseHp: 2880
-    enemyBaseHp: 2880
-    startMoney: 194
-    moneyPerSecond: 28
-    WaveIdList:
-    - wave_025
-    - wave_026
-    - wave_027
-    - wave_028
-    - wave_029
-    waveIntervalSeconds: 3.8
-    bossId: boss_s2_102
-    mapId: map_autumn
-    goldReward: 2180
-    enemyStatMultiplier: 3.35
-  - id: stage_049
-    allyBaseHp: 2920
-    enemyBaseHp: 2920
-    startMoney: 196
-    moneyPerSecond: 28
-    WaveIdList:
-    - wave_026
-    - wave_027
-    - wave_028
-    - wave_029
-    - wave_030
-    waveIntervalSeconds: 3.8
-    bossId: boss_s2_103
-    mapId: map_forest
-    goldReward: 2220
-    enemyStatMultiplier: 3.4
-  - id: stage_050
-    allyBaseHp: 2960
-    enemyBaseHp: 2960
+    goldReward: 1220
+    enemyStatMultiplier: 1.92
+  - id: stage_025
+    allyBaseHp: 1960
+    enemyBaseHp: 1960
     startMoney: 198
     moneyPerSecond: 28
     WaveIdList:
+    - wave_014
+    - wave_015
+    - wave_016
+    - wave_017
+    - wave_018
+    waveIntervalSeconds: 5
+    bossId: boss_s1_104
+    mapId: map_forest
+    goldReward: 1260
+    enemyStatMultiplier: 1.96
+  - id: stage_026
+    allyBaseHp: 2000
+    enemyBaseHp: 2000
+    startMoney: 200
+    moneyPerSecond: 28
+    WaveIdList:
+    - wave_015
+    - wave_016
+    - wave_017
+    - wave_018
+    - wave_013
+    waveIntervalSeconds: 4.96
+    bossId: boss_s2_100
+    mapId: map_desert
+    goldReward: 1300
+    enemyStatMultiplier: 2
+  - id: stage_027
+    allyBaseHp: 2040
+    enemyBaseHp: 2040
+    startMoney: 202
+    moneyPerSecond: 28
+    WaveIdList:
+    - wave_016
+    - wave_017
+    - wave_018
+    - wave_013
+    - wave_014
+    waveIntervalSeconds: 4.92
+    bossId: boss_s2_101
+    mapId: map_autumn
+    goldReward: 1340
+    enemyStatMultiplier: 2.04
+  - id: stage_028
+    allyBaseHp: 2080
+    enemyBaseHp: 2080
+    startMoney: 204
+    moneyPerSecond: 28
+    WaveIdList:
+    - wave_017
+    - wave_018
+    - wave_013
+    - wave_014
+    - wave_015
+    waveIntervalSeconds: 4.88
+    bossId: boss_s2_102
+    mapId: map_forest
+    goldReward: 1380
+    enemyStatMultiplier: 2.08
+  - id: stage_029
+    allyBaseHp: 2120
+    enemyBaseHp: 2120
+    startMoney: 206
+    moneyPerSecond: 28
+    WaveIdList:
+    - wave_018
+    - wave_013
+    - wave_014
+    - wave_015
+    - wave_016
+    waveIntervalSeconds: 4.84
+    bossId: boss_s2_103
+    mapId: map_desert
+    goldReward: 1420
+    enemyStatMultiplier: 2.12
+  - id: stage_030
+    allyBaseHp: 2160
+    enemyBaseHp: 2160
+    startMoney: 208
+    moneyPerSecond: 28
+    WaveIdList:
+    - wave_013
+    - wave_014
+    - wave_015
+    - wave_016
+    - wave_017
+    waveIntervalSeconds: 4.8
+    bossId: boss_s2_104
+    mapId: map_autumn
+    goldReward: 1460
+    enemyStatMultiplier: 2.16
+  - id: stage_031
+    allyBaseHp: 2200
+    enemyBaseHp: 2200
+    startMoney: 210
+    moneyPerSecond: 30
+    WaveIdList:
+    - wave_020
+    - wave_021
+    - wave_022
+    - wave_023
+    - wave_024
+    waveIntervalSeconds: 4.76
+    bossId: boss_s1_100
+    mapId: map_forest
+    goldReward: 1500
+    enemyStatMultiplier: 2.2
+  - id: stage_032
+    allyBaseHp: 2240
+    enemyBaseHp: 2240
+    startMoney: 212
+    moneyPerSecond: 30
+    WaveIdList:
+    - wave_021
+    - wave_022
+    - wave_023
+    - wave_024
+    - wave_019
+    waveIntervalSeconds: 4.72
+    bossId: boss_s1_101
+    mapId: map_desert
+    goldReward: 1540
+    enemyStatMultiplier: 2.24
+  - id: stage_033
+    allyBaseHp: 2280
+    enemyBaseHp: 2280
+    startMoney: 214
+    moneyPerSecond: 30
+    WaveIdList:
+    - wave_022
+    - wave_023
+    - wave_024
+    - wave_019
+    - wave_020
+    waveIntervalSeconds: 4.68
+    bossId: boss_s1_102
+    mapId: map_autumn
+    goldReward: 1580
+    enemyStatMultiplier: 2.28
+  - id: stage_034
+    allyBaseHp: 2320
+    enemyBaseHp: 2320
+    startMoney: 216
+    moneyPerSecond: 30
+    WaveIdList:
+    - wave_023
+    - wave_024
+    - wave_019
+    - wave_020
+    - wave_021
+    waveIntervalSeconds: 4.64
+    bossId: boss_s1_103
+    mapId: map_forest
+    goldReward: 1620
+    enemyStatMultiplier: 2.32
+  - id: stage_035
+    allyBaseHp: 2360
+    enemyBaseHp: 2360
+    startMoney: 218
+    moneyPerSecond: 30
+    WaveIdList:
+    - wave_024
+    - wave_019
+    - wave_020
+    - wave_021
+    - wave_022
+    waveIntervalSeconds: 4.6
+    bossId: boss_s1_104
+    mapId: map_desert
+    goldReward: 1660
+    enemyStatMultiplier: 2.36
+  - id: stage_036
+    allyBaseHp: 2400
+    enemyBaseHp: 2400
+    startMoney: 220
+    moneyPerSecond: 30
+    WaveIdList:
+    - wave_019
+    - wave_020
+    - wave_021
+    - wave_022
+    - wave_023
+    waveIntervalSeconds: 4.56
+    bossId: boss_s2_100
+    mapId: map_autumn
+    goldReward: 1700
+    enemyStatMultiplier: 2.4
+  - id: stage_037
+    allyBaseHp: 2440
+    enemyBaseHp: 2440
+    startMoney: 222
+    moneyPerSecond: 30
+    WaveIdList:
+    - wave_020
+    - wave_021
+    - wave_022
+    - wave_023
+    - wave_024
+    waveIntervalSeconds: 4.52
+    bossId: boss_s2_101
+    mapId: map_forest
+    goldReward: 1740
+    enemyStatMultiplier: 2.44
+  - id: stage_038
+    allyBaseHp: 2480
+    enemyBaseHp: 2480
+    startMoney: 224
+    moneyPerSecond: 30
+    WaveIdList:
+    - wave_021
+    - wave_022
+    - wave_023
+    - wave_024
+    - wave_019
+    waveIntervalSeconds: 4.48
+    bossId: boss_s2_102
+    mapId: map_desert
+    goldReward: 1780
+    enemyStatMultiplier: 2.48
+  - id: stage_039
+    allyBaseHp: 2520
+    enemyBaseHp: 2520
+    startMoney: 226
+    moneyPerSecond: 30
+    WaveIdList:
+    - wave_022
+    - wave_023
+    - wave_024
+    - wave_019
+    - wave_020
+    waveIntervalSeconds: 4.44
+    bossId: boss_s2_103
+    mapId: map_autumn
+    goldReward: 1820
+    enemyStatMultiplier: 2.52
+  - id: stage_040
+    allyBaseHp: 2560
+    enemyBaseHp: 2560
+    startMoney: 228
+    moneyPerSecond: 30
+    WaveIdList:
+    - wave_023
+    - wave_024
+    - wave_019
+    - wave_020
+    - wave_021
+    waveIntervalSeconds: 4.4
+    bossId: boss_s2_104
+    mapId: map_forest
+    goldReward: 1860
+    enemyStatMultiplier: 2.56
+  - id: stage_041
+    allyBaseHp: 2600
+    enemyBaseHp: 2600
+    startMoney: 230
+    moneyPerSecond: 32
+    WaveIdList:
+    - wave_030
+    - wave_025
+    - wave_026
+    - wave_027
+    - wave_028
+    waveIntervalSeconds: 4.36
+    bossId: boss_s1_100
+    mapId: map_desert
+    goldReward: 1900
+    enemyStatMultiplier: 2.6
+  - id: stage_042
+    allyBaseHp: 2640
+    enemyBaseHp: 2640
+    startMoney: 232
+    moneyPerSecond: 32
+    WaveIdList:
+    - wave_025
+    - wave_026
+    - wave_027
+    - wave_028
+    - wave_029
+    waveIntervalSeconds: 4.32
+    bossId: boss_s1_101
+    mapId: map_autumn
+    goldReward: 1940
+    enemyStatMultiplier: 2.64
+  - id: stage_043
+    allyBaseHp: 2680
+    enemyBaseHp: 2680
+    startMoney: 234
+    moneyPerSecond: 32
+    WaveIdList:
+    - wave_026
+    - wave_027
+    - wave_028
+    - wave_029
+    - wave_030
+    waveIntervalSeconds: 4.28
+    bossId: boss_s1_102
+    mapId: map_forest
+    goldReward: 1980
+    enemyStatMultiplier: 2.68
+  - id: stage_044
+    allyBaseHp: 2720
+    enemyBaseHp: 2720
+    startMoney: 236
+    moneyPerSecond: 32
+    WaveIdList:
     - wave_027
     - wave_028
     - wave_029
     - wave_030
     - wave_025
-    waveIntervalSeconds: 3.8
+    waveIntervalSeconds: 4.24
+    bossId: boss_s1_103
+    mapId: map_desert
+    goldReward: 2020
+    enemyStatMultiplier: 2.72
+  - id: stage_045
+    allyBaseHp: 2760
+    enemyBaseHp: 2760
+    startMoney: 238
+    moneyPerSecond: 32
+    WaveIdList:
+    - wave_028
+    - wave_029
+    - wave_030
+    - wave_025
+    - wave_026
+    waveIntervalSeconds: 4.2
+    bossId: boss_s1_104
+    mapId: map_autumn
+    goldReward: 2060
+    enemyStatMultiplier: 2.76
+  - id: stage_046
+    allyBaseHp: 2800
+    enemyBaseHp: 2800
+    startMoney: 240
+    moneyPerSecond: 32
+    WaveIdList:
+    - wave_029
+    - wave_030
+    - wave_025
+    - wave_026
+    - wave_027
+    waveIntervalSeconds: 4.16
+    bossId: boss_s2_100
+    mapId: map_forest
+    goldReward: 2100
+    enemyStatMultiplier: 2.8
+  - id: stage_047
+    allyBaseHp: 2840
+    enemyBaseHp: 2840
+    startMoney: 242
+    moneyPerSecond: 32
+    WaveIdList:
+    - wave_030
+    - wave_025
+    - wave_026
+    - wave_027
+    - wave_028
+    waveIntervalSeconds: 4.12
+    bossId: boss_s2_101
+    mapId: map_desert
+    goldReward: 2140
+    enemyStatMultiplier: 2.84
+  - id: stage_048
+    allyBaseHp: 2880
+    enemyBaseHp: 2880
+    startMoney: 244
+    moneyPerSecond: 32
+    WaveIdList:
+    - wave_025
+    - wave_026
+    - wave_027
+    - wave_028
+    - wave_029
+    waveIntervalSeconds: 4.08
+    bossId: boss_s2_102
+    mapId: map_autumn
+    goldReward: 2180
+    enemyStatMultiplier: 2.88
+  - id: stage_049
+    allyBaseHp: 2920
+    enemyBaseHp: 2920
+    startMoney: 246
+    moneyPerSecond: 32
+    WaveIdList:
+    - wave_026
+    - wave_027
+    - wave_028
+    - wave_029
+    - wave_030
+    waveIntervalSeconds: 4.04
+    bossId: boss_s2_103
+    mapId: map_forest
+    goldReward: 2220
+    enemyStatMultiplier: 2.92
+  - id: stage_050
+    allyBaseHp: 2960
+    enemyBaseHp: 2960
+    startMoney: 248
+    moneyPerSecond: 32
+    WaveIdList:
+    - wave_027
+    - wave_028
+    - wave_029
+    - wave_030
+    - wave_025
+    waveIntervalSeconds: 4
     bossId: boss_s2_104
     mapId: map_desert
     goldReward: 2260
-    enemyStatMultiplier: 3.45
+    enemyStatMultiplier: 2.96

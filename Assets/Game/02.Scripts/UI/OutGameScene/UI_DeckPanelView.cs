@@ -10,10 +10,12 @@ namespace Game.View
         [SerializeField] private UI_UnitCardView[] unitCards;
         [SerializeField] private TMP_Text deckCountText;
         [SerializeField] private Button confirmButton;
+        [SerializeField] private Button closeButton;
 
         public GameObject Root => root;
         public UI_UnitCardView[] UnitCards => unitCards;
         public Button ConfirmButton => confirmButton;
+        public Button CloseButton => closeButton;
 
         public void Show()
         {

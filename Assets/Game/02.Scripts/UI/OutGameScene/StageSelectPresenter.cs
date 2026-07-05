@@ -57,6 +57,10 @@ namespace Game.Presenter
                     .Subscribe(_ => OnStageButtonClicked(capturedStageId))
                     .AddTo(_disposables);
             }
+
+            _view.CloseButton.onClick.AsObservable()
+                .Subscribe(_ => OnCloseButtonClicked())
+                .AddTo(_disposables);
         }
 
         public void Dispose()
@@ -84,6 +88,11 @@ namespace Game.Presenter
         {
             _stageProgressService.SetSelectedStageId(stageId);
             _sceneLoadService.LoadGameScene();
+        }
+
+        private void OnCloseButtonClicked()
+        {
+            _view.Hide();
         }
     }
 }

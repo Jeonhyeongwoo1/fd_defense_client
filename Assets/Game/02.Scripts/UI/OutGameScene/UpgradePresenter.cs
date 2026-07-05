@@ -61,6 +61,10 @@ namespace Game.Presenter
                 .Subscribe(_ => OnUpgradeClicked())
                 .AddTo(_disposables);
 
+            _view.CloseButton.onClick.AsObservable()
+                .Subscribe(_ => OnCloseButtonClicked())
+                .AddTo(_disposables);
+
             _goldService.Gold.Subscribe(_ => RefreshUpgradeButton()).AddTo(_disposables);
         }
 
@@ -212,6 +216,11 @@ namespace Game.Presenter
                     break;
                 }
             }
+        }
+
+        private void OnCloseButtonClicked()
+        {
+            _view.Hide();
         }
     }
 }

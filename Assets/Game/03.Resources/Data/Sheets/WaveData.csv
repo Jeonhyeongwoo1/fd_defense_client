@@ -1,10 +1,10 @@
 id,spawnEntries
-wave_001,enemy_slime_green:4:2.6;enemy_slime_purple:2:5.0
-wave_002,enemy_slime_purple:5:2.5;enemy_bird_eagle:2:5.0
-wave_003,enemy_bird_eagle:6:2.4;enemy_slime_green:3:5.0
-wave_004,enemy_slime_green:7:2.3;enemy_slime_purple:3:5.0;enemy_bird_eagle:2:6.0
-wave_005,enemy_slime_purple:8:2.2;enemy_bird_eagle:4:5.0;enemy_slime_green:2:6.0
-wave_006,enemy_bird_eagle:9:2.1;enemy_slime_green:4:5.0;enemy_slime_purple:2:6.0
+wave_001,enemy_slime_green:3:4.0
+wave_002,enemy_slime_green:4:3.5
+wave_003,enemy_slime_green:4:3.5;enemy_slime_purple:1:8.0
+wave_004,enemy_slime_green:5:3.2;enemy_slime_purple:2:7.0
+wave_005,enemy_slime_purple:4:3.0;enemy_slime_green:3:6.0
+wave_006,enemy_slime_green:5:3.0;enemy_slime_purple:3:5.0;enemy_bird_eagle:1:10.0
 wave_007,enemy_beetle_red:6:2.3;enemy_wolf_gray:3:4.5
 wave_008,enemy_wolf_gray:7:2.2;enemy_slime_purple:3:4.5
 wave_009,enemy_slime_purple:8:2.1;enemy_beetle_red:4:4.5

@@ -53,6 +53,10 @@ namespace Game.Presenter
             {
                 _view.MissionRows[i].gameObject.SetActive(false);
             }
+
+            _view.CloseButton.onClick.AsObservable()
+                .Subscribe(_ => OnCloseButtonClicked())
+                .AddTo(_disposables);
         }
 
         public void Dispose()
@@ -86,6 +90,11 @@ namespace Game.Presenter
                 GameLogger.Log($"[MissionPanelPresenter] Claimed mission {missionData.id}: {missionData.goldReward} gold");
                 Refresh();
             }
+        }
+
+        private void OnCloseButtonClicked()
+        {
+            _view.Hide();
         }
     }
 }

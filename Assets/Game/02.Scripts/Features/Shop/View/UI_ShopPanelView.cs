@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Game.View
 {
@@ -6,8 +7,10 @@ namespace Game.View
     {
         [SerializeField] private GameObject root;
         [SerializeField] private UI_ShopItemView[] shopItems;
+        [SerializeField] private Button closeButton;
 
         public UI_ShopItemView[] ShopItems => shopItems;
+        public Button CloseButton => closeButton;
 
         public void Show()
         {

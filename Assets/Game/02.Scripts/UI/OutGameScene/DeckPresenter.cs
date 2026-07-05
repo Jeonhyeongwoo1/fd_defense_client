@@ -64,6 +64,10 @@ namespace Game.Presenter
             _view.ConfirmButton.onClick.AsObservable()
                 .Subscribe(_ => OnConfirmClicked())
                 .AddTo(_disposables);
+
+            _view.CloseButton.onClick.AsObservable()
+                .Subscribe(_ => OnCloseButtonClicked())
+                .AddTo(_disposables);
         }
 
         public void Refresh()
@@ -134,6 +138,11 @@ namespace Game.Presenter
 
             _deckService.SaveDeck(_tempSelectedUnitIdList);
             GameLogger.Log("[DeckPresenter] Deck saved successfully");
+        }
+
+        private void OnCloseButtonClicked()
+        {
+            _view.Hide();
         }
     }
 }

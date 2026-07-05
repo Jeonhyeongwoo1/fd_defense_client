@@ -18,6 +18,7 @@ namespace Game.App
         [SerializeField] private DailyRewardTableSO dailyRewardTable;
         [SerializeField] private MissionTableSO missionTable;
         [SerializeField] private ShopTableSO shopTable;
+        [SerializeField] private MapTableSO mapTable;
 
         protected override void Configure(IContainerBuilder builder)
         {
@@ -27,6 +28,7 @@ namespace Game.App
             builder.RegisterInstance(dailyRewardTable);
             builder.RegisterInstance(missionTable);
             builder.RegisterInstance(shopTable);
+            builder.RegisterInstance(mapTable);
 
             builder.Register<EventBus>(Lifetime.Scoped);
             builder.Register<UserDataService>(Lifetime.Scoped);
@@ -39,6 +41,9 @@ namespace Game.App
             builder.Register<MissionService>(Lifetime.Scoped);
             builder.Register<SettingsService>(Lifetime.Scoped);
             builder.Register<ShopService>(Lifetime.Scoped);
+            builder.Register<MapBuilderService>(Lifetime.Scoped);
+            builder.Register<LobbyBackgroundService>(Lifetime.Scoped);
+            builder.Register<LobbyShowcaseService>(Lifetime.Scoped);
 
             builder.RegisterComponentInHierarchy<UI_StageSelectView>();
             builder.RegisterComponentInHierarchy<UI_OutGameHomeView>();
@@ -49,6 +54,8 @@ namespace Game.App
             builder.RegisterComponentInHierarchy<UI_SettingsPopupView>();
             builder.RegisterComponentInHierarchy<UI_ShopPanelView>();
 
+            builder.RegisterEntryPoint<LobbyBackgroundService>(Lifetime.Scoped);
+            builder.RegisterEntryPoint<LobbyShowcaseService>(Lifetime.Scoped);
             builder.RegisterEntryPoint<StageSelectPresenter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<DeckPresenter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<UpgradePresenter>(Lifetime.Scoped);

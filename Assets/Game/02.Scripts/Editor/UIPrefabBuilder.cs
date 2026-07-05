@@ -99,6 +99,42 @@ namespace Game.Editor
             }
         }
 
+        private static void DisableDemoDescendants(GameObject root, string[] nameFragments)
+        {
+            var contractNames = new HashSet<string>
+            {
+                "UnitIcon", "NameText", "LevelText", "SelectedMark", "DimOverlay",
+                "StageNameText", "ClearedMark", "LockedOverlay", "CloseButton",
+                "ClaimButton", "DescriptionText", "ProgressText", "ClaimedMark",
+                "BestStageText", "UnitCountText", "DeckTabButton", "UpgradeTabButton",
+                "MissionsTabButton", "ShopTabButton", "PlayButton", "SettingsButton",
+                "DailyRewardButton", "DailyRewardBadge", "ConfirmButton"
+            };
+
+            var allDescendants = root.GetComponentsInChildren<Transform>(true);
+            foreach (var t in allDescendants)
+            {
+                if (t == root.transform)
+                {
+                    continue;
+                }
+
+                if (contractNames.Contains(t.name))
+                {
+                    continue;
+                }
+
+                foreach (var fragment in nameFragments)
+                {
+                    if (t.name.Contains(fragment))
+                    {
+                        t.gameObject.SetActive(false);
+                        break;
+                    }
+                }
+            }
+        }
+
         private static TMP_FontAsset LoadFont()
         {
             var font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(FontPath);
@@ -581,6 +617,14 @@ namespace Game.Editor
             buttonRect.pivot = new Vector2(0.5f, 0);
             buttonRect.anchoredPosition = position;
             buttonRect.sizeDelta = new Vector2(130, 130);
+
+            var darkSquareBgs = buttonInstance.GetComponentsInChildren<Image>(true)
+                .Where(img => img.gameObject != buttonInstance && img.color == new Color(0, 0, 0, 1) || (img.color.r < 0.2f && img.color.g < 0.2f && img.color.b < 0.2f && img.color.a > 0.8f))
+                .ToArray();
+            foreach (var bgImg in darkSquareBgs)
+            {
+                bgImg.gameObject.SetActive(false);
+            }
 
             var button = EnsureButtonComponent(buttonInstance);
 
@@ -1370,6 +1414,12 @@ namespace Game.Editor
                 Transform buttonADRemove = null;
                 if (groupLeftButtons != null)
                 {
+                    var leftRect = groupLeftButtons.GetComponent<RectTransform>();
+                    leftRect.anchorMin = new Vector2(0, 0);
+                    leftRect.anchorMax = new Vector2(0, 0);
+                    leftRect.pivot = new Vector2(0, 0);
+                    leftRect.anchoredPosition = new Vector2(140, 150);
+
                     buttonFree = groupLeftButtons.Find("Button_Free");
                     buttonADRemove = groupLeftButtons.Find("Button_ADRemove");
                 }
@@ -1391,6 +1441,30 @@ namespace Game.Editor
                     if (textTransform != null)
                     {
                         textTransform.text = "DECK";
+                    }
+
+                    var bgImages = buttonFree.GetComponentsInChildren<Image>(true);
+                    var hasActiveBackground = false;
+                    foreach (var img in bgImages)
+                    {
+                        if (img.gameObject.activeSelf && img.gameObject != buttonFree.gameObject)
+                        {
+                            hasActiveBackground = true;
+                            break;
+                        }
+                    }
+                    if (!hasActiveBackground)
+                    {
+                        var circleBg = InstantiateKitPrefab(ButtonCirclePath, buttonFree);
+                        if (circleBg != null)
+                        {
+                            circleBg.transform.SetSiblingIndex(0);
+                            var bgRect = circleBg.GetComponent<RectTransform>();
+                            bgRect.anchorMin = Vector2.zero;
+                            bgRect.anchorMax = Vector2.one;
+                            bgRect.offsetMin = Vector2.zero;
+                            bgRect.offsetMax = Vector2.zero;
+                        }
                     }
 
                     tabButtons[0] = EnsureButtonComponent(buttonFree.gameObject);
@@ -1426,6 +1500,30 @@ namespace Game.Editor
                         sampleEffect.gameObject.SetActive(false);
                     }
 
+                    var bgImagesUpgrade = buttonADRemove.GetComponentsInChildren<Image>(true);
+                    var hasActiveBackgroundUpgrade = false;
+                    foreach (var img in bgImagesUpgrade)
+                    {
+                        if (img.gameObject.activeSelf && img.gameObject != buttonADRemove.gameObject)
+                        {
+                            hasActiveBackgroundUpgrade = true;
+                            break;
+                        }
+                    }
+                    if (!hasActiveBackgroundUpgrade)
+                    {
+                        var circleBg = InstantiateKitPrefab(ButtonCirclePath, buttonADRemove);
+                        if (circleBg != null)
+                        {
+                            circleBg.transform.SetSiblingIndex(0);
+                            var bgRect = circleBg.GetComponent<RectTransform>();
+                            bgRect.anchorMin = Vector2.zero;
+                            bgRect.anchorMax = Vector2.one;
+                            bgRect.offsetMin = Vector2.zero;
+                            bgRect.offsetMax = Vector2.zero;
+                        }
+                    }
+
                     tabButtons[1] = EnsureButtonComponent(buttonADRemove.gameObject);
                 }
                 else
@@ -1438,6 +1536,12 @@ namespace Game.Editor
                 Transform buttonInventory = null;
                 if (groupRightButtons != null)
                 {
+                    var rightRect = groupRightButtons.GetComponent<RectTransform>();
+                    rightRect.anchorMin = new Vector2(1, 0);
+                    rightRect.anchorMax = new Vector2(1, 0);
+                    rightRect.pivot = new Vector2(1, 0);
+                    rightRect.anchoredPosition = new Vector2(-140, 150);
+
                     buttonInventory = groupRightButtons.Find("Button_Inventory");
                 }
 
@@ -1458,6 +1562,30 @@ namespace Game.Editor
                     if (textTransform != null)
                     {
                         textTransform.text = "MISSIONS";
+                    }
+
+                    var bgImagesMissions = buttonInventory.GetComponentsInChildren<Image>(true);
+                    var hasActiveBackgroundMissions = false;
+                    foreach (var img in bgImagesMissions)
+                    {
+                        if (img.gameObject.activeSelf && img.gameObject != buttonInventory.gameObject)
+                        {
+                            hasActiveBackgroundMissions = true;
+                            break;
+                        }
+                    }
+                    if (!hasActiveBackgroundMissions)
+                    {
+                        var circleBg = InstantiateKitPrefab(ButtonCirclePath, buttonInventory);
+                        if (circleBg != null)
+                        {
+                            circleBg.transform.SetSiblingIndex(0);
+                            var bgRect = circleBg.GetComponent<RectTransform>();
+                            bgRect.anchorMin = Vector2.zero;
+                            bgRect.anchorMax = Vector2.one;
+                            bgRect.offsetMin = Vector2.zero;
+                            bgRect.offsetMax = Vector2.zero;
+                        }
                     }
 
                     tabButtons[2] = EnsureButtonComponent(buttonInventory.gameObject);
@@ -1490,6 +1618,30 @@ namespace Game.Editor
                         shopTextTransform.text = "SHOP";
                     }
 
+                    var bgImagesShop = shopButtonClone.GetComponentsInChildren<Image>(true);
+                    var hasActiveBackgroundShop = false;
+                    foreach (var img in bgImagesShop)
+                    {
+                        if (img.gameObject.activeSelf && img.gameObject != shopButtonClone)
+                        {
+                            hasActiveBackgroundShop = true;
+                            break;
+                        }
+                    }
+                    if (!hasActiveBackgroundShop)
+                    {
+                        var circleBg = InstantiateKitPrefab(ButtonCirclePath, shopButtonClone.transform);
+                        if (circleBg != null)
+                        {
+                            circleBg.transform.SetSiblingIndex(0);
+                            var bgRect = circleBg.GetComponent<RectTransform>();
+                            bgRect.anchorMin = Vector2.zero;
+                            bgRect.anchorMax = Vector2.one;
+                            bgRect.offsetMin = Vector2.zero;
+                            bgRect.offsetMax = Vector2.zero;
+                        }
+                    }
+
                     tabButtons[3] = EnsureButtonComponent(shopButtonClone);
                 }
                 else
@@ -1503,71 +1655,17 @@ namespace Game.Editor
                 var hambergerMenu = allChildren.FirstOrDefault(t => t.name == "HambergerMenu");
                 if (hambergerMenu != null)
                 {
-                    var menuButtons = hambergerMenu.GetComponentsInChildren<Button>(true);
-                    Button candidateSettings = null;
-                    Button candidateGift = null;
-
-                    foreach (var btn in menuButtons)
-                    {
-                        var btnName = btn.name.ToLower();
-                        if (btnName.Contains("setting") || btnName.Contains("gear"))
-                        {
-                            candidateSettings = btn;
-                        }
-                        else if (btnName.Contains("gift") || btnName.Contains("reward"))
-                        {
-                            candidateGift = btn;
-                        }
-                    }
-
-                    var alertDots = hambergerMenu.GetComponentsInChildren<Transform>(true)
-                        .Where(t => t.name.Contains("Alert_Dot")).ToArray();
-
-                    if (candidateSettings != null)
-                    {
-                        candidateSettings.name = "SettingsButton";
-                        settingsButton = candidateSettings;
-                    }
-
-                    if (candidateGift != null)
-                    {
-                        candidateGift.name = "DailyRewardButton";
-                        dailyRewardButton = candidateGift;
-
-                        if (alertDots.Length > 0)
-                        {
-                            dailyRewardBadge = alertDots[0].gameObject;
-                            dailyRewardBadge.name = "DailyRewardBadge";
-                        }
-                    }
-
-                    if (settingsButton == null || dailyRewardButton == null || dailyRewardBadge == null)
-                    {
-                        GameLogger.LogWarning("[UIPrefabBuilder] HambergerMenu buttons not adequate, using fallback.");
-                        hambergerMenu.gameObject.SetActive(false);
-
-                        var gearIcon = LoadSprite(KitRoot + "Shared/Icons/PictoIcon/128/headgear.png");
-                        if (gearIcon == null)
-                        {
-                            gearIcon = LoadSprite(KitRoot + "Shared/Icons/PictoIcon/128/menu_1.png");
-                        }
-                        settingsButton = CreateSettingsButton(parent, gearIcon);
-                        dailyRewardButton = CreateDailyRewardButton(parent, giftIcon);
-                        dailyRewardBadge = CreateAlertBadge(dailyRewardButton.transform, new Vector2(30, 30));
-                    }
+                    hambergerMenu.gameObject.SetActive(false);
                 }
-                else
+
+                var gearIcon = LoadSprite(KitRoot + "Shared/Icons/PictoIcon/128/headgear.png");
+                if (gearIcon == null)
                 {
-                    GameLogger.LogWarning("[UIPrefabBuilder] HambergerMenu not found in Lobby_02, using fallback.");
-                    var gearIcon = LoadSprite(KitRoot + "Shared/Icons/PictoIcon/128/headgear.png");
-                    if (gearIcon == null)
-                    {
-                        gearIcon = LoadSprite(KitRoot + "Shared/Icons/PictoIcon/128/menu_1.png");
-                    }
-                    settingsButton = CreateSettingsButton(parent, gearIcon);
-                    dailyRewardButton = CreateDailyRewardButton(parent, giftIcon);
-                    dailyRewardBadge = CreateAlertBadge(dailyRewardButton.transform, new Vector2(30, 30));
+                    gearIcon = LoadSprite(KitRoot + "Shared/Icons/PictoIcon/128/menu_1.png");
                 }
+                settingsButton = CreateSettingsButton(parent, gearIcon);
+                dailyRewardButton = CreateDailyRewardButton(parent, giftIcon);
+                dailyRewardBadge = CreateAlertBadge(dailyRewardButton.transform, new Vector2(30, 30));
 
                 var unusedNames = new[] { "Image_League", "Status_Rune", "Timer", "Text_Time" };
                 foreach (var child in allChildren)
@@ -1880,6 +1978,10 @@ namespace Game.Editor
 
         private static GameObject CreatePlayerStatusPanel(RectTransform parent, TMP_FontAsset font)
         {
+            // UserInfo_03 template produces broken layout (yellow frame + torn text) — always use fallback
+            return CreatePlayerStatusPanelFallback(parent, font);
+
+            /*
             const string templatePath = KitRoot + "Theme_Light/Prefabs/Prefabs~DemoLayout/UserInfo_03.prefab";
             var templateInstance = InstantiateKitPrefab(templatePath, parent);
 
@@ -1996,6 +2098,7 @@ namespace Game.Editor
             unitCountText.gameObject.name = "UnitCountText";
 
             return templateInstance;
+            */
         }
 
         private static GameObject CreatePlayerStatusPanelFallback(RectTransform parent, TMP_FontAsset font)
@@ -2028,6 +2131,7 @@ namespace Game.Editor
             }
 
             panelInstance.name = "PlayerStatusPanel";
+            DisableDemoDescendants(panelInstance, new[] { "Character" });
             var panelRect = panelInstance.GetComponent<RectTransform>();
             if (panelRect == null)
             {
@@ -2318,6 +2422,8 @@ namespace Game.Editor
             panelRect.offsetMin = Vector2.zero;
             panelRect.offsetMax = Vector2.zero;
 
+            DisableDemoDescendants(templateInstance, new[] { "ResourceBar", "Tab_", "Dropdown", "Info" });
+
             var scrollRectTransform = templateInstance.GetComponentsInChildren<ScrollRect>(true)
                 .FirstOrDefault()?.transform;
             var viewportTransform = scrollRectTransform?.Find("Viewport");
@@ -2346,6 +2452,23 @@ namespace Game.Editor
             var stageIds = GenerateStageIds();
             var stageButtons = new UI_StageButtonView[stageIds.Length];
 
+            foreach (Transform directChild in contentTransform)
+            {
+                var isStageItem = false;
+                foreach (var item in demoItems)
+                {
+                    if (directChild.gameObject == item)
+                    {
+                        isStageItem = true;
+                        break;
+                    }
+                }
+                if (!isStageItem)
+                {
+                    directChild.gameObject.SetActive(false);
+                }
+            }
+
             for (var i = 0; i < stageIds.Length; i++)
             {
                 GameObject itemInstance;
@@ -2360,6 +2483,15 @@ namespace Game.Editor
 
                 itemInstance.name = $"StageButton_{stageIds[i]}";
                 itemInstance.SetActive(true);
+
+                DisableDemoDescendants(itemInstance, new[] { "ResourceStats", "Key" });
+
+                var demoLocks = itemInstance.GetComponentsInChildren<Transform>(true)
+                    .Where(t => t.name == "Lock" && t.parent.name != "LockedOverlay").ToArray();
+                foreach (var lockTr in demoLocks)
+                {
+                    lockTr.gameObject.SetActive(false);
+                }
 
                 var button = EnsureButtonComponent(itemInstance);
 
@@ -2589,6 +2721,8 @@ namespace Game.Editor
             panelRect.offsetMin = Vector2.zero;
             panelRect.offsetMax = Vector2.zero;
 
+            DisableDemoDescendants(templateInstance, new[] { "Dropdown", "Option", "Button_Info", "Info", "ResourceBar", "Group_Money", "Tab_" });
+
             var middleTransform = templateInstance.GetComponentsInChildren<Transform>(true)
                 .FirstOrDefault(t => t.name == "Middle");
             var scrollRectTransform = middleTransform?.Find("ScrollRect");
@@ -2632,6 +2766,28 @@ namespace Game.Editor
                 itemInstance.name = $"DeckCard_{i}";
                 itemInstance.SetActive(true);
 
+                DisableDemoDescendants(itemInstance, new[] { "Character", "Iocn_Up", "RoleArea", "Slider", "Gauge" });
+
+                // 데모 캐릭터 아트는 오브젝트명이 아니라 스프라이트명(Sample_Cha* 류)으로 식별해 제거
+                foreach (var demoArtImage in itemInstance.GetComponentsInChildren<Image>(true))
+                {
+                    if (demoArtImage.sprite != null && (demoArtImage.sprite.name.Contains("Cha") || demoArtImage.sprite.name.Contains("Sample")))
+                    {
+                        demoArtImage.gameObject.SetActive(false);
+                    }
+                }
+
+                var demoGaugeTexts = itemInstance.GetComponentsInChildren<TMP_Text>(true)
+                    .Where(txt => txt.text.Contains("/") && txt.name != "LevelText").ToArray();
+                foreach (var txt in demoGaugeTexts)
+                {
+                    var parentGroup = txt.transform.parent;
+                    if (parentGroup != null && parentGroup != itemInstance.transform)
+                    {
+                        parentGroup.gameObject.SetActive(false);
+                    }
+                }
+
                 var button = EnsureButtonComponent(itemInstance);
 
                 var iconImage = itemInstance.GetComponentsInChildren<Image>(true)
@@ -2648,8 +2804,8 @@ namespace Game.Editor
                     var iconRect = iconObject.AddComponent<RectTransform>();
                     iconRect.anchorMin = new Vector2(0.5f, 0.5f);
                     iconRect.anchorMax = new Vector2(0.5f, 0.5f);
-                    iconRect.anchoredPosition = new Vector2(0, 25);
-                    iconRect.sizeDelta = new Vector2(140, 140);
+                    iconRect.anchoredPosition = new Vector2(0, 20);
+                    iconRect.sizeDelta = new Vector2(150, 150);
                     iconImage = iconObject.AddComponent<Image>();
                     iconImage.preserveAspect = true;
                     iconImage.raycastTarget = false;
@@ -2657,6 +2813,11 @@ namespace Game.Editor
                 else
                 {
                     iconImage.gameObject.name = "UnitIcon";
+                    var iconRect = iconImage.GetComponent<RectTransform>();
+                    iconRect.anchorMin = new Vector2(0.5f, 0.5f);
+                    iconRect.anchorMax = new Vector2(0.5f, 0.5f);
+                    iconRect.anchoredPosition = new Vector2(0, 20);
+                    iconRect.sizeDelta = new Vector2(150, 150);
                 }
 
                 if (nameText == null)
@@ -2667,7 +2828,7 @@ namespace Game.Editor
                     nameRect.anchorMin = new Vector2(0.5f, 0);
                     nameRect.anchorMax = new Vector2(0.5f, 0);
                     nameRect.pivot = new Vector2(0.5f, 0);
-                    nameRect.anchoredPosition = new Vector2(0, 52);
+                    nameRect.anchoredPosition = new Vector2(0, 10);
                     nameRect.sizeDelta = new Vector2(230, 40);
                     var nameTmp = nameObject.AddComponent<TextMeshProUGUI>();
                     nameTmp.fontSize = 30;
@@ -2677,6 +2838,11 @@ namespace Game.Editor
                 else
                 {
                     nameText.gameObject.name = "NameText";
+                    var nameRect = nameText.GetComponent<RectTransform>();
+                    nameRect.anchorMin = new Vector2(0.5f, 0);
+                    nameRect.anchorMax = new Vector2(0.5f, 0);
+                    nameRect.pivot = new Vector2(0.5f, 0);
+                    nameRect.anchoredPosition = new Vector2(0, 10);
                 }
                 nameText.text = "Unit";
                 nameText.font = font;
@@ -2776,16 +2942,53 @@ namespace Game.Editor
                 deckCountText.font = font;
             }
 
+            // 마지막 카드 줄이 CONFIRM/도크에 가리지 않게 그리드 하단 여백 확보
+            var contentGrid = contentTransform != null ? contentTransform.GetComponent<GridLayoutGroup>() : null;
+            if (contentGrid != null)
+            {
+                contentGrid.padding.bottom += 200;
+            }
+
             var confirmButtonTransform = templateInstance.GetComponentsInChildren<Transform>(true)
                 .FirstOrDefault(t => t.name.Contains("Confirm"));
             Button confirmButton;
             if (confirmButtonTransform != null)
             {
+                var confirmRect = confirmButtonTransform.GetComponent<RectTransform>();
+                confirmRect.anchorMin = new Vector2(0.5f, 0);
+                confirmRect.anchorMax = new Vector2(0.5f, 0);
+                confirmRect.pivot = new Vector2(0.5f, 0);
+                confirmRect.anchoredPosition = new Vector2(0, 40);
                 confirmButton = EnsureButtonComponent(confirmButtonTransform.gameObject);
             }
             else
             {
-                confirmButton = CreatePausePopupButton(templateInstance.transform, "ConfirmButton", new Vector2(0, 50), "CONFIRM", ButtonGreenPath, font);
+                confirmButton = CreatePausePopupButton(templateInstance.transform, "ConfirmButton", new Vector2(0, 60), "CONFIRM", ButtonGreenPath, font);
+                var createdConfirmRect = confirmButton.GetComponent<RectTransform>();
+                createdConfirmRect.anchorMin = new Vector2(0.5f, 0);
+                createdConfirmRect.anchorMax = new Vector2(0.5f, 0);
+                createdConfirmRect.pivot = new Vector2(0.5f, 0);
+                createdConfirmRect.anchoredPosition = new Vector2(0, 60);
+            }
+
+            // 덱 카운터는 좌상단 고정, 템플릿의 데모 카운터("7/30" 류)는 비활성
+            if (deckCountText != null)
+            {
+                var deckCountRect = deckCountText.GetComponent<RectTransform>();
+                deckCountRect.anchorMin = new Vector2(0, 1);
+                deckCountRect.anchorMax = new Vector2(0, 1);
+                deckCountRect.pivot = new Vector2(0, 1);
+                deckCountRect.anchoredPosition = new Vector2(60, -90);
+                deckCountRect.sizeDelta = new Vector2(240, 50);
+                deckCountText.alignment = TextAlignmentOptions.Left;
+
+                foreach (var demoCounter in templateInstance.GetComponentsInChildren<TMP_Text>(true))
+                {
+                    if (demoCounter != deckCountText && demoCounter.name != "LevelText" && demoCounter.name != "NameText" && demoCounter.text.Contains("/"))
+                    {
+                        demoCounter.gameObject.SetActive(false);
+                    }
+                }
             }
 
             var closeButtonTransform = templateInstance.GetComponentsInChildren<Transform>(true)
@@ -3633,6 +3836,8 @@ namespace Game.Editor
             panelRect.offsetMin = Vector2.zero;
             panelRect.offsetMax = Vector2.zero;
 
+            DisableDemoDescendants(templateInstance, new[] { "ResourceBar", "Tab_", "Dropdown", "Option", "Button_Info" });
+
             var topTransform = templateInstance.GetComponentsInChildren<Transform>(true)
                 .FirstOrDefault(t => t.name == "Top");
             if (topTransform != null)
@@ -4245,6 +4450,8 @@ namespace Game.Editor
 
             templateInstance.name = "MissionPanel";
 
+            DisableDemoDescendants(templateInstance, new[] { "ResourceBar", "Tab_", "Dropdown", "Option", "Button_Info" });
+
             var dimmedTransform = templateInstance.GetComponentsInChildren<Transform>(true)
                 .FirstOrDefault(t => t.name == "Dimmed");
             var popupTransform = templateInstance.GetComponentsInChildren<Transform>(true)
@@ -4751,6 +4958,8 @@ namespace Game.Editor
             rootRect.offsetMin = Vector2.zero;
             rootRect.offsetMax = Vector2.zero;
 
+            DisableDemoDescendants(popupRoot, new[] { "ResourceBar", "Tab_", "Dropdown", "Option", "Button_Info" });
+
             var dimImage = popupRoot.AddComponent<Image>();
             dimImage.color = new Color(0, 0, 0, 0.7f);
             dimImage.raycastTarget = true;
@@ -4916,6 +5125,8 @@ namespace Game.Editor
             }
 
             templateInstance.name = "SettingsPopupRoot";
+
+            DisableDemoDescendants(templateInstance, new[] { "ResourceBar", "Tab_", "Dropdown", "Option", "Button_Info" });
 
             var dimmedTransform = templateInstance.GetComponentsInChildren<Transform>(true)
                 .FirstOrDefault(t => t.name == "Dimmed");

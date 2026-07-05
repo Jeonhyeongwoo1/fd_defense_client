@@ -46,7 +46,8 @@ namespace Game.Service
 
         public void Tick()
         {
-            if (_gameStateModel.CurrentStateType.Value != GameStateType.WavePlaying)
+            var currentState = _gameStateModel.CurrentStateType.Value;
+            if (currentState != GameStateType.WavePlaying && currentState != GameStateType.WaveCleared)
             {
                 return;
             }

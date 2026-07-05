@@ -31,6 +31,23 @@ namespace Game.Editor
             }
         }
 
+        /// <summary>킷 원본 템플릿을 기준 이미지로 캡처 — 재현 목표 확인용.</summary>
+        public static void CaptureReferenceTemplates()
+        {
+            Directory.CreateDirectory(OutputDir);
+
+            var referencePaths = new[]
+            {
+                "Assets/Layer Lab/GUI Pro-MinimalGame/Theme_Light/Prefabs/Prefabs~DemoScenes/Lobby_Default.prefab",
+                "Assets/Layer Lab/GUI Pro-MinimalGame/Theme_Light/Prefabs/Prefabs~DemoScenes/Lobby_02.prefab"
+            };
+
+            foreach (var path in referencePaths)
+            {
+                CapturePrefab(path, "REF_" + Path.GetFileNameWithoutExtension(path));
+            }
+        }
+
         private static void CapturePrefab(string prefabPath, string baseName)
         {
             var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);

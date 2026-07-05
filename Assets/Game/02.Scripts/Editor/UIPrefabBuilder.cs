@@ -167,6 +167,34 @@ namespace Game.Editor
             return button;
         }
 
+        private static void AddPanelBackgroundFrame(GameObject panelObject)
+        {
+            const string framePath = KitRoot + "Theme_Light/Prefabs/Prefabs_Popup/Popup_Box_02_DecoLine_Basic.prefab";
+            var frameInstance = InstantiateKitPrefab(framePath, panelObject.transform);
+
+            if (frameInstance == null)
+            {
+                return;
+            }
+
+            frameInstance.name = "BackgroundFrame";
+            frameInstance.transform.SetSiblingIndex(0);
+
+            var frameRect = frameInstance.GetComponent<RectTransform>();
+            frameRect.anchorMin = Vector2.zero;
+            frameRect.anchorMax = Vector2.one;
+            frameRect.offsetMin = Vector2.zero;
+            frameRect.offsetMax = Vector2.zero;
+
+            foreach (Transform child in frameInstance.transform)
+            {
+                if (child.name.Contains("Text") || child.name.Contains("Button"))
+                {
+                    child.gameObject.SetActive(false);
+                }
+            }
+        }
+
         private static GameObject FindTitlePrefab(string keyword)
         {
             var titleGuids = AssetDatabase.FindAssets("t:Prefab", new[] { KitRoot + "Theme_Light/Prefabs/Prefabs_Title" });
@@ -983,8 +1011,10 @@ namespace Game.Editor
 
             var goldText = CreateTopGoldBar(rootRect, goldIcon);
             var statusPanel = CreatePlayerStatusPanel(rootRect, font);
-            var bestStageText = statusPanel.transform.Find("BestStageText")?.GetComponent<TMP_Text>();
-            var unitCountText = statusPanel.transform.Find("UnitCountText")?.GetComponent<TMP_Text>();
+            var bestStageText = statusPanel.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name == "BestStageText")?.GetComponent<TMP_Text>();
+            var unitCountText = statusPanel.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name == "UnitCountText")?.GetComponent<TMP_Text>();
 
             var playButton = CreatePlayButton(rootRect, font, battleIcon);
             var tabButtons = CreateBottomDockButtons(rootRect, font, cardIcon, hammerIcon, checkIcon, shopIcon);
@@ -1420,6 +1450,118 @@ namespace Game.Editor
 
         private static GameObject CreatePlayerStatusPanel(RectTransform parent, TMP_FontAsset font)
         {
+            const string templatePath = KitRoot + "Theme_Light/Prefabs/Prefabs~DemoLayout/UserInfo_03.prefab";
+            var templateInstance = InstantiateKitPrefab(templatePath, parent);
+
+            if (templateInstance == null)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] UserInfo_03 not found, using fallback.");
+                return CreatePlayerStatusPanelFallback(parent, font);
+            }
+
+            templateInstance.name = "PlayerStatusPanel";
+            var panelRect = templateInstance.GetComponent<RectTransform>();
+            panelRect.anchorMin = new Vector2(0.5f, 1);
+            panelRect.anchorMax = new Vector2(0.5f, 1);
+            panelRect.pivot = new Vector2(0.5f, 1);
+            panelRect.anchoredPosition = new Vector2(-100, -50);
+            panelRect.sizeDelta = new Vector2(380, 110);
+
+            var iconTrophy = templateInstance.transform.Find("Icon_Trophy");
+            var iconLeague = templateInstance.transform.Find("Icon_League");
+            var bgTop = templateInstance.transform.Find("BgTop");
+
+            if (iconTrophy != null)
+            {
+                iconTrophy.gameObject.SetActive(false);
+            }
+            if (iconLeague != null)
+            {
+                iconLeague.gameObject.SetActive(false);
+            }
+            if (bgTop != null)
+            {
+                bgTop.gameObject.SetActive(false);
+            }
+
+            var userNameText = templateInstance.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name == "Text_UserName")?.GetComponent<TMP_Text>();
+            var trophyTransform = templateInstance.transform.Find("Trophy");
+            var textTMP = templateInstance.transform.Find("Text (TMP)")?.GetComponent<TMP_Text>();
+
+            TMP_Text bestStageText = null;
+            if (userNameText != null)
+            {
+                bestStageText = userNameText;
+                bestStageText.text = "BEST STAGE -";
+                bestStageText.font = font;
+            }
+            else if (trophyTransform != null)
+            {
+                bestStageText = trophyTransform.GetComponentInChildren<TMP_Text>();
+                if (bestStageText != null)
+                {
+                    bestStageText.text = "BEST STAGE -";
+                    bestStageText.font = font;
+                }
+            }
+
+            TMP_Text unitCountText = null;
+            if (textTMP != null)
+            {
+                unitCountText = textTMP;
+                unitCountText.text = "UNITS 10/15";
+                unitCountText.font = font;
+            }
+
+            if (bestStageText == null)
+            {
+                var bestStageTextObject = new GameObject("BestStageText");
+                bestStageTextObject.transform.SetParent(templateInstance.transform, false);
+                var bestStageRect = bestStageTextObject.AddComponent<RectTransform>();
+                bestStageRect.anchorMin = new Vector2(0.5f, 1);
+                bestStageRect.anchorMax = new Vector2(0.5f, 1);
+                bestStageRect.pivot = new Vector2(0.5f, 1);
+                bestStageRect.anchoredPosition = new Vector2(0, -20);
+                bestStageRect.sizeDelta = new Vector2(350, 40);
+
+                bestStageText = bestStageTextObject.AddComponent<TextMeshProUGUI>();
+                bestStageText.text = "BEST STAGE -";
+                bestStageText.fontSize = 30;
+                bestStageText.alignment = TextAlignmentOptions.Center;
+                bestStageText.font = font;
+            }
+
+            if (bestStageText != null)
+            {
+                bestStageText.gameObject.name = "BestStageText";
+            }
+
+            if (unitCountText == null)
+            {
+                var unitCountTextObject = new GameObject("UnitCountText");
+                unitCountTextObject.transform.SetParent(templateInstance.transform, false);
+                var unitCountRect = unitCountTextObject.AddComponent<RectTransform>();
+                unitCountRect.anchorMin = new Vector2(0.5f, 1);
+                unitCountRect.anchorMax = new Vector2(0.5f, 1);
+                unitCountRect.pivot = new Vector2(0.5f, 1);
+                unitCountRect.anchoredPosition = new Vector2(0, -65);
+                unitCountRect.sizeDelta = new Vector2(350, 35);
+
+                unitCountText = unitCountTextObject.AddComponent<TextMeshProUGUI>();
+                unitCountText.text = "UNITS 10/15";
+                unitCountText.fontSize = 26;
+                unitCountText.alignment = TextAlignmentOptions.Center;
+                unitCountText.font = font;
+            }
+
+            unitCountText.gameObject.name = "UnitCountText";
+
+            return templateInstance;
+        }
+
+        private static GameObject CreatePlayerStatusPanelFallback(RectTransform parent, TMP_FontAsset font)
+        {
             var profileFramePrefab = AssetDatabase.LoadAssetAtPath<GameObject>(ProfileFrameBluePath);
             GameObject panelInstance;
 
@@ -1734,6 +1876,8 @@ namespace Game.Editor
             var bgImage = panelObject.AddComponent<Image>();
             bgImage.color = new Color(0.1f, 0.1f, 0.15f, 0.95f);
 
+            AddPanelBackgroundFrame(panelObject);
+
             CreateStageTitle(panelRect, font);
             var stageButtons = CreateStageButtons(panelRect, font, starIcon, lockIcon);
 
@@ -1791,6 +1935,8 @@ namespace Game.Editor
 
             var bgImage = panelObject.AddComponent<Image>();
             bgImage.color = new Color(0.1f, 0.1f, 0.15f, 0.95f);
+
+            AddPanelBackgroundFrame(panelObject);
 
             var cards = new UI_UnitCardView[15];
             const int columns = 5;
@@ -1888,6 +2034,8 @@ namespace Game.Editor
             var bgImage = panelObject.AddComponent<Image>();
             bgImage.color = new Color(0.1f, 0.1f, 0.15f, 0.95f);
 
+            AddPanelBackgroundFrame(panelObject);
+
             var cards = new UI_UnitCardView[15];
             const int columns = 5;
             const int rows = 3;
@@ -1970,6 +2118,145 @@ namespace Game.Editor
         }
 
         private static UI_UnitCardView CreateUnitCard(RectTransform parent, Vector2 position, Vector2 size, TMP_FontAsset font, Sprite starIcon, string cardName)
+        {
+            const string templatePath = KitRoot + "Theme_Light/Prefabs/Prefabs~DemoLayout/ListItem_Hero_02.prefab";
+            var templateInstance = InstantiateKitPrefab(templatePath, parent);
+
+            if (templateInstance == null)
+            {
+                GameLogger.LogWarning($"[UIPrefabBuilder] ListItem_Hero_02 not found, using fallback for {cardName}.");
+                return CreateUnitCardFallback(parent, position, size, font, starIcon, cardName);
+            }
+
+            templateInstance.name = cardName;
+            var cardRect = templateInstance.GetComponent<RectTransform>();
+            cardRect.anchorMin = new Vector2(0.5f, 0.5f);
+            cardRect.anchorMax = new Vector2(0.5f, 0.5f);
+            cardRect.pivot = new Vector2(0.5f, 0.5f);
+            cardRect.anchoredPosition = position;
+            cardRect.sizeDelta = size;
+
+            var iconCheckTransform = templateInstance.transform.Find("Icon_Check");
+            var nameText = templateInstance.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name == "Text_Name")?.GetComponent<TMP_Text>();
+            var star1 = templateInstance.transform.Find("Star (1)");
+            var star2 = templateInstance.transform.Find("Star (2)");
+            var levelTransform = templateInstance.transform.Find("Level");
+            var roleArea = templateInstance.transform.Find("RoleArea");
+
+            if (star1 != null)
+            {
+                star1.gameObject.SetActive(false);
+            }
+            if (star2 != null)
+            {
+                star2.gameObject.SetActive(false);
+            }
+            if (roleArea != null)
+            {
+                roleArea.gameObject.SetActive(false);
+            }
+
+            var button = EnsureButtonComponent(templateInstance);
+
+            var iconObject = new GameObject("UnitIcon");
+            iconObject.transform.SetParent(templateInstance.transform, false);
+            var iconRect = iconObject.AddComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0.5f, 1);
+            iconRect.anchorMax = new Vector2(0.5f, 1);
+            iconRect.pivot = new Vector2(0.5f, 1);
+            iconRect.anchoredPosition = new Vector2(0, -10);
+            iconRect.sizeDelta = new Vector2(size.x * 0.6f, size.x * 0.6f);
+
+            var iconImage = iconObject.AddComponent<Image>();
+            iconImage.raycastTarget = false;
+
+            TMP_Text levelText = null;
+            if (levelTransform != null)
+            {
+                levelText = levelTransform.GetComponentInChildren<TMP_Text>();
+                if (levelText != null)
+                {
+                    levelText.text = "Lv.1";
+                    levelText.font = font;
+                }
+            }
+
+            if (levelText == null)
+            {
+                var levelTextObject = new GameObject("LevelText");
+                levelTextObject.transform.SetParent(templateInstance.transform, false);
+                var levelTextRect = levelTextObject.AddComponent<RectTransform>();
+                levelTextRect.anchorMin = new Vector2(0, 0);
+                levelTextRect.anchorMax = new Vector2(1, 0);
+                levelTextRect.pivot = new Vector2(0.5f, 0);
+                levelTextRect.anchoredPosition = new Vector2(0, 5);
+                levelTextRect.sizeDelta = new Vector2(-10, 25);
+
+                levelText = levelTextObject.AddComponent<TextMeshProUGUI>();
+                levelText.text = "Lv.1";
+                levelText.fontSize = 18;
+                levelText.alignment = TextAlignmentOptions.Center;
+                levelText.font = font;
+            }
+
+            if (nameText != null)
+            {
+                nameText.text = "Unit";
+                nameText.font = font;
+            }
+
+            GameObject selectedMarkObject = null;
+            if (iconCheckTransform != null)
+            {
+                selectedMarkObject = iconCheckTransform.gameObject;
+                selectedMarkObject.SetActive(false);
+            }
+            else
+            {
+                selectedMarkObject = new GameObject("SelectedMark");
+                selectedMarkObject.transform.SetParent(templateInstance.transform, false);
+                var selectedMarkRect = selectedMarkObject.AddComponent<RectTransform>();
+                selectedMarkRect.anchorMin = new Vector2(1, 1);
+                selectedMarkRect.anchorMax = new Vector2(1, 1);
+                selectedMarkRect.pivot = new Vector2(1, 1);
+                selectedMarkRect.anchoredPosition = new Vector2(-5, -5);
+                selectedMarkRect.sizeDelta = new Vector2(40, 40);
+
+                var selectedMarkImage = selectedMarkObject.AddComponent<Image>();
+                selectedMarkImage.sprite = starIcon;
+                selectedMarkImage.raycastTarget = false;
+                selectedMarkObject.SetActive(false);
+            }
+
+            var dimOverlayObject = new GameObject("DimOverlay");
+            dimOverlayObject.transform.SetParent(templateInstance.transform, false);
+            var dimOverlayRect = dimOverlayObject.AddComponent<RectTransform>();
+            dimOverlayRect.anchorMin = Vector2.zero;
+            dimOverlayRect.anchorMax = Vector2.one;
+            dimOverlayRect.offsetMin = Vector2.zero;
+            dimOverlayRect.offsetMax = Vector2.zero;
+
+            var dimOverlayImage = dimOverlayObject.AddComponent<Image>();
+            dimOverlayImage.color = new Color(0, 0, 0, 0.5f);
+            dimOverlayImage.raycastTarget = false;
+            dimOverlayObject.SetActive(false);
+
+            var cardView = templateInstance.AddComponent<UI_UnitCardView>();
+            var serializedObject = new SerializedObject(cardView);
+            serializedObject.FindProperty("button").objectReferenceValue = button;
+            serializedObject.FindProperty("iconImage").objectReferenceValue = iconImage;
+            serializedObject.FindProperty("nameText").objectReferenceValue = nameText;
+            serializedObject.FindProperty("levelText").objectReferenceValue = levelText;
+            serializedObject.FindProperty("selectedMark").objectReferenceValue = selectedMarkObject;
+            serializedObject.FindProperty("dimOverlay").objectReferenceValue = dimOverlayObject;
+            serializedObject.FindProperty("unitId").stringValue = "";
+            serializedObject.ApplyModifiedProperties();
+
+            return cardView;
+        }
+
+        private static UI_UnitCardView CreateUnitCardFallback(RectTransform parent, Vector2 position, Vector2 size, TMP_FontAsset font, Sprite starIcon, string cardName)
         {
             var cardInstance = InstantiateKitPrefab(CardFrameBluePath, parent);
 
@@ -2208,6 +2495,8 @@ namespace Game.Editor
             var bgImage = panelObject.AddComponent<Image>();
             bgImage.color = new Color(0.1f, 0.1f, 0.15f, 0.95f);
 
+            AddPanelBackgroundFrame(panelObject);
+
             var shopItems = new UI_ShopItemView[5];
             const float itemHeight = 120f;
             const float itemWidth = 700f;
@@ -2265,6 +2554,105 @@ namespace Game.Editor
         }
 
         private static UI_ShopItemView CreateShopItem(RectTransform parent, Vector2 position, Vector2 size, TMP_FontAsset font, Sprite goldIcon, int index)
+        {
+            const string templatePath = KitRoot + "Theme_Light/Prefabs/Prefabs~DemoLayout/ListItem_ShopItem.prefab";
+            var templateInstance = InstantiateKitPrefab(templatePath, parent);
+
+            if (templateInstance == null)
+            {
+                GameLogger.LogWarning($"[UIPrefabBuilder] ListItem_ShopItem not found, using fallback for ShopItem_{index}.");
+                return CreateShopItemFallback(parent, position, size, font, goldIcon, index);
+            }
+
+            templateInstance.name = $"ShopItem_{index}";
+            var itemRect = templateInstance.GetComponent<RectTransform>();
+            itemRect.anchorMin = new Vector2(0.5f, 0.5f);
+            itemRect.anchorMax = new Vector2(0.5f, 0.5f);
+            itemRect.pivot = new Vector2(0.5f, 0.5f);
+            itemRect.anchoredPosition = position;
+            itemRect.sizeDelta = size;
+
+            var icon = templateInstance.transform.Find("Icon")?.GetComponent<Image>();
+            var nameText = templateInstance.transform.Find("Text_Title")?.GetComponent<TMP_Text>();
+            var priceButtonTransform = templateInstance.transform.Find("Button_Price");
+            var textItemNum = templateInstance.transform.Find("Text_ItemNum");
+            var textLimit = templateInstance.transform.Find("Text_Limit");
+            var groupArea = templateInstance.transform.Find("Group/GroupArea");
+
+            if (textItemNum != null)
+            {
+                textItemNum.gameObject.SetActive(false);
+            }
+            if (textLimit != null)
+            {
+                textLimit.gameObject.SetActive(false);
+            }
+            if (groupArea != null)
+            {
+                groupArea.gameObject.SetActive(false);
+            }
+
+            TMP_Text priceText = null;
+            if (priceButtonTransform != null)
+            {
+                priceText = priceButtonTransform.GetComponentInChildren<TMP_Text>();
+                if (priceText != null)
+                {
+                    priceText.font = font;
+                }
+            }
+            else
+            {
+                var textTMP = templateInstance.transform.Find("Text (TMP)")?.GetComponent<TMP_Text>();
+                if (textTMP != null)
+                {
+                    priceText = textTMP;
+                    priceText.font = font;
+                }
+            }
+
+            Button buyButton = null;
+            if (priceButtonTransform != null)
+            {
+                buyButton = EnsureButtonComponent(priceButtonTransform.gameObject);
+            }
+
+            if (nameText != null)
+            {
+                nameText.text = "Unit Name";
+                nameText.font = font;
+            }
+
+            var ownedMarkObject = new GameObject("OwnedMark");
+            ownedMarkObject.transform.SetParent(templateInstance.transform, false);
+            var ownedMarkRect = ownedMarkObject.AddComponent<RectTransform>();
+            ownedMarkRect.anchorMin = new Vector2(1, 0.5f);
+            ownedMarkRect.anchorMax = new Vector2(1, 0.5f);
+            ownedMarkRect.pivot = new Vector2(1, 0.5f);
+            ownedMarkRect.anchoredPosition = new Vector2(-60, 0);
+            ownedMarkRect.sizeDelta = new Vector2(120, 50);
+
+            var ownedMarkText = ownedMarkObject.AddComponent<TextMeshProUGUI>();
+            ownedMarkText.text = "OWNED";
+            ownedMarkText.fontSize = 24;
+            ownedMarkText.alignment = TextAlignmentOptions.Center;
+            ownedMarkText.font = font;
+            ownedMarkText.color = new Color(0.3f, 0.8f, 0.3f);
+            ownedMarkObject.SetActive(false);
+
+            var shopItemView = templateInstance.AddComponent<UI_ShopItemView>();
+            var serializedObject = new SerializedObject(shopItemView);
+            serializedObject.FindProperty("iconImage").objectReferenceValue = icon;
+            serializedObject.FindProperty("nameText").objectReferenceValue = nameText;
+            serializedObject.FindProperty("priceText").objectReferenceValue = priceText;
+            serializedObject.FindProperty("buyButton").objectReferenceValue = buyButton;
+            serializedObject.FindProperty("ownedMark").objectReferenceValue = ownedMarkObject;
+            serializedObject.ApplyModifiedProperties();
+
+            return shopItemView;
+        }
+
+        private static UI_ShopItemView CreateShopItemFallback(RectTransform parent, Vector2 position, Vector2 size, TMP_FontAsset font, Sprite goldIcon, int index)
         {
             var itemObject = new GameObject($"ShopItem_{index}");
             itemObject.transform.SetParent(parent, false);
@@ -2416,6 +2804,8 @@ namespace Game.Editor
             var bgImage = panelObject.AddComponent<Image>();
             bgImage.color = new Color(0.1f, 0.1f, 0.15f, 0.95f);
 
+            AddPanelBackgroundFrame(panelObject);
+
             var rows = new UI_MissionRowView[10];
             const float rowHeight = 80f;
             const float rowWidth = 900f;
@@ -2473,6 +2863,115 @@ namespace Game.Editor
         }
 
         private static UI_MissionRowView CreateMissionRow(RectTransform parent, Vector2 position, Vector2 size, TMP_FontAsset font, Sprite goldIcon, int index)
+        {
+            const string templatePath = KitRoot + "Theme_Light/Prefabs/Prefabs~DemoLayout/ListItem_Mission_01.prefab";
+            var templateInstance = InstantiateKitPrefab(templatePath, parent);
+
+            if (templateInstance == null)
+            {
+                GameLogger.LogWarning($"[UIPrefabBuilder] ListItem_Mission_01 not found, using fallback for MissionRow_{index}.");
+                return CreateMissionRowFallback(parent, position, size, font, goldIcon, index);
+            }
+
+            templateInstance.name = $"MissionRow_{index}";
+            var rowRect = templateInstance.GetComponent<RectTransform>();
+            rowRect.anchorMin = new Vector2(0.5f, 0.5f);
+            rowRect.anchorMax = new Vector2(0.5f, 0.5f);
+            rowRect.pivot = new Vector2(0.5f, 0.5f);
+            rowRect.anchoredPosition = position;
+            rowRect.sizeDelta = size;
+
+            var descriptionText = templateInstance.transform.Find("Text_Title")?.GetComponent<TMP_Text>();
+            var progressSlider = templateInstance.transform.Find("Slider_Border_Rectangle");
+            var rewardIcon = templateInstance.transform.Find("Icon");
+            var rewardText = templateInstance.transform.Find("Text (TMP)")?.GetComponent<TMP_Text>();
+            var claimButton = templateInstance.transform.Find("Button_Claim");
+            var claimDisabledButton = templateInstance.transform.Find("Button_ClaimDisabled");
+            var buttonAd = templateInstance.transform.Find("Button_Ad");
+            var buttonTimer = templateInstance.transform.Find("Button_Timer");
+            var stampe = templateInstance.transform.Find("Stampe");
+
+            if (buttonAd != null)
+            {
+                buttonAd.gameObject.SetActive(false);
+            }
+            if (buttonTimer != null)
+            {
+                buttonTimer.gameObject.SetActive(false);
+            }
+            if (stampe != null)
+            {
+                stampe.gameObject.SetActive(false);
+            }
+            if (claimDisabledButton != null)
+            {
+                claimDisabledButton.gameObject.SetActive(false);
+            }
+            if (progressSlider != null)
+            {
+                progressSlider.gameObject.SetActive(false);
+            }
+            if (rewardIcon != null)
+            {
+                rewardIcon.gameObject.SetActive(false);
+            }
+
+            var progressTextObject = new GameObject("ProgressText");
+            progressTextObject.transform.SetParent(templateInstance.transform, false);
+            var progressTextRect = progressTextObject.AddComponent<RectTransform>();
+            progressTextRect.anchorMin = new Vector2(0.5f, 0.5f);
+            progressTextRect.anchorMax = new Vector2(0.5f, 0.5f);
+            progressTextRect.pivot = new Vector2(0.5f, 0.5f);
+            progressTextRect.anchoredPosition = new Vector2(100, 0);
+            progressTextRect.sizeDelta = new Vector2(100, 40);
+
+            var progressText = progressTextObject.AddComponent<TextMeshProUGUI>();
+            progressText.text = "0/10";
+            progressText.fontSize = 22;
+            progressText.alignment = TextAlignmentOptions.Center;
+            progressText.font = font;
+
+            if (descriptionText != null)
+            {
+                descriptionText.text = "Mission Description";
+                descriptionText.font = font;
+            }
+
+            Button claimButtonComponent = null;
+            if (claimButton != null)
+            {
+                claimButtonComponent = EnsureButtonComponent(claimButton.gameObject);
+            }
+
+            var claimedMarkObject = new GameObject("ClaimedMark");
+            claimedMarkObject.transform.SetParent(templateInstance.transform, false);
+            var claimedMarkRect = claimedMarkObject.AddComponent<RectTransform>();
+            claimedMarkRect.anchorMin = new Vector2(1, 0.5f);
+            claimedMarkRect.anchorMax = new Vector2(1, 0.5f);
+            claimedMarkRect.pivot = new Vector2(1, 0.5f);
+            claimedMarkRect.anchoredPosition = new Vector2(-60, 0);
+            claimedMarkRect.sizeDelta = new Vector2(100, 40);
+
+            var claimedMarkText = claimedMarkObject.AddComponent<TextMeshProUGUI>();
+            claimedMarkText.text = "CLAIMED";
+            claimedMarkText.fontSize = 22;
+            claimedMarkText.alignment = TextAlignmentOptions.Center;
+            claimedMarkText.font = font;
+            claimedMarkText.color = new Color(0.3f, 0.8f, 0.3f);
+            claimedMarkObject.SetActive(false);
+
+            var rowView = templateInstance.AddComponent<UI_MissionRowView>();
+            var serializedObject = new SerializedObject(rowView);
+            serializedObject.FindProperty("descriptionText").objectReferenceValue = descriptionText;
+            serializedObject.FindProperty("progressText").objectReferenceValue = progressText;
+            serializedObject.FindProperty("claimButton").objectReferenceValue = claimButtonComponent;
+            serializedObject.FindProperty("claimedMark").objectReferenceValue = claimedMarkObject;
+            serializedObject.ApplyModifiedProperties();
+
+            return rowView;
+        }
+
+        private static UI_MissionRowView CreateMissionRowFallback(RectTransform parent, Vector2 position, Vector2 size, TMP_FontAsset font, Sprite goldIcon, int index)
         {
             var rowObject = new GameObject($"MissionRow_{index}");
             rowObject.transform.SetParent(parent, false);

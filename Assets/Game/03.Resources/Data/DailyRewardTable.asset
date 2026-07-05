@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: 75f35c3e67efa48c18cb30b5f813c952, type: 3}
   m_Name: DailyRewardTable
-  m_EditorClassIdentifier: Assembly-CSharp:Game.Data:DailyRewardTableSO
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Data.DailyRewardTableSO
   DailyRewardDataList:
   - day: 1
     gold: 200

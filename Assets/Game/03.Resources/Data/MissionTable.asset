@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 0}
+  m_Script: {fileID: 11500000, guid: aa7bd234d4569454fa7326a9bc812a1c, type: 3}
   m_Name: MissionTable
-  m_EditorClassIdentifier: Assembly-CSharp:Game.Data:MissionTableSO
+  m_EditorClassIdentifier: Assembly-CSharp::Game.Data.MissionTableSO
   MissionDataList:
   - id: mission_kill_100
     missionType: 0

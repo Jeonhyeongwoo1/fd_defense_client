@@ -18,6 +18,7 @@ namespace Game.Editor
         private const string DailyRewardTablePath = "Assets/Game/03.Resources/Data/DailyRewardTable.asset";
         private const string MissionTablePath = "Assets/Game/03.Resources/Data/MissionTable.asset";
         private const string ShopTablePath = "Assets/Game/03.Resources/Data/ShopTable.asset";
+        private const string MapTablePath = "Assets/Game/03.Resources/Data/MapTable.asset";
         private const string ScenePath = "Assets/Game/01.Scene/OutGameScene.unity";
         private const string StageSelectScreenPrefabPath = "Assets/Game/03.Resources/UI/StageSelectScreen.prefab";
 
@@ -53,7 +54,8 @@ namespace Game.Editor
                 !AssetDatabase.AssetPathExists(UpgradeTablePath) ||
                 !AssetDatabase.AssetPathExists(DailyRewardTablePath) ||
                 !AssetDatabase.AssetPathExists(MissionTablePath) ||
-                !AssetDatabase.AssetPathExists(ShopTablePath))
+                !AssetDatabase.AssetPathExists(ShopTablePath) ||
+                !AssetDatabase.AssetPathExists(MapTablePath))
             {
                 GameLogger.LogWarning("[OutGameSceneBuilder] Data tables not found. Importing sheets...");
                 CsvSheetImporter.ImportAllSheets();
@@ -67,10 +69,10 @@ namespace Game.Editor
 
             var camera = cameraObject.AddComponent<Camera>();
             camera.orthographic = true;
-            camera.orthographicSize = 5f;
+            camera.orthographicSize = 8f;
             camera.backgroundColor = new Color(0.15f, 0.2f, 0.35f);
             camera.clearFlags = CameraClearFlags.SolidColor;
-            cameraObject.transform.position = new Vector3(0f, 0f, -10f);
+            cameraObject.transform.position = new Vector3(0f, 1f, -10f);
         }
 
         private static void CreateCanvas()
@@ -137,6 +139,7 @@ namespace Game.Editor
             var dailyRewardTable = AssetDatabase.LoadAssetAtPath<DailyRewardTableSO>(DailyRewardTablePath);
             var missionTable = AssetDatabase.LoadAssetAtPath<MissionTableSO>(MissionTablePath);
             var shopTable = AssetDatabase.LoadAssetAtPath<ShopTableSO>(ShopTablePath);
+            var mapTable = AssetDatabase.LoadAssetAtPath<MapTableSO>(MapTablePath);
 
             var serializedObject = new SerializedObject(lifetimeScope);
             serializedObject.FindProperty("stageTable").objectReferenceValue = stageTable;
@@ -145,6 +148,7 @@ namespace Game.Editor
             serializedObject.FindProperty("dailyRewardTable").objectReferenceValue = dailyRewardTable;
             serializedObject.FindProperty("missionTable").objectReferenceValue = missionTable;
             serializedObject.FindProperty("shopTable").objectReferenceValue = shopTable;
+            serializedObject.FindProperty("mapTable").objectReferenceValue = mapTable;
             serializedObject.ApplyModifiedProperties();
 
             if (stageTable == null)
@@ -175,6 +179,11 @@ namespace Game.Editor
             if (shopTable == null)
             {
                 GameLogger.LogError("[OutGameSceneBuilder] Failed to assign ShopTable to LifetimeScope.");
+            }
+
+            if (mapTable == null)
+            {
+                GameLogger.LogError("[OutGameSceneBuilder] Failed to assign MapTable to LifetimeScope.");
             }
         }
     }

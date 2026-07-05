@@ -1924,6 +1924,279 @@ namespace Game.Editor
 
         private static GameObject CreateDeckPanel(RectTransform parent, TMP_FontAsset font, Sprite starIcon)
         {
+            const string templatePath = KitRoot + "Theme_Light/Prefabs/Prefabs~DemoScenes/Character_Hero_List_01.prefab";
+            var templateInstance = InstantiateKitPrefab(templatePath, parent);
+
+            if (templateInstance == null)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] Character_Hero_List_01 not found, using fallback.");
+                return CreateDeckPanelFallback(parent, font, starIcon);
+            }
+
+            templateInstance.name = "DeckPanel";
+            var panelRect = templateInstance.GetComponent<RectTransform>();
+            panelRect.anchorMin = new Vector2(0, 0.22f);
+            panelRect.anchorMax = Vector2.one;
+            panelRect.offsetMin = Vector2.zero;
+            panelRect.offsetMax = Vector2.zero;
+
+            var middleTransform = templateInstance.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name == "Middle");
+            var scrollRectTransform = middleTransform?.Find("ScrollRect");
+            var viewportTransform = scrollRectTransform?.Find("Viewport");
+            var contentTransform = viewportTransform?.Find("Content");
+
+            if (contentTransform == null)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] Content not found in Character_Hero_List_01, using fallback.");
+                Object.DestroyImmediate(templateInstance);
+                return CreateDeckPanelFallback(parent, font, starIcon);
+            }
+
+            var demoItems = contentTransform.GetComponentsInChildren<Transform>(true)
+                .Where(t => t.name.StartsWith("ListItem_Hero_01") && t != contentTransform)
+                .Select(t => t.gameObject)
+                .ToArray();
+
+            if (demoItems.Length == 0)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] No demo items found in Character_Hero_List_01, using fallback.");
+                Object.DestroyImmediate(templateInstance);
+                return CreateDeckPanelFallback(parent, font, starIcon);
+            }
+
+            var cards = new UI_UnitCardView[15];
+            var firstItem = demoItems[0];
+
+            for (var i = 0; i < 15; i++)
+            {
+                GameObject itemInstance;
+                if (i < demoItems.Length)
+                {
+                    itemInstance = demoItems[i];
+                }
+                else
+                {
+                    itemInstance = Object.Instantiate(firstItem, contentTransform);
+                }
+
+                itemInstance.name = $"DeckCard_{i}";
+                itemInstance.SetActive(true);
+
+                var button = EnsureButtonComponent(itemInstance);
+
+                var iconImage = itemInstance.GetComponentsInChildren<Image>(true)
+                    .FirstOrDefault(img => img.name.Contains("Icon") && !img.name.Contains("Check") && !img.name.Contains("Up"));
+                var nameText = itemInstance.GetComponentsInChildren<TMP_Text>(true)
+                    .FirstOrDefault(txt => txt.name.Contains("Name"));
+                var levelText = itemInstance.GetComponentsInChildren<TMP_Text>(true)
+                    .FirstOrDefault(txt => txt.name.Contains("Level"));
+
+                if (iconImage == null)
+                {
+                    var iconObject = new GameObject("UnitIcon");
+                    iconObject.transform.SetParent(itemInstance.transform, false);
+                    var iconRect = iconObject.AddComponent<RectTransform>();
+                    iconRect.anchorMin = new Vector2(0.5f, 0.5f);
+                    iconRect.anchorMax = new Vector2(0.5f, 0.5f);
+                    iconRect.anchoredPosition = new Vector2(0, 25);
+                    iconRect.sizeDelta = new Vector2(140, 140);
+                    iconImage = iconObject.AddComponent<Image>();
+                    iconImage.preserveAspect = true;
+                    iconImage.raycastTarget = false;
+                }
+                else
+                {
+                    iconImage.gameObject.name = "UnitIcon";
+                }
+
+                if (nameText == null)
+                {
+                    var nameObject = new GameObject("NameText");
+                    nameObject.transform.SetParent(itemInstance.transform, false);
+                    var nameRect = nameObject.AddComponent<RectTransform>();
+                    nameRect.anchorMin = new Vector2(0.5f, 0);
+                    nameRect.anchorMax = new Vector2(0.5f, 0);
+                    nameRect.pivot = new Vector2(0.5f, 0);
+                    nameRect.anchoredPosition = new Vector2(0, 52);
+                    nameRect.sizeDelta = new Vector2(230, 40);
+                    var nameTmp = nameObject.AddComponent<TextMeshProUGUI>();
+                    nameTmp.fontSize = 30;
+                    nameTmp.alignment = TextAlignmentOptions.Center;
+                    nameText = nameTmp;
+                }
+                else
+                {
+                    nameText.gameObject.name = "NameText";
+                }
+                nameText.text = "Unit";
+                nameText.font = font;
+                if (levelText != null)
+                {
+                    levelText.gameObject.name = "LevelText";
+                    levelText.text = "Lv.1";
+                    levelText.font = font;
+                }
+
+                var selectedMarkObject = itemInstance.GetComponentsInChildren<Transform>(true)
+                    .FirstOrDefault(t => t.name.Contains("Check") || t.name.Contains("Selected"));
+                GameObject selectedMarkGO;
+                if (selectedMarkObject != null)
+                {
+                    selectedMarkGO = selectedMarkObject.gameObject;
+                    selectedMarkGO.name = "SelectedMark";
+                    selectedMarkGO.SetActive(false);
+                }
+                else
+                {
+                    selectedMarkGO = new GameObject("SelectedMark");
+                    selectedMarkGO.transform.SetParent(itemInstance.transform, false);
+                    var markRect = selectedMarkGO.AddComponent<RectTransform>();
+                    markRect.anchorMin = new Vector2(1, 1);
+                    markRect.anchorMax = new Vector2(1, 1);
+                    markRect.pivot = new Vector2(1, 1);
+                    markRect.anchoredPosition = new Vector2(-5, -5);
+                    markRect.sizeDelta = new Vector2(40, 40);
+                    var markImage = selectedMarkGO.AddComponent<Image>();
+                    markImage.sprite = starIcon;
+                    markImage.raycastTarget = false;
+                    selectedMarkGO.SetActive(false);
+                }
+
+                var dimOverlayObject = new GameObject("DimOverlay");
+                dimOverlayObject.transform.SetParent(itemInstance.transform, false);
+                var dimRect = dimOverlayObject.AddComponent<RectTransform>();
+                dimRect.anchorMin = Vector2.zero;
+                dimRect.anchorMax = Vector2.one;
+                dimRect.offsetMin = Vector2.zero;
+                dimRect.offsetMax = Vector2.zero;
+                var dimImage = dimOverlayObject.AddComponent<Image>();
+                dimImage.color = new Color(0, 0, 0, 0.5f);
+                dimImage.raycastTarget = false;
+                dimOverlayObject.SetActive(false);
+
+                var cardView = itemInstance.AddComponent<UI_UnitCardView>();
+                var cardSerializer = new SerializedObject(cardView);
+                cardSerializer.FindProperty("button").objectReferenceValue = button;
+                cardSerializer.FindProperty("iconImage").objectReferenceValue = iconImage;
+                cardSerializer.FindProperty("nameText").objectReferenceValue = nameText;
+                cardSerializer.FindProperty("levelText").objectReferenceValue = levelText;
+                cardSerializer.FindProperty("selectedMark").objectReferenceValue = selectedMarkGO;
+                cardSerializer.FindProperty("dimOverlay").objectReferenceValue = dimOverlayObject;
+                cardSerializer.FindProperty("unitId").stringValue = "";
+                cardSerializer.ApplyModifiedProperties();
+
+                cards[i] = cardView;
+            }
+
+            var topTransform = templateInstance.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name == "Top");
+            if (topTransform != null)
+            {
+                var dropdownTransform = topTransform.GetComponentsInChildren<Transform>(true)
+                    .FirstOrDefault(t => t.name.Contains("Dropdown"));
+                if (dropdownTransform != null)
+                {
+                    dropdownTransform.gameObject.SetActive(false);
+                }
+            }
+
+            var deckCountText = topTransform?.GetComponentsInChildren<TMP_Text>(true)
+                .FirstOrDefault(txt => txt.text.Contains("/"));
+            if (deckCountText != null)
+            {
+                deckCountText.gameObject.name = "DeckCountText";
+                deckCountText.text = "10/10";
+                deckCountText.font = font;
+            }
+            else
+            {
+                var deckCountTextObject = new GameObject("DeckCountText");
+                deckCountTextObject.transform.SetParent(templateInstance.transform, false);
+                var deckCountRect = deckCountTextObject.AddComponent<RectTransform>();
+                deckCountRect.anchorMin = new Vector2(0.5f, 0);
+                deckCountRect.anchorMax = new Vector2(0.5f, 0);
+                deckCountRect.pivot = new Vector2(0.5f, 0);
+                deckCountRect.anchoredPosition = new Vector2(0, 120);
+                deckCountRect.sizeDelta = new Vector2(200, 50);
+
+                deckCountText = deckCountTextObject.AddComponent<TextMeshProUGUI>();
+                deckCountText.text = "10/10";
+                deckCountText.fontSize = 36;
+                deckCountText.alignment = TextAlignmentOptions.Center;
+                deckCountText.font = font;
+            }
+
+            var confirmButtonTransform = templateInstance.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name.Contains("Confirm"));
+            Button confirmButton;
+            if (confirmButtonTransform != null)
+            {
+                confirmButton = EnsureButtonComponent(confirmButtonTransform.gameObject);
+            }
+            else
+            {
+                confirmButton = CreatePausePopupButton(templateInstance.transform, "ConfirmButton", new Vector2(0, 50), "CONFIRM", ButtonGreenPath, font);
+            }
+
+            var closeButtonTransform = templateInstance.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name.Contains("Close") || t.name.Contains("Back"));
+            Button closeButton;
+            if (closeButtonTransform != null)
+            {
+                closeButton = EnsureButtonComponent(closeButtonTransform.gameObject);
+            }
+            else
+            {
+                var closeButtonInstance = InstantiateKitPrefab(ButtonCirclePath, templateInstance.transform);
+                if (closeButtonInstance != null)
+                {
+                    closeButtonInstance.name = "CloseButton";
+                    var closeButtonRect = closeButtonInstance.GetComponent<RectTransform>();
+                    closeButtonRect.anchorMin = new Vector2(1, 1);
+                    closeButtonRect.anchorMax = new Vector2(1, 1);
+                    closeButtonRect.pivot = new Vector2(1, 1);
+                    closeButtonRect.anchoredPosition = new Vector2(-70, -70);
+                    closeButtonRect.sizeDelta = new Vector2(90, 90);
+
+                    var closeIconObject = new GameObject("CloseIcon");
+                    closeIconObject.transform.SetParent(closeButtonInstance.transform, false);
+                    var closeIconRect = closeIconObject.AddComponent<RectTransform>();
+                    closeIconRect.anchorMin = new Vector2(0.5f, 0.5f);
+                    closeIconRect.anchorMax = new Vector2(0.5f, 0.5f);
+                    closeIconRect.pivot = new Vector2(0.5f, 0.5f);
+                    closeIconRect.anchoredPosition = Vector2.zero;
+                    closeIconRect.sizeDelta = new Vector2(50, 50);
+
+                    var closeIconImage = closeIconObject.AddComponent<Image>();
+                    var closeIcon = LoadSprite("Assets/Layer Lab/GUI Pro-MinimalGame/Shared/Icons/PictoIcon/128/arrow_back.png");
+                    closeIconImage.sprite = closeIcon;
+                    closeIconImage.raycastTarget = false;
+                }
+
+                closeButton = EnsureButtonComponent(closeButtonInstance);
+            }
+
+            var deckPanelView = templateInstance.AddComponent<UI_DeckPanelView>();
+            var serializedObject = new SerializedObject(deckPanelView);
+            serializedObject.FindProperty("root").objectReferenceValue = templateInstance;
+            serializedObject.FindProperty("unitCards").arraySize = cards.Length;
+            for (var i = 0; i < cards.Length; i++)
+            {
+                serializedObject.FindProperty("unitCards").GetArrayElementAtIndex(i).objectReferenceValue = cards[i];
+            }
+            serializedObject.FindProperty("deckCountText").objectReferenceValue = deckCountText;
+            serializedObject.FindProperty("confirmButton").objectReferenceValue = confirmButton;
+            serializedObject.FindProperty("closeButton").objectReferenceValue = closeButton;
+            serializedObject.ApplyModifiedProperties();
+
+            templateInstance.SetActive(false);
+
+            return templateInstance;
+        }
+
+        private static GameObject CreateDeckPanelFallback(RectTransform parent, TMP_FontAsset font, Sprite starIcon)
+        {
             var panelObject = new GameObject("DeckPanel");
             panelObject.transform.SetParent(parent, false);
 
@@ -2792,6 +3065,231 @@ namespace Game.Editor
 
         private static GameObject CreateMissionPanel(RectTransform parent, TMP_FontAsset font, Sprite goldIcon)
         {
+            const string templatePath = KitRoot + "Theme_Light/Prefabs/Prefabs~DemoScenes/Progression_Mission_02.prefab";
+            var templateInstance = InstantiateKitPrefab(templatePath, parent);
+
+            if (templateInstance == null)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] Progression_Mission_02 not found, using fallback.");
+                return CreateMissionPanelFallback(parent, font, goldIcon);
+            }
+
+            templateInstance.name = "MissionPanel";
+
+            var dimmedTransform = templateInstance.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name == "Dimmed");
+            var popupTransform = templateInstance.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name == "Popup");
+
+            if (dimmedTransform == null || popupTransform == null)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] Dimmed or Popup not found in Progression_Mission_02, using fallback.");
+                Object.DestroyImmediate(templateInstance);
+                return CreateMissionPanelFallback(parent, font, goldIcon);
+            }
+
+            var contentTransform = popupTransform.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name == "Content");
+
+            if (contentTransform == null)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] Content not found in Progression_Mission_02, using fallback.");
+                Object.DestroyImmediate(templateInstance);
+                return CreateMissionPanelFallback(parent, font, goldIcon);
+            }
+
+            var demoItems = contentTransform.GetComponentsInChildren<Transform>(true)
+                .Where(t => t.name.StartsWith("ListItem_Mission_02") && t != contentTransform)
+                .Select(t => t.gameObject)
+                .ToArray();
+
+            if (demoItems.Length == 0)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] No demo items found in Progression_Mission_02, using fallback.");
+                Object.DestroyImmediate(templateInstance);
+                return CreateMissionPanelFallback(parent, font, goldIcon);
+            }
+
+            var rows = new UI_MissionRowView[10];
+            var firstItem = demoItems[0];
+
+            for (var i = 0; i < 10; i++)
+            {
+                GameObject itemInstance;
+                if (i < demoItems.Length)
+                {
+                    itemInstance = demoItems[i];
+                }
+                else
+                {
+                    itemInstance = Object.Instantiate(firstItem, contentTransform);
+                }
+
+                itemInstance.name = $"MissionRow_{i}";
+                itemInstance.SetActive(true);
+
+                var descriptionText = itemInstance.GetComponentsInChildren<TMP_Text>(true)
+                    .FirstOrDefault(txt => txt.name.Contains("Title") || txt.name.Contains("Description"));
+                if (descriptionText == null)
+                {
+                    // 템플릿에 제목 요소가 없으면 아이템의 기본 텍스트를 설명으로 재활용
+                    descriptionText = itemInstance.GetComponentsInChildren<TMP_Text>(true).FirstOrDefault();
+                }
+                var progressText = itemInstance.GetComponentsInChildren<TMP_Text>(true)
+                    .FirstOrDefault(txt => txt.text.Contains("/") && txt != descriptionText);
+
+                if (descriptionText == null)
+                {
+                    var descriptionObject = new GameObject("DescriptionText");
+                    descriptionObject.transform.SetParent(itemInstance.transform, false);
+                    var descriptionRect = descriptionObject.AddComponent<RectTransform>();
+                    descriptionRect.anchorMin = new Vector2(0.5f, 1);
+                    descriptionRect.anchorMax = new Vector2(0.5f, 1);
+                    descriptionRect.pivot = new Vector2(0.5f, 1);
+                    descriptionRect.anchoredPosition = new Vector2(0, -30);
+                    descriptionRect.sizeDelta = new Vector2(400, 60);
+                    var descriptionTmp = descriptionObject.AddComponent<TextMeshProUGUI>();
+                    descriptionTmp.fontSize = 26;
+                    descriptionTmp.alignment = TextAlignmentOptions.Center;
+                    descriptionText = descriptionTmp;
+                }
+                descriptionText.gameObject.name = "DescriptionText";
+                descriptionText.text = "Mission Description";
+                descriptionText.font = font;
+
+                if (progressText == null)
+                {
+                    var progressTextObject = new GameObject("ProgressText");
+                    progressTextObject.transform.SetParent(itemInstance.transform, false);
+                    var progressTextRect = progressTextObject.AddComponent<RectTransform>();
+                    progressTextRect.anchorMin = new Vector2(0.5f, 0.5f);
+                    progressTextRect.anchorMax = new Vector2(0.5f, 0.5f);
+                    progressTextRect.pivot = new Vector2(0.5f, 0.5f);
+                    progressTextRect.anchoredPosition = new Vector2(100, 0);
+                    progressTextRect.sizeDelta = new Vector2(100, 40);
+
+                    progressText = progressTextObject.AddComponent<TextMeshProUGUI>();
+                    progressText.text = "0/10";
+                    progressText.fontSize = 22;
+                    progressText.alignment = TextAlignmentOptions.Center;
+                    progressText.font = font;
+                }
+                else
+                {
+                    progressText.gameObject.name = "ProgressText";
+                    progressText.text = "0/10";
+                    progressText.font = font;
+                }
+
+                var claimButtonTransform = itemInstance.GetComponentsInChildren<Transform>(true)
+                    .FirstOrDefault(t => t.name.Contains("Claim") && !t.name.Contains("Disabled"));
+                Button claimButton;
+                if (claimButtonTransform != null)
+                {
+                    claimButton = EnsureButtonComponent(claimButtonTransform.gameObject);
+                    claimButtonTransform.gameObject.name = "ClaimButton";
+                }
+                else
+                {
+                    // 템플릿에 수령 버튼이 없으면 킷 버튼으로 생성
+                    claimButton = CreatePausePopupButton(itemInstance.transform, "ClaimButton", new Vector2(0, -95), "CLAIM", ButtonBluePath, font);
+                    var claimRect = claimButton.GetComponent<RectTransform>();
+                    claimRect.sizeDelta = new Vector2(220, 70);
+                }
+
+                var unusedButtons = itemInstance.GetComponentsInChildren<Transform>(true)
+                    .Where(t => (t.name.Contains("Ad") || t.name.Contains("Timer") || t.name.Contains("ClaimDisabled")) && t != claimButtonTransform);
+                foreach (var unused in unusedButtons)
+                {
+                    unused.gameObject.SetActive(false);
+                }
+
+                var claimedMarkObject = new GameObject("ClaimedMark");
+                claimedMarkObject.transform.SetParent(itemInstance.transform, false);
+                var claimedMarkRect = claimedMarkObject.AddComponent<RectTransform>();
+                claimedMarkRect.anchorMin = new Vector2(1, 0.5f);
+                claimedMarkRect.anchorMax = new Vector2(1, 0.5f);
+                claimedMarkRect.pivot = new Vector2(1, 0.5f);
+                claimedMarkRect.anchoredPosition = new Vector2(-60, 0);
+                claimedMarkRect.sizeDelta = new Vector2(100, 40);
+
+                var claimedMarkText = claimedMarkObject.AddComponent<TextMeshProUGUI>();
+                claimedMarkText.text = "CLAIMED";
+                claimedMarkText.fontSize = 22;
+                claimedMarkText.alignment = TextAlignmentOptions.Center;
+                claimedMarkText.font = font;
+                claimedMarkText.color = new Color(0.3f, 0.8f, 0.3f);
+                claimedMarkObject.SetActive(false);
+
+                var rowView = itemInstance.AddComponent<UI_MissionRowView>();
+                var rowSerializer = new SerializedObject(rowView);
+                rowSerializer.FindProperty("descriptionText").objectReferenceValue = descriptionText;
+                rowSerializer.FindProperty("progressText").objectReferenceValue = progressText;
+                rowSerializer.FindProperty("claimButton").objectReferenceValue = claimButton;
+                rowSerializer.FindProperty("claimedMark").objectReferenceValue = claimedMarkObject;
+                rowSerializer.ApplyModifiedProperties();
+
+                rows[i] = rowView;
+            }
+
+            var topTransform = popupTransform.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name == "Top");
+            var closeButtonTransform = topTransform?.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name.Contains("Close") || t.name.Contains("Back"));
+            Button closeButton;
+            if (closeButtonTransform != null)
+            {
+                closeButton = EnsureButtonComponent(closeButtonTransform.gameObject);
+            }
+            else
+            {
+                var closeButtonInstance = InstantiateKitPrefab(ButtonCirclePath, popupTransform);
+                if (closeButtonInstance != null)
+                {
+                    closeButtonInstance.name = "CloseButton";
+                    var closeButtonRect = closeButtonInstance.GetComponent<RectTransform>();
+                    closeButtonRect.anchorMin = new Vector2(1, 1);
+                    closeButtonRect.anchorMax = new Vector2(1, 1);
+                    closeButtonRect.pivot = new Vector2(1, 1);
+                    closeButtonRect.anchoredPosition = new Vector2(-70, -70);
+                    closeButtonRect.sizeDelta = new Vector2(90, 90);
+
+                    var closeIconObject = new GameObject("CloseIcon");
+                    closeIconObject.transform.SetParent(closeButtonInstance.transform, false);
+                    var closeIconRect = closeIconObject.AddComponent<RectTransform>();
+                    closeIconRect.anchorMin = new Vector2(0.5f, 0.5f);
+                    closeIconRect.anchorMax = new Vector2(0.5f, 0.5f);
+                    closeIconRect.pivot = new Vector2(0.5f, 0.5f);
+                    closeIconRect.anchoredPosition = Vector2.zero;
+                    closeIconRect.sizeDelta = new Vector2(50, 50);
+
+                    var closeIconImage = closeIconObject.AddComponent<Image>();
+                    var closeIcon = LoadSprite("Assets/Layer Lab/GUI Pro-MinimalGame/Shared/Icons/PictoIcon/128/arrow_back.png");
+                    closeIconImage.sprite = closeIcon;
+                    closeIconImage.raycastTarget = false;
+                }
+
+                closeButton = EnsureButtonComponent(closeButtonInstance);
+            }
+
+            var missionPanelView = templateInstance.AddComponent<UI_MissionPanelView>();
+            var serializedObject = new SerializedObject(missionPanelView);
+            serializedObject.FindProperty("root").objectReferenceValue = templateInstance;
+            serializedObject.FindProperty("missionRows").arraySize = rows.Length;
+            for (var i = 0; i < rows.Length; i++)
+            {
+                serializedObject.FindProperty("missionRows").GetArrayElementAtIndex(i).objectReferenceValue = rows[i];
+            }
+            serializedObject.FindProperty("closeButton").objectReferenceValue = closeButton;
+            serializedObject.ApplyModifiedProperties();
+
+            templateInstance.SetActive(false);
+
+            return templateInstance;
+        }
+
+        private static GameObject CreateMissionPanelFallback(RectTransform parent, TMP_FontAsset font, Sprite goldIcon)
+        {
             var panelObject = new GameObject("MissionPanel");
             panelObject.transform.SetParent(parent, false);
 
@@ -3238,6 +3736,221 @@ namespace Game.Editor
         }
 
         private static GameObject CreateSettingsPopup(RectTransform parent, TMP_FontAsset font)
+        {
+            const string templatePath = KitRoot + "Theme_Light/Prefabs/Prefabs~DemoScenes/Settings.prefab";
+            var templateInstance = InstantiateKitPrefab(templatePath, parent);
+
+            if (templateInstance == null)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] Settings.prefab not found, using fallback.");
+                return CreateSettingsPopupFallback(parent, font);
+            }
+
+            templateInstance.name = "SettingsPopupRoot";
+
+            var dimmedTransform = templateInstance.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name == "Dimmed");
+            var popupTransform = templateInstance.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name == "Popup");
+
+            if (dimmedTransform == null || popupTransform == null)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] Dimmed or Popup not found in Settings.prefab, using fallback.");
+                Object.DestroyImmediate(templateInstance);
+                return CreateSettingsPopupFallback(parent, font);
+            }
+
+            var sfxGroup = popupTransform.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name.Contains("SFX"));
+            var bgmGroup = popupTransform.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name.Contains("BGM") || t.name.Contains("Music"));
+            var languageGroup = popupTransform.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name.Contains("Language"));
+            var uidGroup = popupTransform.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name.Contains("UID") || t.name.Contains("UserID"));
+            var privacyButton = popupTransform.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name.Contains("Privacy"));
+            var termsButton = popupTransform.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name.Contains("Terms"));
+
+            if (sfxGroup != null)
+            {
+                sfxGroup.gameObject.SetActive(false);
+            }
+            if (bgmGroup != null)
+            {
+                bgmGroup.gameObject.SetActive(false);
+            }
+            if (languageGroup != null)
+            {
+                languageGroup.gameObject.SetActive(false);
+            }
+            if (uidGroup != null)
+            {
+                uidGroup.gameObject.SetActive(false);
+            }
+            if (privacyButton != null)
+            {
+                privacyButton.gameObject.SetActive(false);
+            }
+            if (termsButton != null)
+            {
+                termsButton.gameObject.SetActive(false);
+            }
+
+            var hapticToggle = popupTransform.GetComponentsInChildren<Toggle>(true)
+                .FirstOrDefault(tog => tog.name.Contains("Haptic") || tog.name.Contains("Vibration"));
+            Toggle vibrationToggle = hapticToggle;
+            if (vibrationToggle != null)
+            {
+                vibrationToggle.gameObject.name = "VibrationToggle";
+            }
+            else
+            {
+                var togglePath = KitRoot + "Theme_Light/Prefabs/Prefabs_Control/Toggle_Check_02.prefab";
+                var toggleInstance = InstantiateKitPrefab(togglePath, popupTransform);
+                if (toggleInstance != null)
+                {
+                    toggleInstance.name = "VibrationToggle";
+                    var toggleRect = toggleInstance.GetComponent<RectTransform>();
+                    toggleRect.anchorMin = new Vector2(0.5f, 0.5f);
+                    toggleRect.anchorMax = new Vector2(0.5f, 0.5f);
+                    toggleRect.pivot = new Vector2(0.5f, 0.5f);
+                    toggleRect.anchoredPosition = new Vector2(-50, 80);
+                    toggleRect.sizeDelta = new Vector2(80, 80);
+
+                    vibrationToggle = toggleInstance.GetComponent<Toggle>();
+                    if (vibrationToggle == null)
+                    {
+                        vibrationToggle = toggleInstance.AddComponent<Toggle>();
+                        var checkmark = toggleInstance.transform.Find("Checkmark");
+                        if (checkmark != null)
+                        {
+                            vibrationToggle.graphic = checkmark.GetComponent<Image>();
+                        }
+                    }
+                }
+            }
+
+            var versionText = popupTransform.GetComponentsInChildren<TMP_Text>(true)
+                .FirstOrDefault(txt => txt.name.Contains("Version"));
+            if (versionText != null)
+            {
+                versionText.gameObject.name = "VersionText";
+                versionText.text = "v1.0.0";
+                versionText.font = font;
+            }
+            else
+            {
+                var versionTextObject = new GameObject("VersionText");
+                versionTextObject.transform.SetParent(popupTransform, false);
+                var versionTextRect = versionTextObject.AddComponent<RectTransform>();
+                versionTextRect.anchorMin = new Vector2(0.5f, 0);
+                versionTextRect.anchorMax = new Vector2(0.5f, 0);
+                versionTextRect.pivot = new Vector2(0.5f, 0);
+                versionTextRect.anchoredPosition = new Vector2(0, 80);
+                versionTextRect.sizeDelta = new Vector2(300, 40);
+
+                versionText = versionTextObject.AddComponent<TextMeshProUGUI>();
+                versionText.text = "v1.0.0";
+                versionText.fontSize = 24;
+                versionText.alignment = TextAlignmentOptions.Center;
+                versionText.font = font;
+                versionText.color = new Color(0.7f, 0.7f, 0.7f);
+            }
+
+            var resetButtonTransform = popupTransform.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name.Contains("Reset"));
+            Button resetButton;
+            if (resetButtonTransform != null)
+            {
+                resetButton = EnsureButtonComponent(resetButtonTransform.gameObject);
+                resetButtonTransform.gameObject.name = "ResetButton";
+            }
+            else
+            {
+                resetButton = CreatePausePopupButton(popupTransform, "ResetButton", new Vector2(0, -20), "RESET PROGRESS", ButtonBluePath, font);
+                if (resetButton != null)
+                {
+                    var resetButtonRect = resetButton.GetComponent<RectTransform>();
+                    resetButtonRect.sizeDelta = new Vector2(350, 80);
+                }
+            }
+
+            var resetConfirmRoot = new GameObject("ResetConfirmRoot");
+            resetConfirmRoot.transform.SetParent(popupTransform, false);
+            var resetConfirmRect = resetConfirmRoot.AddComponent<RectTransform>();
+            resetConfirmRect.anchorMin = new Vector2(0.5f, 0.5f);
+            resetConfirmRect.anchorMax = new Vector2(0.5f, 0.5f);
+            resetConfirmRect.pivot = new Vector2(0.5f, 0.5f);
+            resetConfirmRect.anchoredPosition = new Vector2(0, -130);
+            resetConfirmRect.sizeDelta = new Vector2(500, 100);
+
+            var confirmTextObject = new GameObject("ConfirmText");
+            confirmTextObject.transform.SetParent(resetConfirmRoot.transform, false);
+            var confirmTextRect = confirmTextObject.AddComponent<RectTransform>();
+            confirmTextRect.anchorMin = new Vector2(0.5f, 1);
+            confirmTextRect.anchorMax = new Vector2(0.5f, 1);
+            confirmTextRect.pivot = new Vector2(0.5f, 1);
+            confirmTextRect.anchoredPosition = new Vector2(0, 0);
+            confirmTextRect.sizeDelta = new Vector2(480, 40);
+
+            var confirmText = confirmTextObject.AddComponent<TextMeshProUGUI>();
+            confirmText.text = "Are you sure?";
+            confirmText.fontSize = 28;
+            confirmText.alignment = TextAlignmentOptions.Center;
+            confirmText.font = font;
+            confirmText.color = new Color(1f, 0.3f, 0.3f);
+
+            var resetConfirmButton = CreatePausePopupButton(resetConfirmRoot.transform, "ResetConfirmButton", new Vector2(-80, -50), "YES", ButtonGreenPath, font);
+            var resetCancelButton = CreatePausePopupButton(resetConfirmRoot.transform, "ResetCancelButton", new Vector2(80, -50), "NO", ButtonBluePath, font);
+
+            if (resetConfirmButton != null)
+            {
+                var confirmBtnRect = resetConfirmButton.GetComponent<RectTransform>();
+                confirmBtnRect.anchoredPosition = new Vector2(-80, -50);
+                confirmBtnRect.sizeDelta = new Vector2(130, 70);
+            }
+
+            if (resetCancelButton != null)
+            {
+                var cancelBtnRect = resetCancelButton.GetComponent<RectTransform>();
+                cancelBtnRect.anchoredPosition = new Vector2(80, -50);
+                cancelBtnRect.sizeDelta = new Vector2(130, 70);
+            }
+
+            resetConfirmRoot.SetActive(false);
+
+            var closeButtonTransform = popupTransform.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name.Contains("Close") || t.name.Contains("Back"));
+            Button closeButton;
+            if (closeButtonTransform != null)
+            {
+                closeButton = EnsureButtonComponent(closeButtonTransform.gameObject);
+            }
+            else
+            {
+                closeButton = CreatePausePopupButton(templateInstance.transform, "CloseButton", new Vector2(0, 20), "CLOSE", ButtonBluePath, font);
+            }
+
+            var settingsView = templateInstance.AddComponent<UI_SettingsPopupView>();
+            var serializedObject = new SerializedObject(settingsView);
+            serializedObject.FindProperty("root").objectReferenceValue = templateInstance;
+            serializedObject.FindProperty("vibrationToggle").objectReferenceValue = vibrationToggle;
+            serializedObject.FindProperty("resetButton").objectReferenceValue = resetButton;
+            serializedObject.FindProperty("resetConfirmRoot").objectReferenceValue = resetConfirmRoot;
+            serializedObject.FindProperty("resetConfirmButton").objectReferenceValue = resetConfirmButton;
+            serializedObject.FindProperty("resetCancelButton").objectReferenceValue = resetCancelButton;
+            serializedObject.FindProperty("closeButton").objectReferenceValue = closeButton;
+            serializedObject.FindProperty("versionText").objectReferenceValue = versionText;
+            serializedObject.ApplyModifiedProperties();
+
+            templateInstance.SetActive(false);
+
+            return templateInstance;
+        }
+
+        private static GameObject CreateSettingsPopupFallback(RectTransform parent, TMP_FontAsset font)
         {
             var popupRoot = new GameObject("SettingsPopupRoot");
             popupRoot.transform.SetParent(parent, false);

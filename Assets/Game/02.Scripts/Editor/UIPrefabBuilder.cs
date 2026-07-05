@@ -23,6 +23,8 @@ namespace Game.Editor
         private const string ResultWinPath = KitRoot + "Theme_Light/Prefabs/Prefabs~DemoScenes/Play_Result_Win_Detail.prefab";
         private const string ResultLosePath = KitRoot + "Theme_Light/Prefabs/Prefabs~DemoScenes/Play_Result_Lose.prefab";
         private const string SleepModePath = KitRoot + "Theme_Light/Prefabs/Prefabs~DemoScenes/Play_SleepMode.prefab";
+        private const string BossWarningPath = KitRoot + "Theme_Light/Prefabs/Prefabs~DemoScenes/Play_Warning_Boss.prefab";
+        private const string TugOfWarBarPath = KitRoot + "Theme_Light/Prefabs/Prefabs_HUD/TugOfWarBar.prefab";
         private const string FontPath = KitRoot + "Shared/Font/LTAvocado-Bold SDF.asset";
         private const string IconCoinPath = KitRoot + "Shared/Icons/PictoIcon/128/coin_2.png";
         private const string IconLockPath = KitRoot + "Shared/Icons/PictoIcon/128/lock.png";
@@ -224,8 +226,7 @@ namespace Game.Editor
 
             var moneyText = CreateResourceBarGroup(rootRect, coinIcon);
             var waveText = CreateWaveTitle(rootRect, font);
-            var allyBaseHpFillImage = CreateHpBar(rootRect, "AllyHpBar", new Vector2(60, -200), new Vector2(0, 1), SliderBluePath);
-            var enemyBaseHpFillImage = CreateHpBar(rootRect, "EnemyHpBar", new Vector2(-60, -200), new Vector2(1, 1), SliderRedPath);
+            var (allyBaseHpFillImage, enemyBaseHpFillImage) = CreateTugOfWarHpBar(rootRect);
             var spawnButtons = CreateUnitButtons(rootRect, font);
             var pauseButton = CreatePauseButton(rootRect, pauseIcon);
             var bossBanner = CreateBossBanner(rootRect, font);
@@ -414,6 +415,79 @@ namespace Game.Editor
             waveText.font = font;
 
             return waveText;
+        }
+
+        private static (Image allyFill, Image enemyFill) CreateTugOfWarHpBar(RectTransform parent)
+        {
+            var tugOfWarInstance = InstantiateKitPrefab(TugOfWarBarPath, parent);
+
+            if (tugOfWarInstance == null)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] TugOfWarBar not found, using fallback.");
+                return CreateTugOfWarHpBarFallback(parent);
+            }
+
+            tugOfWarInstance.name = "TugOfWarHpBar";
+            var barRect = tugOfWarInstance.GetComponent<RectTransform>();
+            barRect.anchorMin = new Vector2(0.5f, 1);
+            barRect.anchorMax = new Vector2(0.5f, 1);
+            barRect.pivot = new Vector2(0.5f, 1);
+            barRect.anchoredPosition = new Vector2(0, -180);
+            barRect.sizeDelta = new Vector2(700, 40);
+
+            var allTexts = tugOfWarInstance.GetComponentsInChildren<TMP_Text>(true);
+            foreach (var txt in allTexts)
+            {
+                txt.gameObject.SetActive(false);
+            }
+
+            var barLeft = tugOfWarInstance.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name.Contains("Bar_Left") || t.name.Contains("BarLeft") || t.name.Contains("Left"));
+            var barRight = tugOfWarInstance.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name.Contains("Bar_Right") || t.name.Contains("BarRight") || t.name.Contains("Right"));
+
+            Image allyFillImage = null;
+            Image enemyFillImage = null;
+
+            if (barLeft != null)
+            {
+                allyFillImage = barLeft.GetComponentInChildren<Image>(true);
+                if (allyFillImage != null)
+                {
+                    allyFillImage.type = Image.Type.Filled;
+                    allyFillImage.fillMethod = Image.FillMethod.Horizontal;
+                    allyFillImage.fillOrigin = (int)Image.OriginHorizontal.Left;
+                    allyFillImage.fillAmount = 1f;
+                }
+            }
+
+            if (barRight != null)
+            {
+                enemyFillImage = barRight.GetComponentInChildren<Image>(true);
+                if (enemyFillImage != null)
+                {
+                    enemyFillImage.type = Image.Type.Filled;
+                    enemyFillImage.fillMethod = Image.FillMethod.Horizontal;
+                    enemyFillImage.fillOrigin = (int)Image.OriginHorizontal.Right;
+                    enemyFillImage.fillAmount = 1f;
+                }
+            }
+
+            if (allyFillImage == null || enemyFillImage == null)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] TugOfWarBar fill images not found correctly, using fallback.");
+                Object.DestroyImmediate(tugOfWarInstance);
+                return CreateTugOfWarHpBarFallback(parent);
+            }
+
+            return (allyFillImage, enemyFillImage);
+        }
+
+        private static (Image allyFill, Image enemyFill) CreateTugOfWarHpBarFallback(RectTransform parent)
+        {
+            var allyFillImage = CreateHpBar(parent, "AllyHpBar", new Vector2(60, -200), new Vector2(0, 1), SliderBluePath);
+            var enemyFillImage = CreateHpBar(parent, "EnemyHpBar", new Vector2(-60, -200), new Vector2(1, 1), SliderRedPath);
+            return (allyFillImage, enemyFillImage);
         }
 
         private static Image CreateHpBar(RectTransform parent, string name, Vector2 position, Vector2 anchor, string sliderPath)
@@ -625,6 +699,62 @@ namespace Game.Editor
         }
 
         private static GameObject CreateBossBanner(RectTransform parent, TMP_FontAsset font)
+        {
+            var bannerInstance = InstantiateKitPrefab(BossWarningPath, parent);
+
+            if (bannerInstance == null)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] Play_Warning_Boss not found, using fallback.");
+                return CreateBossBannerFallback(parent, font);
+            }
+
+            bannerInstance.name = "BossBanner";
+            var bannerRect = bannerInstance.GetComponent<RectTransform>();
+            bannerRect.anchorMin = new Vector2(0.5f, 0.5f);
+            bannerRect.anchorMax = new Vector2(0.5f, 0.5f);
+            bannerRect.pivot = new Vector2(0.5f, 0.5f);
+            bannerRect.anchoredPosition = new Vector2(0, -250);
+            bannerRect.localScale = Vector3.one * 2.0f;
+
+            var allTexts = bannerInstance.GetComponentsInChildren<TMP_Text>(true);
+            TMP_Text bannerText = null;
+
+            foreach (var txt in allTexts)
+            {
+                if (txt.name.Contains("Text") && txt.text.Contains("BOSS"))
+                {
+                    bannerText = txt;
+                    bannerText.text = "BOSS INCOMING!";
+                    bannerText.font = font;
+                }
+                else
+                {
+                    txt.gameObject.SetActive(false);
+                }
+            }
+
+            if (bannerText == null)
+            {
+                GameLogger.LogWarning("[UIPrefabBuilder] BOSS text not found in Play_Warning_Boss template.");
+            }
+
+            var panelDimmed = bannerInstance.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.name.Contains("PanelDimmed"))?.gameObject;
+            if (panelDimmed != null)
+            {
+                var dimImage = panelDimmed.GetComponent<Image>();
+                if (dimImage != null && dimImage.color.a > 0.5f)
+                {
+                    panelDimmed.SetActive(false);
+                }
+            }
+
+            bannerInstance.SetActive(false);
+
+            return bannerInstance;
+        }
+
+        private static GameObject CreateBossBannerFallback(RectTransform parent, TMP_FontAsset font)
         {
             var titlePrefab = FindTitlePrefab("Deco");
 

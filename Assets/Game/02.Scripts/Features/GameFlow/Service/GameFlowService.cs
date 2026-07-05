@@ -39,7 +39,7 @@ namespace Game.Service
         {
             _stateDict[GameStateType.Ready] = new ReadyState(ChangeState);
             _stateDict[GameStateType.WavePlaying] = new WavePlayingState(ChangeState, _baseService, _resultModel, _waveProgressService);
-            _stateDict[GameStateType.WaveCleared] = new WaveClearedState(ChangeState, _waveProgressService, _stageService, _resultModel);
+            _stateDict[GameStateType.WaveCleared] = new WaveClearedState(ChangeState, _waveProgressService, _stageService, _resultModel, _baseService);
             _stateDict[GameStateType.Result] = new ResultState(ChangeState, _resultModel, _unitBattleService.ReleaseAllUnits, OnVictory);
 
             ChangeState(GameStateType.Ready);

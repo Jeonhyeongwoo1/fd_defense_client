@@ -82,9 +82,11 @@ publish/
 ### Claude Code
 .claude/worktrees/
 .claude/settings.local.json
+.mcp.json
 
 ### Unity IL2CPP build symbol backup (per-build, do not commit/ship)
 *_BackUpThisFolder_ButDontShipItWithYourGame/
 
 ### Unity Burst compiler debug info (per-build, do not commit/ship)
 *_BurstDebugInformation_DoNotShip/
+UiScreenshots/

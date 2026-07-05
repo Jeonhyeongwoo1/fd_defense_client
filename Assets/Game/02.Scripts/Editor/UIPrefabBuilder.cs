@@ -1236,11 +1236,12 @@ namespace Game.Editor
             GameObject statusPanel;
             TMP_Text bestStageText;
             TMP_Text unitCountText;
+            Button stageTabHomeButton = null;
 
             const string lobbyDefaultPath = "Assets/Layer Lab/GUI Pro-MinimalGame/Theme_Light/Prefabs/Prefabs~DemoScenes/Lobby_Default.prefab";
             var lobbyDefaultTemplate = AssetDatabase.LoadAssetAtPath<GameObject>(lobbyDefaultPath);
 
-            if (lobbyDefaultTemplate != null && TryBuildHomeFromLobbyDefault(rootRect, lobbyDefaultTemplate, font, battleIcon, cardIcon, hammerIcon, checkIcon, shopIcon, giftIcon, goldIcon, out playButton, out tabButtons, out dailyRewardButton, out settingsButton, out goldText, out dailyRewardBadge, out missionsBadge, out statusPanel, out bestStageText, out unitCountText))
+            if (lobbyDefaultTemplate != null && TryBuildHomeFromLobbyDefault(rootRect, lobbyDefaultTemplate, font, battleIcon, cardIcon, hammerIcon, checkIcon, shopIcon, giftIcon, goldIcon, out playButton, out tabButtons, out dailyRewardButton, out settingsButton, out goldText, out dailyRewardBadge, out missionsBadge, out statusPanel, out bestStageText, out unitCountText, out stageTabHomeButton))
             {
                 GameLogger.Log("[UIPrefabBuilder] Home UI built from Lobby_Default template.");
             }
@@ -1293,7 +1294,7 @@ namespace Game.Editor
 
             var outGameHomeView = rootObject.AddComponent<UI_OutGameHomeView>();
             var homeSerializer = new SerializedObject(outGameHomeView);
-            homeSerializer.FindProperty("stageTabButton").objectReferenceValue = playButton;
+            homeSerializer.FindProperty("stageTabButton").objectReferenceValue = stageTabHomeButton != null ? (Object)stageTabHomeButton : playButton;
             homeSerializer.FindProperty("deckTabButton").objectReferenceValue = tabButtons[0];
             homeSerializer.FindProperty("upgradeTabButton").objectReferenceValue = tabButtons[1];
             homeSerializer.FindProperty("missionsTabButton").objectReferenceValue = tabButtons[2];
@@ -1403,9 +1404,10 @@ namespace Game.Editor
             GameLogger.Log($"[UIPrefabBuilder] StageSelectScreen.prefab created at {prefabPath}");
         }
 
-        private static bool TryBuildHomeFromLobbyDefault(RectTransform parent, GameObject lobbyDefaultTemplate, TMP_FontAsset font, Sprite battleIcon, Sprite cardIcon, Sprite hammerIcon, Sprite checkIcon, Sprite shopIcon, Sprite giftIcon, Sprite goldIcon, out Button playButton, out Button[] tabButtons, out Button dailyRewardButton, out Button settingsButton, out TMP_Text goldText, out GameObject dailyRewardBadge, out GameObject missionsBadge, out GameObject statusPanel, out TMP_Text bestStageText, out TMP_Text unitCountText)
+        private static bool TryBuildHomeFromLobbyDefault(RectTransform parent, GameObject lobbyDefaultTemplate, TMP_FontAsset font, Sprite battleIcon, Sprite cardIcon, Sprite hammerIcon, Sprite checkIcon, Sprite shopIcon, Sprite giftIcon, Sprite goldIcon, out Button playButton, out Button[] tabButtons, out Button dailyRewardButton, out Button settingsButton, out TMP_Text goldText, out GameObject dailyRewardBadge, out GameObject missionsBadge, out GameObject statusPanel, out TMP_Text bestStageText, out TMP_Text unitCountText, out Button stageTabButton)
         {
             playButton = null;
+            stageTabButton = null;
             tabButtons = new Button[4];
             dailyRewardButton = null;
             settingsButton = null;
@@ -1415,6 +1417,15 @@ namespace Game.Editor
             statusPanel = null;
             bestStageText = null;
             unitCountText = null;
+
+            // 원본 컬러 아이콘 톤에 맞춰 흰색 픽토그램 대신 UniqueIcon 컬러 세트 사용 (사용자 지시)
+            const string uniqueIconRoot = KitRoot + "Shared/Icons/UniqueIcon/128/";
+            var coloredGift = LoadSprite(uniqueIconRoot + "UI_Rewards_Gift_01_Red.png");
+            var coloredHammer = LoadSprite(uniqueIconRoot + "Gear_Weapons_Hammer_01.png");
+            var coloredCard = LoadSprite(uniqueIconRoot + "Item_Card_01_Color.png");
+            giftIcon = coloredGift != null ? coloredGift : giftIcon;
+            hammerIcon = coloredHammer != null ? coloredHammer : hammerIcon;
+            cardIcon = coloredCard != null ? coloredCard : cardIcon;
 
             try
             {
@@ -1487,6 +1498,27 @@ namespace Game.Editor
                         }
                     }
 
+                    // 데모 게이지("25 / 55")를 스테이지 진행 표기로 교체 — 로비 전체에서 숫자/숫자 패턴 검색
+                    var wiredBestStageText = bestStageText;
+                    var wiredUnitCountText = unitCountText;
+                    var gaugeText = lobbyInstance.GetComponentsInChildren<TMP_Text>(true)
+                        .FirstOrDefault(t => t != wiredBestStageText && t != wiredUnitCountText
+                            && System.Text.RegularExpressions.Regex.IsMatch(t.text.Trim(), @"^\d+\s*/\s*\d+$"));
+                    if (gaugeText != null)
+                    {
+                        gaugeText.text = "0 / 50";
+                    }
+                    else
+                    {
+                        // 킷 슬라이더 게이지가 레거시 UI.Text인 경우
+                        var legacyGaugeText = lobbyInstance.GetComponentsInChildren<Text>(true)
+                            .FirstOrDefault(t => System.Text.RegularExpressions.Regex.IsMatch(t.text.Trim(), @"^\d+\s*/\s*\d+$"));
+                        if (legacyGaugeText != null)
+                        {
+                            legacyGaugeText.text = "0 / 50";
+                        }
+                    }
+
                     statusPanel = profileCard.gameObject;
                 }
 
@@ -1544,133 +1576,71 @@ namespace Game.Editor
                     dailyRewardBadge = CreateAlertBadge(dailyRewardButton.transform, new Vector2(30, 30));
                 }
 
-                // 5. upgradeTabButton: 좌측 AD Skip 버튼
-                Transform adSkipButton = null;
+                // 5~7. 사이드 중복 버튼 전부 비활성 — 메인 컨텐츠는 하단 탭바로 이동 (사용자 지시)
                 foreach (var child in allChildren)
                 {
-                    if (child.name.Contains("ADSkip") || child.name.Contains("Skip") || child.name.Contains("AD"))
+                    if (child == null)
                     {
-                        var btn = child.GetComponent<Button>();
-                        var img = child.GetComponent<Image>();
-                        if (btn != null || img != null)
-                        {
-                            adSkipButton = child;
-                            break;
-                        }
+                        continue;
+                    }
+
+                    if (child.name.Contains("ADSkip") || child.name.Contains("Skip") || child.name.Contains("ADRemove") ||
+                        child.name.Contains("Mission") || child.name.Contains("Scroll") ||
+                        child.name.Contains("Inventory") || child.name.Contains("Bag"))
+                    {
+                        child.gameObject.SetActive(false);
                     }
                 }
 
-                if (adSkipButton != null)
+                // 12. 하단 킷 탭바 = 메인 도크: [스테이지][덱][강화][미션][상점] 전부 배선
+                var bottomTabBar = allChildren.FirstOrDefault(t => t.name.Contains("Tab_01"));
+                if (bottomTabBar != null)
                 {
-                    adSkipButton.name = "UpgradeTabButton";
-                    SwapIconSprite(adSkipButton, hammerIcon);
-
-                    var labelText = adSkipButton.GetComponentInChildren<TMP_Text>(true);
-                    if (labelText != null)
+                    var tabChildren = new List<Transform>();
+                    foreach (Transform tab in bottomTabBar)
                     {
-                        labelText.text = "Upgrade";
-                        if (font != null)
+                        if (tab.gameObject.activeSelf && tab.GetComponentInChildren<Image>(true) != null)
                         {
-                            labelText.font = font;
+                            tabChildren.Add(tab);
                         }
                     }
 
-                    var sampleEffects = adSkipButton.GetComponentsInChildren<Transform>(true);
-                    foreach (var eff in sampleEffects)
+                    if (tabChildren.Count >= 5)
                     {
-                        if (eff.name.Contains("SampleEffect") || eff.name.Contains("Effect") || eff.name.Contains("Glow"))
+                        tabChildren[0].name = "StageTabButton";
+                        stageTabButton = EnsureButtonComponent(tabChildren[0].gameObject);
+
+                        tabChildren[1].name = "DeckTabButton";
+                        tabButtons[0] = EnsureButtonComponent(tabChildren[1].gameObject);
+
+                        tabChildren[2].name = "UpgradeTabButton";
+                        SwapIconSprite(tabChildren[2], hammerIcon);
+                        var upgradeTabLabel = tabChildren[2].GetComponentInChildren<TMP_Text>(true);
+                        if (upgradeTabLabel != null)
                         {
-                            eff.gameObject.SetActive(false);
-                        }
-                    }
-
-                    tabButtons[1] = EnsureButtonComponent(adSkipButton.gameObject);
-                }
-
-                // 6. missionsTabButton: 우측 Mission 두루마리 버튼
-                Transform missionButton = null;
-                foreach (var child in allChildren)
-                {
-                    if (child.name.Contains("Mission") || child.name.Contains("Scroll"))
-                    {
-                        var btn = child.GetComponent<Button>();
-                        var img = child.GetComponent<Image>();
-                        if (btn != null || img != null)
-                        {
-                            missionButton = child;
-                            break;
-                        }
-                    }
-                }
-
-                if (missionButton != null)
-                {
-                    missionButton.name = "MissionsTabButton";
-                    tabButtons[2] = EnsureButtonComponent(missionButton.gameObject);
-                    missionsBadge = CreateAlertBadge(tabButtons[2].transform, new Vector2(30, 30));
-                }
-
-                // 7. deckTabButton: 우측 Inventory 가방 버튼
-                Transform inventoryButton = null;
-                foreach (var child in allChildren)
-                {
-                    if (child.name.Contains("Inventory") || child.name.Contains("Bag"))
-                    {
-                        var btn = child.GetComponent<Button>();
-                        var img = child.GetComponent<Image>();
-                        if (btn != null || img != null)
-                        {
-                            inventoryButton = child;
-                            break;
-                        }
-                    }
-                }
-
-                if (inventoryButton != null)
-                {
-                    inventoryButton.name = "DeckTabButton";
-                    SwapIconSprite(inventoryButton, cardIcon);
-
-                    var labelText = inventoryButton.GetComponentInChildren<TMP_Text>(true);
-                    if (labelText != null)
-                    {
-                        labelText.text = "Deck";
-                        if (font != null)
-                        {
-                            labelText.font = font;
-                        }
-                    }
-
-                    tabButtons[0] = EnsureButtonComponent(inventoryButton.gameObject);
-
-                    // 12. shopTabButton: Inventory 버튼 복제
-                    if (inventoryButton.parent != null)
-                    {
-                        var shopButtonClone = Object.Instantiate(inventoryButton.gameObject);
-                        shopButtonClone.name = "ShopTabButton";
-                        shopButtonClone.transform.SetParent(inventoryButton.parent, false);
-
-                        var shopRect = shopButtonClone.GetComponent<RectTransform>();
-                        var inventoryRect = inventoryButton.GetComponent<RectTransform>();
-                        if (shopRect != null && inventoryRect != null)
-                        {
-                            shopRect.anchoredPosition = inventoryRect.anchoredPosition + new Vector2(0, -150);
-                        }
-
-                        SwapIconSprite(shopButtonClone.transform, shopIcon);
-
-                        var shopLabelText = shopButtonClone.GetComponentInChildren<TMP_Text>(true);
-                        if (shopLabelText != null)
-                        {
-                            shopLabelText.text = "Shop";
+                            upgradeTabLabel.text = "Upgrade";
                             if (font != null)
                             {
-                                shopLabelText.font = font;
+                                upgradeTabLabel.font = font;
                             }
                         }
+                        tabButtons[1] = EnsureButtonComponent(tabChildren[2].gameObject);
 
-                        tabButtons[3] = EnsureButtonComponent(shopButtonClone);
+                        tabChildren[3].name = "MissionsTabButton";
+                        tabButtons[2] = EnsureButtonComponent(tabChildren[3].gameObject);
+                        missionsBadge = CreateAlertBadge(tabChildren[3], new Vector2(40, 50));
+
+                        tabChildren[4].name = "ShopTabButton";
+                        tabButtons[3] = EnsureButtonComponent(tabChildren[4].gameObject);
                     }
+                    else
+                    {
+                        GameLogger.LogWarning($"[UIPrefabBuilder] Bottom tab bar tab count {tabChildren.Count} < 5, wiring skipped.");
+                    }
+                }
+                else
+                {
+                    GameLogger.LogWarning("[UIPrefabBuilder] Bottom tab bar not found for shop wiring.");
                 }
 
                 // 8. stageTabButton: 중앙 맵 디오라마 버튼화
@@ -1686,7 +1656,7 @@ namespace Game.Editor
 
                 if (mapDiorama != null)
                 {
-                    mapDiorama.name = "StageTabButton";
+                    // 디오라마는 원본 그대로 데코 유지 — 스테이지 진입은 START(PLAY)가 담당
                     var mapTexts = mapDiorama.GetComponentsInChildren<TMP_Text>(true);
                     foreach (var txt in mapTexts)
                     {
@@ -1699,25 +1669,12 @@ namespace Game.Editor
                             }
                         }
                     }
-
-                    var stageButton = EnsureButtonComponent(mapDiorama.gameObject);
-                    playButton = stageButton;
                 }
 
                 // 9. playButton: 빨간 START 버튼
-                Transform startButton = null;
-                foreach (var child in allChildren)
-                {
-                    if (child.name.Contains("START") || child.name.Contains("Start") || child.name.Contains("Play"))
-                    {
-                        var btn = child.GetComponent<Button>();
-                        if (btn != null)
-                        {
-                            startButton = child;
-                            break;
-                        }
-                    }
-                }
+                // 킷 버튼엔 Button 컴포넌트가 없으므로 이름으로만 탐색 (빨간 START = Button_03_Red 인스턴스)
+                Transform startButton = allChildren.FirstOrDefault(t =>
+                    t.name.Contains("START") || t.name.Contains("Start") || t.name.Contains("Play") || t.name.Contains("Button_03"));
 
                 if (startButton != null)
                 {
@@ -1732,14 +1689,11 @@ namespace Game.Editor
                         }
                     }
 
-                    if (playButton == null)
-                    {
-                        playButton = EnsureButtonComponent(startButton.gameObject);
-                    }
+                    playButton = EnsureButtonComponent(startButton.gameObject);
                 }
 
-                // 10. 비활성: 하단 채팅·탭바
-                var disableNames = new[] { "Chat", "chat", "Tab_", "Bubble" };
+                // 10. 비활성: 하단 채팅만 (탭바는 원본 유지 — 사용자 지시)
+                var disableNames = new[] { "Chat", "chat", "Bubble" };
                 foreach (var child in allChildren)
                 {
                     if (disableNames.Any(n => child.name.Contains(n)))

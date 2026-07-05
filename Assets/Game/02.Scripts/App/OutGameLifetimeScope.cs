@@ -42,8 +42,6 @@ namespace Game.App
             builder.Register<SettingsService>(Lifetime.Scoped);
             builder.Register<ShopService>(Lifetime.Scoped);
             builder.Register<MapBuilderService>(Lifetime.Scoped);
-            builder.Register<LobbyBackgroundService>(Lifetime.Scoped);
-            builder.Register<LobbyShowcaseService>(Lifetime.Scoped);
 
             builder.RegisterComponentInHierarchy<UI_StageSelectView>();
             builder.RegisterComponentInHierarchy<UI_OutGameHomeView>();
@@ -57,12 +55,12 @@ namespace Game.App
             builder.RegisterEntryPoint<LobbyBackgroundService>(Lifetime.Scoped);
             builder.RegisterEntryPoint<LobbyShowcaseService>(Lifetime.Scoped);
             builder.RegisterEntryPoint<StageSelectPresenter>(Lifetime.Scoped);
-            builder.RegisterEntryPoint<DeckPresenter>(Lifetime.Scoped);
-            builder.RegisterEntryPoint<UpgradePresenter>(Lifetime.Scoped);
-            builder.RegisterEntryPoint<MissionPanelPresenter>(Lifetime.Scoped);
-            builder.RegisterEntryPoint<DailyRewardPresenter>(Lifetime.Scoped);
-            builder.RegisterEntryPoint<SettingsPresenter>(Lifetime.Scoped);
-            builder.RegisterEntryPoint<ShopPanelPresenter>(Lifetime.Scoped);
+            builder.RegisterEntryPoint<DeckPresenter>(Lifetime.Scoped).AsSelf();
+            builder.RegisterEntryPoint<UpgradePresenter>(Lifetime.Scoped).AsSelf();
+            builder.RegisterEntryPoint<MissionPanelPresenter>(Lifetime.Scoped).AsSelf();
+            builder.RegisterEntryPoint<DailyRewardPresenter>(Lifetime.Scoped).AsSelf();
+            builder.RegisterEntryPoint<SettingsPresenter>(Lifetime.Scoped).AsSelf();
+            builder.RegisterEntryPoint<ShopPanelPresenter>(Lifetime.Scoped).AsSelf();
             builder.RegisterEntryPoint<OutGameHomePresenter>(Lifetime.Scoped);
             builder.RegisterEntryPoint<MissionProgressController>(Lifetime.Scoped);
         }
